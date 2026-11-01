@@ -493,3 +493,7 @@ crouchjump/drop) and `.n` (node index). `nearest(pos)` → node **index** (not a
   `viewmodel.muzzleView()` / eject-in-view plus `opts.viewmodel = true`; everyone else passes
   world positions with `opts.viewmodel = false`.
 * Damage info may carry `tagging` / `taggingSmall` (slow-down when hit); `Player.takeDamage` reads them.
+* Rules (`src/game/rules.js`) owns the planted C4 model, its timer and every `bomb_*` emission.
+  Bots plant/defuse via `World.match.use(ent, held)` (held = use/attack down this tick).
+* At halftime rules calls `World.bots?.onTeamSwap?.()` if present; until BotManager implements it,
+  rules rebuilds bot character models itself.

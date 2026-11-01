@@ -157,27 +157,35 @@ float sandSurf(vec2 uv, vec4 L, float tone, float s, inout Surf o) {
   float mid = fbmU(uv, 18.0, 3, 0.5, s + 5.0);
   float fine = fbmU(uv, 90.0, 2, 0.55, s + 6.0);
   float grit = gnU(uv, 300.0, s + 7.0);
-  // shallow scuffs / footprint-scale dents: sparse oriented ellipses
-  vec4 sp = sparse(uv * 22.0, vec2(22.0), 0.45, s + 8.0);
+  float grit2 = gnU(uv, 220.0, s + 17.0);
+  // scuffs / footprint-scale dents: sparse oriented ellipses
+  vec4 sp = sparse(uv * 22.0, vec2(22.0), 0.55, s + 8.0);
   vec2 d = sp.zw; float a = sp.y * 3.14;
   d = mat2(cos(a), -sin(a), sin(a), cos(a)) * d;
   float dent = (1.0 - smoothstep(0.1, 0.32, length(d * vec2(1.0, 2.2)))) * step(0.0, sp.y);
-  // pebbles
-  vec4 pb = sparse(uv * 70.0, vec2(70.0), 0.1, s + 9.0);
-  float pr = 0.08 + 0.14 * fract(pb.y * 13.0);
-  float peb = pillow(pr - pb.x, 0.12) * step(0.0, pb.y);
-  float h = 0.2 * L.x + 0.05 * mid + 0.012 * fine + 0.004 * grit - 0.12 * dent + 0.25 * peb;
-  vec3 c0 = mix(${C('#d4c6aa')}, ${C('#d6ba90')}, tone);
-  vec3 c1 = mix(${C('#c2b192')}, ${C('#c6a57a')}, tone);
-  vec3 c2 = mix(${C('#ddd1b8')}, ${C('#dfc7a0')}, tone);
-  vec3 c = mix(c0, c1, smoothstep(0.0, 0.6, L.y) * 0.8);   // compacted darker patches
-  c = mix(c, c2, smoothstep(0.1, 0.6, L.x) * 0.6);          // loose pale drift on highs
-  c *= 0.97 + 0.04 * L.z + 0.02 * mid + 0.025 * fine;
-  c *= 1.0 - 0.06 * smoothstep(0.3, 0.8, grit);              // dark grit specks
-  c *= 1.0 - 0.05 * dent;
-  vec3 pc = mix(${C('#a89a86')}, ${C('#c4b8a2')}, fract(pb.y * 7.0));
-  o.col = mix(c, pc, smoothstep(0.0, 0.25, peb));
-  o.rough = 0.95 - 0.05 * smoothstep(0.0, 0.6, L.y) - 0.12 * peb;
+  // trodden ruts: long soft furrows along u
+  float rut = smoothstep(0.2, 0.7, fbm(uv * vec2(2.0, 14.0), vec2(2.0, 14.0), 3, 0.5, s + 18.0));
+  // gravel: many small stones + a few bigger ones, clustered by the low field
+  float gd = 0.22 + 0.25 * smoothstep(-0.2, 0.5, L.y);
+  vec4 pb = sparse(uv * 110.0, vec2(110.0), gd, s + 9.0);
+  float peb = pillow(0.07 + 0.12 * fract(pb.y * 13.0) - pb.x, 0.1) * step(0.0, pb.y);
+  vec4 pb2 = sparse(uv * 36.0, vec2(36.0), 0.12, s + 19.0);
+  float peb2 = pillow(0.1 + 0.12 * fract(pb2.y * 7.0) - pb2.x * (1.0 + 0.3 * gnU(uv, 60.0, s + 20.0)), 0.12) * step(0.0, pb2.y);
+  float pebs = max(peb, peb2);
+  float h = 0.35 * L.x + 0.12 * mid + 0.03 * fine + 0.01 * grit - 0.2 * dent - 0.25 * rut + 0.3 * peb + 0.5 * peb2;
+  vec3 c0 = mix(${C('#c2ad8c')}, ${C('#c9a87c')}, tone);
+  vec3 c1 = mix(${C('#a6927a')}, ${C('#ad8e68')}, tone);
+  vec3 c2 = mix(${C('#d3c3a4')}, ${C('#d8bf96')}, tone);
+  vec3 c = mix(c0, c1, smoothstep(-0.1, 0.6, L.y) * 0.85);   // compacted darker patches
+  c = mix(c, c2, smoothstep(0.05, 0.55, L.x) * 0.55);         // loose pale drift on highs
+  c = mix(c, c1 * 0.92, rut * 0.5);
+  c *= 0.95 + 0.05 * L.z + 0.04 * mid + 0.05 * fine;
+  c *= 1.0 - 0.16 * smoothstep(0.25, 0.75, grit);              // dark grit specks
+  c *= 1.0 + 0.10 * smoothstep(0.35, 0.8, grit2);              // pale grit specks
+  c *= 1.0 - 0.08 * dent;
+  vec3 pc = mix(${C('#8e8070')}, ${C('#c4b8a2')}, fract(pb.y * 7.0 + pb2.y * 3.0));
+  o.col = mix(c, pc, smoothstep(0.0, 0.25, pebs));
+  o.rough = 0.95 - 0.05 * smoothstep(0.0, 0.6, L.y) - 0.15 * pebs;
   o.h = h;
   return h;
 }

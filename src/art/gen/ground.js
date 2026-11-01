@@ -10,8 +10,8 @@ void lowField(vec2 uv, out vec4 a, out vec4 b) {
 
 // Pale compacted dust / sand: the default ground everywhere.
 export const sand_floor = {
-  hero: true, world: 256, normal: 1.0, ao: 0.7, aoRadius: 5, cavity: 0.3, cavRough: 0.02,
-  antiTile: true, macro: [0.12, 0.04], surface: 'sand', seed: 201,
+  hero: true, world: 256, normal: 1.3, ao: 0.9, aoRadius: 5, cavity: 0.45, cavRough: 0.02,
+  antiTile: true, macro: [0.16, 0.04], surface: 'sand', seed: 201,
   lowGlsl: SAND_LOW(0),
   glsl: /* glsl */`
 void surface(vec2 uv, inout Surf o) {

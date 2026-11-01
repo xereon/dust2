@@ -260,6 +260,39 @@ function rasterTri(S, t, isIdx, is, paint) {
   }
 }
 
+
+function normalRows(S, y0, y1) {
+  const { size, owner, hgt, alb, rough, metal, aoT, Ds, nrmT, albT, ormT } = S;
+  for (let y = y0; y < y1; y++) for (let x = 0; x < size; x++) {
+    const o = y * size + x, isl = owner[o];
+    if (isl < 0) continue;
+    const D = Ds[isl], hC = hgt[o];
+    const hL = x > 0 && owner[o - 1] === isl ? hgt[o - 1] : hC;
+    const hR = x < size - 1 && owner[o + 1] === isl ? hgt[o + 1] : hC;
+    const hD = y > 0 && owner[o - size] === isl ? hgt[o - size] : hC;
+    const hU = y < size - 1 && owner[o + size] === isl ? hgt[o + size] : hC;
+    const gx = -(hR - hL) * D * 0.5, gy = -(hU - hD) * D * 0.5;
+    const l = Math.sqrt(gx * gx + gy * gy + 1);
+    const o4 = o * 4;
+    nrmT[o4] = ((gx / l) * 0.5 + 0.5) * 255;
+    nrmT[o4 + 1] = ((gy / l) * 0.5 + 0.5) * 255;
+    nrmT[o4 + 2] = ((1 / l) * 0.5 + 0.5) * 255;
+    nrmT[o4 + 3] = 255;
+    const lap = (hL + hR + hD + hU) * 0.25 - hC; // >0 in creases
+    const cav = clamp01(1 - lap * D * 1.6);
+    const ao = aoT[o] * (0.55 + 0.45 * cav);
+    const albK = 0.8 + 0.2 * cav;
+    albT[o4] = clamp01(alb[o * 3] * albK) * 255 + 0.5;
+    albT[o4 + 1] = clamp01(alb[o * 3 + 1] * albK) * 255 + 0.5;
+    albT[o4 + 2] = clamp01(alb[o * 3 + 2] * albK) * 255 + 0.5;
+    albT[o4 + 3] = 255;
+    ormT[o4] = clamp01(ao) * 255 + 0.5;
+    ormT[o4 + 1] = clamp01(rough[o]) * 255 + 0.5;
+    ormT[o4 + 2] = clamp01(metal[o]) * 255 + 0.5;
+    ormT[o4 + 3] = 255;
+  }
+}
+
 function* bakeSteps(mb, layout, opts) {
   const size = layout.size;
   const islands = layout.islands;
@@ -290,37 +323,10 @@ function* bakeSteps(mb, layout, opts) {
 
   // normals from height (island-local differences), plus cavity darkening
   const nrmT = new Uint8Array(N * 4), albT = new Uint8Array(N * 4), ormT = new Uint8Array(N * 4);
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    if (x === 0 && (y & 31) === 31) yield;
-    const o = y * size + x, isl = owner[o];
-    if (isl < 0) continue;
-    const D = islands[isl].D;
-    const hC = hgt[o];
-    const hs = (xx, yy) => {
-      if (xx < 0 || yy < 0 || xx >= size || yy >= size) return hC;
-      const q = yy * size + xx;
-      return owner[q] === isl ? hgt[q] : hC;
-    };
-    const hL = hs(x - 1, y), hR = hs(x + 1, y), hD = hs(x, y - 1), hU = hs(x, y + 1);
-    let gx = -(hR - hL) * D * 0.5, gy = -(hU - hD) * D * 0.5;
-    const l = Math.hypot(gx, gy, 1);
-    nrmT[o * 4] = ((gx / l) * 0.5 + 0.5) * 255;
-    nrmT[o * 4 + 1] = ((gy / l) * 0.5 + 0.5) * 255;
-    nrmT[o * 4 + 2] = ((1 / l) * 0.5 + 0.5) * 255;
-    nrmT[o * 4 + 3] = 255;
-    const lap = (hL + hR + hD + hU) * 0.25 - hC; // >0 in creases
-    const cav = clamp01(1 - lap * D * 1.6);
-    const ao = aoT[o] * (0.55 + 0.45 * cav);
-    const albK = 0.8 + 0.2 * cav;
-    albT[o * 4] = Math.round(clamp01(alb[o * 3] * albK) * 255);
-    albT[o * 4 + 1] = Math.round(clamp01(alb[o * 3 + 1] * albK) * 255);
-    albT[o * 4 + 2] = Math.round(clamp01(alb[o * 3 + 2] * albK) * 255);
-    albT[o * 4 + 3] = 255;
-    ormT[o * 4] = Math.round(clamp01(ao) * 255);
-    ormT[o * 4 + 1] = Math.round(clamp01(rough[o]) * 255);
-    ormT[o * 4 + 2] = Math.round(clamp01(metal[o]) * 255);
-    ormT[o * 4 + 3] = 255;
-  }
+  const Ds = new Float32Array(islands.length);
+  islands.forEach((is, k) => { Ds[k] = is.D; });
+  const NS = { size, owner, hgt, alb, rough, metal, aoT, Ds, nrmT, albT, ormT };
+  for (let y = 0; y < size; y += 64) { normalRows(NS, y, Math.min(size, y + 64)); yield; }
   yield;
   dilate([albT, nrmT, ormT], owner, size, 6);
   yield;

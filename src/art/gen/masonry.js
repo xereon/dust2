@@ -27,9 +27,19 @@ export const plaster_wall = {
   lowGlsl: PLASTER_LOW(7),
   glsl: /* glsl */`
 void surface(vec2 uv, inout Surf o) {
-  limePlaster(uv, LOWA(uv), LOWB(uv), ${C('#dccaa6')}, ${C('#cbb38a')}, 0.47, 1.0, 7.0, o);
+  // CS-style weathered lime: grey-white base, heavy grey-brown grime blooms and run-off,
+  // only a warm hint (tints from the map multiply this, so it must stay near-neutral)
+  vec4 L = LOWA(uv);
+  float cover = limePlaster(uv, L, LOWB(uv), ${C('#d6cfc2')}, ${C('#c9bfae')}, 0.42, 1.0, 7.0, o);
+  float grime = smoothstep(0.15, 0.85, L.z) * (0.6 + 0.4 * fbmU(uv, 10.0, 3, 0.5, 90.0));
+  float runs = L.w;
+  vec3 g = mix(vec3(1.0), vec3(0.66, 0.63, 0.58), grime * 0.75);
+  g *= mix(vec3(1.0), vec3(0.74, 0.72, 0.68), runs * 0.7);
+  o.col = mix(o.col, o.col * g, cover);
+  o.col = mix(o.col, vec3(luma(o.col)), 0.15 * cover);
+  o.rough = mix(o.rough, o.rough + 0.04 * grime, cover);
   float cr = crackNet(uv, 5.0, 0.4, 1.2, 40.0) * step(0.99, o.h);
-  o.h -= cr * 0.15; o.col *= 1.0 - cr * 0.3; o.ao = 1.0 - cr * 0.35;
+  o.h -= cr * 0.15; o.col *= 1.0 - cr * 0.35; o.ao = 1.0 - cr * 0.35;
 }
 `,
 };
@@ -154,9 +164,9 @@ void surface(vec2 uv, inout Surf o) {
   float hM = 0.25 + 0.03 * mf;
   o.h = max(hS, hM);
   float isM = 1.0 - smoothstep(0.0, 0.1, hS - hM);
-  vec3 sc = mix(${C('#d8c49a')}, ${C('#c7aa7c')}, hr.y);
-  sc = mix(sc, ${C('#e0d2b2')}, smoothstep(0.6, 1.0, hr.z) * 0.8);
-  sc = mix(sc, ${C('#bf9f74')}, smoothstep(0.75, 1.0, c.rnd) * 0.8);
+  vec3 sc = mix(${C('#d2b88e')}, ${C('#c0a072')}, hr.y);
+  sc = mix(sc, ${C('#dccaa6')}, smoothstep(0.6, 1.0, hr.z) * 0.7);
+  sc = mix(sc, ${C('#b48e64')}, smoothstep(0.75, 1.0, c.rnd) * 0.8);
   float mot = fbmU(uv + c.rnd * 3.1, 14.0, 4, 0.55, 13.0);
   sc *= 0.96 + 0.05 * mot + 0.015 * fine;
   sc = mix(sc * 1.05, sc, prof);                                  // fresh worn arrises
@@ -173,25 +183,44 @@ void surface(vec2 uv, inout Surf o) {
 
 // Rounded field stones set in mortar (wall bases, B site plinths).
 export const stone_wall = {
-  world: 128, normal: 1.2, ao: 1.0, aoRadius: 8, cavity: 0.55, antiTile: true, macro: [0.08, 0.04],
+  world: 128, normal: 1.2, ao: 1.0, aoRadius: 7, cavity: 0.55, antiTile: true, macro: [0.1, 0.04],
   surface: 'rock', seed: 41,
   glsl: /* glsl */`
+// B-site walls: roughly coursed rubble blocks bedded in mud mortar, warm orange-tan,
+// partly smeared over with adobe render.
 void surface(vec2 uv, inout Surf o) {
-  vec3 st = fieldStones(uv, vec2(8.0, 11.0), 0.6, 1.35, 1.0, 1.0);
-  vec3 hr = hash3(vec2(st.y * 997.0, 1.0), 2.0);
-  float bump = fbmU(uv + hr.xy, 16.0, 4, 0.55, 4.0);
-  float hS = st.x * (1.6 + 0.6 * hr.y) + (0.18 * bump + 0.03 * fbmU(uv, 90.0, 2, 0.5, 8.0)) * st.x;
-  float mf = fbmU(uv, 120.0, 2, 0.6, 5.0);
-  float hM = 0.45 + 0.04 * mf + 0.05 * fbmU(uv, 16.0, 2, 0.5, 6.0);
-  o.h = max(hS, hM);
+  vec2 wu = uv + 0.004 * vec2(fbmU(uv, 8.0, 3, 0.5, 1.0), fbmU(uv + 0.3, 8.0, 3, 0.5, 2.0));
+  Cell c = ashlar(wu, 9.0, 4.0, 7.0, 0.5, 3.0);
+  vec3 hr = hash3(c.id, 9.0);
+  float ero = fbmU(uv, 20.0, 4, 0.55, 4.0);
+  float e = roundEdge(c, 0.02) + 0.006 * ero + 0.0015 * gnU(uv, 80.0, 5.0) - 0.004 * hr.z;
+  float prof = pillow(e - 0.004, 0.022);
+  float bump = fbmU(uv + c.rnd * 5.1, 10.0, 4, 0.55, 6.0);
+  float fine = fbmU(uv, 70.0, 2, 0.5, 7.0);
+  float tilt = dot(c.local - 0.5, hr.xy - 0.5) * 1.2;
+  float hS = 1.5 * prof + (0.3 * bump + 0.04 * fine + tilt) * prof;
+  float mf = fbmU(uv, 90.0, 2, 0.6, 12.0);
+  float hM = 0.65 + 0.06 * mf + 0.08 * fbmU(uv, 14.0, 2, 0.5, 13.0);
+  float hStone = max(hS, hM);
   float isM = 1.0 - smoothstep(0.0, 0.12, hS - hM);
-  vec3 sc = mix(${C('#cbbda2')}, ${C('#9c8e78')}, hr.z * hr.z);
-  sc = mix(sc, ${C('#dcd0b8')}, smoothstep(0.65, 1.0, hr.x) * 0.7);
-  sc = mix(sc, ${C('#b89a76')}, smoothstep(0.7, 1.0, hr.y) * 0.6);
-  sc *= 0.94 + 0.08 * fbmU(uv + hr.yz, 24.0, 3, 0.5, 7.0) + 0.05 * bump;
-  vec3 mc = ${C('#bda886')} * (0.9 + 0.07 * mf);
-  o.col = mix(sc, mc, isM);
-  o.rough = mix(0.72 + 0.12 * hr.x, 0.96, isM);
+  vec3 sc = mix(${C('#c9a274')}, ${C('#b4895c')}, hr.y);
+  sc = mix(sc, ${C('#d6b88c')}, smoothstep(0.6, 1.0, hr.z) * 0.7);
+  sc = mix(sc, ${C('#9c7a58')}, smoothstep(0.8, 1.0, c.rnd) * 0.7);
+  sc *= 0.92 + 0.08 * bump + 0.04 * fine;
+  sc = mix(sc * 1.06, sc, prof);
+  vec3 mc = ${C('#b8966c')} * (0.9 + 0.08 * mf);
+  vec3 col = mix(sc, mc, isM);
+  // adobe render smeared over parts of the wall
+  float rn = 0.7 * warpFbm(uv, 3.0, 0.25, 4, 20.0) + 0.25 * fbmU(uv, 18.0, 3, 0.5, 21.0);
+  float rend = smoothstep(0.32, 0.35, rn);
+  float hR = 1.7 + 0.12 * fbmU(uv, 6.0, 3, 0.5, 22.0) + 0.03 * fine;
+  vec3 rc = mix(${C('#cfa274')}, ${C('#c08f60')}, sat(fbmU(uv, 4.0, 3, 0.5, 23.0) * 0.7 + 0.5)) * (0.95 + 0.05 * fine);
+  float st = stainField(uv, 3.0, 24.0);
+  col = mix(col, rc, rend);
+  col *= mix(vec3(1.0), vec3(0.82, 0.78, 0.72), st * 0.5);
+  o.h = mix(hStone, max(hStone, hR), rend);
+  o.col = col;
+  o.rough = mix(mix(0.82 + 0.06 * hr.x, 0.95, isM), 0.93, rend);
 }
 `,
 };
@@ -294,7 +323,7 @@ void surface(vec2 uv, inout Surf o) {
 
 // Pale concrete ground slabs / rooftops: joints, cracks, dark water stains, dust.
 export const concrete_floor = {
-  world: 256, normal: 1.0, ao: 0.9, aoRadius: 5, cavity: 0.4, antiTile: true, macro: [0.12, 0.06],
+  world: 256, normal: 1.3, ao: 0.9, aoRadius: 5, cavity: 0.4, antiTile: true, macro: [0.12, 0.06],
   surface: 'concrete', seed: 92,
   lowGlsl: /* glsl */`
 void lowField(vec2 uv, out vec4 a, out vec4 b) {
@@ -313,13 +342,13 @@ void surface(vec2 uv, inout Surf o) {
   vec4 ag = sparse(uv * 260.0, vec2(260.0), 0.5, 9.0);
   float agg = (1.0 - smoothstep(0.15, 0.4, ag.x)) * step(0.0, ag.y);
   float pores = (1.0 - smoothstep(0.06, 0.2, pw.x)) * step(0.0, pw.y);
-  o.h = 0.5 + 0.05 * L.x + 0.008 * fine - 0.2 * joint - 0.06 * cr - 0.06 * pores + 0.015 * agg;
-  vec3 c = mix(${C('#c9c1b2')}, ${C('#b9b09f')}, sat(L.x * 0.6 + 0.5));
-  c *= 0.97 + 0.03 * L.y + 0.012 * fine;
-  float wet = smoothstep(0.2, 0.6, L.z);
-  c *= mix(vec3(1.0), vec3(0.74, 0.74, 0.73), wet * 0.5);
-  float dust = smoothstep(0.0, 0.6, L.w);
-  c = mix(c, ${C('#d8ccb4')}, dust * 0.35);
+  o.h = 0.5 + 0.08 * L.x + 0.02 * fine - 0.2 * joint - 0.06 * cr - 0.06 * pores + 0.03 * agg;
+  vec3 c = mix(${C('#b9b0a0')}, ${C('#a39a8a')}, sat(L.x * 0.8 + 0.5));
+  c *= 0.95 + 0.06 * L.y + 0.04 * fine;
+  float wet = smoothstep(0.15, 0.6, L.z);
+  c *= mix(vec3(1.0), vec3(0.7, 0.69, 0.67), wet * 0.55);
+  float dust = smoothstep(-0.1, 0.6, L.w);
+  c = mix(c, ${C('#c6b494')} * (0.94 + 0.08 * fine), dust * 0.5);
   c = mix(c, c * mix(0.88, 1.1, fract(ag.y * 7.0)), agg);
   c *= 1.0 - 0.15 * joint - 0.16 * cr - 0.15 * pores;
   o.col = c;
