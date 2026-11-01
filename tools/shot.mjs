@@ -32,7 +32,10 @@ for (let i = 0; i < args.length; i++) {
   if (k === 'eval') opt.eval.push(val); else opt[k] = val;
 }
 
-const poses = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/poses.json'), 'utf8'));
+let poses = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools/poses.json'), 'utf8'));
+const refPosesFile = path.join(ROOT, 'tools/refposes.json');
+const refPoses = fs.existsSync(refPosesFile) ? JSON.parse(fs.readFileSync(refPosesFile, 'utf8')) : {};
+if (opt.refposes) poses = { ...refPoses, ...poses };   // --all/--list-poses include ref_* only with --refposes
 if (opt['list-poses']) {
   for (const [k, v] of Object.entries(poses)) console.log(k.padEnd(18), v.desc || '');
   process.exit(0);

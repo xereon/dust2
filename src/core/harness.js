@@ -9,6 +9,9 @@ export async function setupHarness() {
   let poses = {};
   try { poses = await (await fetch('./tools/poses.json', { cache: 'no-store' })).json(); }
   catch (e) { console.warn('[harness] no poses.json'); }
+  // Poses matched to real CS:GO/CS2 reference frames (tools/refpair.mjs --write-poses).
+  try { poses = { ...(await (await fetch('./tools/refposes.json', { cache: 'no-store' })).json()), ...poses }; }
+  catch (e) { /* optional */ }
   World.harnessPoses = poses;
 
   World.harnessFixedDt = 1 / 60;
