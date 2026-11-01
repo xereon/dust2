@@ -67,6 +67,17 @@ export const vfov = (hfov) => 2 * Math.atan(Math.tan((hfov * Math.PI) / 360) * 0
 const _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _v = new THREE.Vector3(), _v2 = new THREE.Vector3();
 const _m4 = new THREE.Matrix4(), _q3 = new THREE.Quaternion();
 
+// three r180's RenderTarget.setSize leaves an attached DepthTexture at its old size, which
+// makes the framebuffer incomplete after a runtime resolution change: swap in a fresh one.
+function fitDepth(rt) {
+  const d = rt.depthTexture;
+  if (!d || (d.image.width === rt.width && d.image.height === rt.height)) return;
+  const n = new THREE.DepthTexture(rt.width, rt.height, d.type);
+  n.format = d.format; n.minFilter = d.minFilter; n.magFilter = d.magFilter;
+  d.dispose();
+  rt.depthTexture = n;
+}
+
 // ---- composer passes ------------------------------------------------------------------
 class WorldPass extends Pass {
   constructor(p) { super(); this.p = p; this.needsSwap = false; }
@@ -249,7 +260,7 @@ export class RenderPipeline {
     this.passFx = new FxPass(this);
     this._fxList = [];
     // sample-safe opaque depth for soft particles (never attached while FX draw)
-    this.fxDepthTexture = this.sceneRT.depthTexture;
+    // (fxDepthTexture getter below)
     this.passVM = new ViewmodelPass(this);
     this.passBloom = new BloomPass(this);
     this.passTone = new ShaderStagePass(this.tonemap.material);
@@ -277,6 +288,9 @@ export class RenderPipeline {
     }
     return out;
   }
+
+  /** Sample-safe opaque scene depth for soft particles (never attached while FX draw). */
+  get fxDepthTexture() { return this.sceneRT.depthTexture; }
 
   get scene() { return this._scene; }
   get camera() { return this._camera; }
@@ -321,9 +335,12 @@ export class RenderPipeline {
     this._viewCamera.updateProjectionMatrix();
     const W = Math.max(1, Math.round(w * prr)), H = Math.max(1, Math.round(h * prr));
     this.sceneRT.setSize(W, H);
+    fitDepth(this.sceneRT);
     this.gtao.setSize(W, H);
     this.composer.setPixelRatio(prr);
     this.composer.setSize(w, h);
+    fitDepth(this.composer.renderTarget1);
+    fitDepth(this.composer.renderTarget2);
     const a = this.atmo.material.uniforms;
     a.uAOTexel.value.set(1 / this.gtao.w, 1 / this.gtao.h);
     a.uAOHalf.value = this.gtao.scale < 0.99 ? 1 : 0;

@@ -514,3 +514,9 @@ crouchjump/drop) and `.n` (node index). `nearest(pos)` → node **index** (not a
 * `buildWorldModel(key).userData.grip` and `.support` exist for **every** key (characters IK onto them).
 * Planting/defusing state lives on the entity: rules sets `ent.planting` / `ent.defusing` (bool) while the
   action runs; characters and HUD read those, not `World.match.bomb` internals.
+
+### 8a. Renderer notes (shipped)
+* `pipeline.fxDepthTexture` — safe-to-sample copy of scene depth. Top-level objects with
+  `userData.fx = true` (except lights) are drawn after AO/haze, depth-tested against the world.
+* Keep point-light counts FIXED (pool and toggle intensity): a changing light count recompiles every material.
+* Don't share a material between the viewmodel and the world — the viewmodel lighting patch sticks to it.
