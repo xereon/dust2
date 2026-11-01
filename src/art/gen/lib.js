@@ -173,10 +173,10 @@ float sandSurf(vec2 uv, vec4 L, float tone, float s, inout Surf o) {
   float peb2 = pillow(0.1 + 0.12 * fract(pb2.y * 7.0) - pb2.x * (1.0 + 0.3 * gnU(uv, 60.0, s + 20.0)), 0.12) * step(0.0, pb2.y);
   float pebs = max(peb, peb2);
   float h = 0.35 * L.x + 0.12 * mid + 0.03 * fine + 0.01 * grit - 0.2 * dent - 0.25 * rut + 0.3 * peb + 0.5 * peb2;
-  vec3 c0 = mix(${C('#c2ad8c')}, ${C('#c9a87c')}, tone);
-  vec3 c1 = mix(${C('#a6927a')}, ${C('#ad8e68')}, tone);
-  vec3 c2 = mix(${C('#d3c3a4')}, ${C('#d8bf96')}, tone);
-  vec3 c = mix(c0, c1, smoothstep(-0.1, 0.6, L.y) * 0.85);   // compacted darker patches
+  vec3 c0 = mix(${C('#b6a082')}, ${C('#bf9e74')}, tone);
+  vec3 c1 = mix(${C('#957f66')}, ${C('#9c7e5c')}, tone);
+  vec3 c2 = mix(${C('#cbb99a')}, ${C('#d0b68c')}, tone);
+  vec3 c = mix(c0, c1, smoothstep(-0.2, 0.5, L.y) * 0.9);    // compacted darker patches
   c = mix(c, c2, smoothstep(0.05, 0.55, L.x) * 0.55);         // loose pale drift on highs
   c = mix(c, c1 * 0.92, rut * 0.5);
   c *= 0.95 + 0.05 * L.z + 0.04 * mid + 0.05 * fine;

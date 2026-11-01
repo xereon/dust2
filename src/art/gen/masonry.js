@@ -343,12 +343,12 @@ void surface(vec2 uv, inout Surf o) {
   float agg = (1.0 - smoothstep(0.15, 0.4, ag.x)) * step(0.0, ag.y);
   float pores = (1.0 - smoothstep(0.06, 0.2, pw.x)) * step(0.0, pw.y);
   o.h = 0.5 + 0.08 * L.x + 0.02 * fine - 0.2 * joint - 0.06 * cr - 0.06 * pores + 0.03 * agg;
-  vec3 c = mix(${C('#b9b0a0')}, ${C('#a39a8a')}, sat(L.x * 0.8 + 0.5));
+  vec3 c = mix(${C('#aca290')}, ${C('#8f8676')}, sat(L.x * 1.1 + 0.5));
   c *= 0.95 + 0.06 * L.y + 0.04 * fine;
   float wet = smoothstep(0.15, 0.6, L.z);
   c *= mix(vec3(1.0), vec3(0.7, 0.69, 0.67), wet * 0.55);
   float dust = smoothstep(-0.1, 0.6, L.w);
-  c = mix(c, ${C('#c6b494')} * (0.94 + 0.08 * fine), dust * 0.5);
+  c = mix(c, ${C('#bba786')} * (0.92 + 0.1 * fine), dust * 0.5);
   c = mix(c, c * mix(0.88, 1.1, fract(ag.y * 7.0)), agg);
   c *= 1.0 - 0.15 * joint - 0.16 * cr - 0.15 * pores;
   o.col = c;

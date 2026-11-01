@@ -19,15 +19,8 @@ export class DepthCapture {
     this.checked = false;
     this.frame = -1;
     this.enabled = true;
-    // Invisible hook object: its onBeforeRender runs between opaque and transparent FX.
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(9), 3));
-    const m = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, depthTest: false, colorWrite: false });
-    this.hook = new THREE.Mesh(g, m);
-    this.hook.frustumCulled = false;
-    this.hook.renderOrder = 5;
-    this.hook.userData.fx = true;
-    this.hook.onBeforeRender = (renderer, scene, camera) => this.capture(renderer, camera);
+    // capture() is driven from the first FX transparent draw (see Decals.onBeforeRender);
+    // a dedicated hook mesh upset three's depth state for following draws.
   }
 
   capture(renderer, camera) {

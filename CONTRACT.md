@@ -203,7 +203,13 @@ export const TextureLib = {
   material(key, opts = {}) -> THREE.MeshStandardMaterial   // cached; opts {repeat, tint, aniso}
   maps(key) -> { map, normalMap, roughnessMap, metalnessMap, aoMap, displacementMap? }
   keys() -> string[]
+  info(key) -> { tile /* world units per repeat */, surface, hero }
+  preload(keys) -> Promise                                  // bake a set up front
+  decal(type) -> Texture (with .normalMap)                  // bullet_*, blood, scorch
+  detailNormal() -> Texture
 }
+// Extra keys: plaster_white plaster_band_ochre plaster_band_teal cobblestone paving_setts
+// asphalt curb_redwhite flagstone adobe wood_shutter
 ```
 
 Required keys (map agent depends on these exact names):

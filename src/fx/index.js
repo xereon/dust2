@@ -62,12 +62,13 @@ export class FX {
     const scene = World.scene, vscene = World.viewScene;
 
     this.depth = new DepthCapture();
-    scene?.add(this.depth.hook);
     this.pool = new ParticlePool(this.textures.particles, { capacity: 6144, renderOrder: 10, name: 'fx-particles' });
     scene?.add(this.pool.mesh);
     this.vpool = vscene ? new ParticlePool(this.textures.particles, { capacity: 384, renderOrder: 900, name: 'fx-view-particles' }) : null;
     if (this.vpool) vscene.add(this.vpool.mesh);
     this.decals = new Decals(scene, this.textures);
+    // decals are the first FX transparent draw: grab scene depth there for soft particles
+    this.decals.mesh.onBeforeRender = (renderer, sc, camera) => this.depth.capture(renderer, camera);
     this.tracers = new Tracers(scene);
     this.shells = new Shells(scene);
     this.lights = new LightPool(scene, 3);

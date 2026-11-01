@@ -151,6 +151,10 @@ export class SunShadows {
       u[`rpShadowMap${i}`].value = used ? l.shadow.map.depthTexture : null;
       u.rpShadowParams.value[i].w = 0;
     }
+    // Unused slots must still hold a real compare-mode depth texture: WebGL2 rejects every
+    // draw (INVALID_OPERATION) if a sampler2DShadow sees anything else.
+    const fallback = this.lights[STATIC_SLOT].shadow.map.depthTexture;
+    for (let i = 0; i < 4; i++) if (!u[`rpShadowMap${i}`].value) u[`rpShadowMap${i}`].value = fallback;
     this.lights[STATIC_SLOT].shadow.needsUpdate = true;
     shadowConfig.pcf = this.software ? 3 : p.pcf;
     this._fitStatic();
