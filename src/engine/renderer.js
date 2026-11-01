@@ -76,7 +76,12 @@ class WorldPass extends Pass {
     renderer.setRenderTarget(p.sceneRT);
     renderer.setClearColor(0x000000, 0);
     renderer.clear(true, true, false);
+    // transparent FX (smoke, particles, tracers, decals) are drawn after AO + haze (FxPass),
+    // so screen-space AO and fog computed from opaque depth never shade through them
+    const fx = p._collectFx();
+    for (let i = 0; i < fx.length; i++) fx[i].visible = false;
     renderer.render(p._scene, p._camera);
+    for (let i = 0; i < fx.length; i++) fx[i].visible = true;
     if (p.aoOn) p.gtao.render(renderer, p.sceneRT.depthTexture, p._camera);
   }
 }
@@ -89,6 +94,39 @@ class AtmoPass extends Pass {
     u.tDepth.value = this.p.sceneRT.depthTexture;
     renderer.setRenderTarget(writeBuffer);
     this.quad.render(renderer);
+  }
+}
+
+class FxPass extends Pass {
+  constructor(p) { super(); this.p = p; this.needsSwap = false; this.hidden = []; }
+  render(renderer, writeBuffer, readBuffer) {
+    const p = this.p, fx = p._collectFx();
+    if (!fx.length) return;
+    // copy opaque scene depth into the composer buffer so FX depth-test against the world
+    const gl = renderer.getContext(), st = renderer.state, props = renderer.properties;
+    renderer.setRenderTarget(readBuffer);
+    const src = props.get(p.sceneRT).__webglFramebuffer, dst = props.get(readBuffer).__webglFramebuffer;
+    if (src && dst) {
+      st.bindFramebuffer(gl.READ_FRAMEBUFFER, src);
+      st.bindFramebuffer(gl.DRAW_FRAMEBUFFER, dst);
+      const w = p.sceneRT.width, h = p.sceneRT.height;
+      gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, gl.DEPTH_BUFFER_BIT, gl.NEAREST);
+      st.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+    }
+    renderer.setRenderTarget(readBuffer);
+    // draw only the FX objects (lights stay visible so lit FX shade the same as in-world)
+    const hid = this.hidden; hid.length = 0;
+    const ch = p._scene.children;
+    for (let i = 0; i < ch.length; i++) {
+      const o = ch[i];
+      if (o.visible && !o.isLight && !o.userData?.fx) { o.visible = false; hid.push(o); }
+    }
+    const sky = p.sky.visible; p.sky.visible = false;
+    const sm = renderer.shadowMap.autoUpdate; renderer.shadowMap.autoUpdate = false;
+    renderer.render(p._scene, p._camera);
+    renderer.shadowMap.autoUpdate = sm;
+    p.sky.visible = sky;
+    for (let i = 0; i < hid.length; i++) hid[i].visible = true;
   }
 }
 
@@ -200,17 +238,24 @@ export class RenderPipeline {
     this.tonemap.material.uniforms.tBloom.value = this.bloom.texture;
     this.final = new FinalPass();
 
-    const crt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: true, stencilBuffer: false });
+    const crt = new THREE.WebGLRenderTarget(1, 1, {
+      type: THREE.HalfFloatType, depthBuffer: true, stencilBuffer: false,
+      depthTexture: Object.assign(new THREE.DepthTexture(1, 1), { type: THREE.UnsignedIntType }),
+    });
     crt.texture.name = 'rp.composer';
     this.composer = new EffectComposer(r, crt);
     this.passWorld = new WorldPass(this);
     this.passAtmo = new AtmoPass(this);
+    this.passFx = new FxPass(this);
+    this._fxList = [];
+    // sample-safe opaque depth for soft particles (never attached while FX draw)
+    this.fxDepthTexture = this.sceneRT.depthTexture;
     this.passVM = new ViewmodelPass(this);
     this.passBloom = new BloomPass(this);
     this.passTone = new ShaderStagePass(this.tonemap.material);
     this.passSMAA = new SMAAPass();
     this.passFinal = new ShaderStagePass(this.final.material);
-    for (const p of [this.passWorld, this.passAtmo, this.passVM, this.passBloom, this.passTone, this.passSMAA, this.passFinal]) this.composer.addPass(p);
+    for (const p of [this.passWorld, this.passAtmo, this.passFx, this.passVM, this.passBloom, this.passTone, this.passSMAA, this.passFinal]) this.composer.addPass(p);
 
     this.tinyRT = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType });
 
@@ -220,6 +265,17 @@ export class RenderPipeline {
     addEventListener('resize', () => this.resize());
     World.on('cvar', (e) => this._onCvar(e?.name));
     World.on('spawn', () => { this._matsDirty = true; });
+  }
+
+  /** Top-level transparent-FX objects (userData.fx, not lights) for the post-atmosphere pass. */
+  _collectFx() {
+    const out = this._fxList; out.length = 0;
+    const ch = this._scene.children;
+    for (let i = 0; i < ch.length; i++) {
+      const o = ch[i];
+      if (o.visible && o.userData?.fx && !o.isLight) out.push(o);
+    }
+    return out;
   }
 
   get scene() { return this._scene; }
@@ -521,7 +577,7 @@ export class RenderPipeline {
     let now = performance.now();
     sync();
     t.pre = performance.now() - now;
-    const names = ['world', 'atmo', 'vm', 'bloom', 'tone', 'smaa', 'final'];
+    const names = ['world', 'atmo', 'fx', 'vm', 'bloom', 'tone', 'smaa', 'final'];
     // split the world pass: shadows+scene vs AO
     const aoOn = this.aoOn;
     this.aoOn = false;
