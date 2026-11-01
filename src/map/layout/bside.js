@@ -4,7 +4,7 @@ import { zx, zy, zc } from './util.js';
 
 export function build(K) {
   const tun = { mat: 'concrete_floor', wallMat: 'plaster_wall', ceilMat: 'wood_planks', paint: { h: 36, mat: 'plaster_wall#dark' } };
-  const stoneWall = { wallMat: 'adobe', paint: null, tint: [0.9, 0.9, 0.97] };
+  const stoneWall = { wallMat: 'adobe', paint: null, tint: [0.8, 0.82, 0.92], base: { h: 34, out: 4, mat: 'stone_wall' } };
 
   // ---- upper tunnels ------------------------------------------------------------------------
   K.region('utun_mouth', zc([[-1736, 716], [-1588, 716], [-1588, 744], [-1736, 744]], 30),
@@ -19,10 +19,14 @@ export function build(K) {
   K.region('utun_hall_e', zc([
     [-1700, 958], [-1588, 958], [-1537, 958], [-1537, 1020], [-1293, 1020], [-1293, 1180], [-1293, 1298], [-1653, 1298], [-1653, 1425], [-1700, 1425],
   ], 32), uhall);
+  K.region('utun_exit', zc([[-2057, 1425], [-1906, 1425], [-1906, 1765], [-2057, 1765]], 32),
+    { ...tun, ceil: 170, beams: { dir: 'x', step: 96 } });
+  K.region('utun_exit_mouth', zc([[-2057, 1765], [-1906, 1765], [-1906, 1789], [-2057, 1789]], 32),
+    { ...tun, arch: { spring: 118, crown: 170 }, ceilTop: 330, wallMat: 'adobe' });
   K.region('utun_sky', zc([[-1860, 1100], [-1700, 1100], [-1700, 1250], [-1860, 1250]], 32), { ...tun, top: 360, decor: false });
   // skylight timber grid (some joists missing) over the open bay
-  for (const [i, x] of [-1840, -1800, -1760, -1720].entries()) if (i !== 2) K.box([x - 4, 1094, 296], [x + 4, 1256, 306], 'wood_planks', { col: false, color: 0.7 });
-  for (const y of [1140, 1210]) K.box([-1866, y - 3, 300], [-1694, y + 3, 306], 'wood_planks', { col: false, color: 0.7 });
+  for (const [i, x] of [-1850, -1810, -1770, -1730, -1710].entries()) if (i !== 2) K.box([x - 4, 1094, 334], [x + 4, 1256, 344], 'wood_planks', { col: false, color: 0.7 });
+  for (let y = 1108; y < 1250; y += 18) if (Math.abs(y - 1180) > 20) K.box([-1866, y - 2, 344], [-1694, y + 2, 347], 'wood_planks', { col: false, color: 0.65 });
   // shallow arched recesses in the side walls
   for (const [x0, x1, y] of [[-2185, -2075, 1425], [-2010, -1930, 1022]]) {
     const ys = y > 1200 ? y - 0.5 : y + 0.5, sg = y > 1200 ? -1 : 1;
@@ -43,7 +47,7 @@ export function build(K) {
     [-1334, 2719], [-1334, 2787], [-1352, 2803], [-1512, 2895], [-1715, 2895], [-1715, 2442], [-1860, 2442],
     [-1980, 2442], [-2185, 2442], [-2185, 2320], [-2211, 2320], [-2211, 2068], [-2186, 2068],
   ], 4), {
-    mat: 'sand_blend', ...stoneWall, top: 330, tops: { 25: 64, 26: 64, 28: 64 }, cornice: { mat: 'stone_block', h: 10, out: 5 }, merlons: { mat: 'adobe' },
+    mat: 'sand_blend', ...stoneWall, top: 330, tops: { 25: 64, 26: 64, 28: 64 }, cornice: { mat: 'stone_block', h: 10, out: 5 },
   });
   // close the skyline above the north end of the low plat/site divider
   K.slab([-1736, 2896], [-1714, 2896], 60, 330, 12, 'adobe', { side: 'left', color: 0.95 });
@@ -52,7 +56,7 @@ export function build(K) {
   K.region('b_plat', zc([
     [-2140, 2460], [-1980, 2460], [-1980, 2500], [-1860, 2500], [-1860, 2460], [-1735, 2460], [-1735, 2895],
     [-1874, 2895], [-1874, 3172], [-2140, 3172],
-  ], 32), { mat: 'sand_blend', ...stoneWall, top: 360, tops: { 0: 64, 4: 64, 5: 64 }, cornice: { mat: 'stone_block', h: 10, out: 5 }, merlons: { mat: 'adobe' } });
+  ], 32), { mat: 'sand_blend', ...stoneWall, top: 360, tops: { 0: 64, 4: 64, 5: 64 }, cornice: { mat: 'stone_block', h: 10, out: 5 } });
 
   // B window: raised ledge inside the site, the opening through the wall, the CT-side platform
   K.region('bwin_step', zc([[-1455, 2600], [-1400, 2600], [-1400, 2640], [-1455, 2640]], 108), { mat: 'stone_block', ...stoneWall });

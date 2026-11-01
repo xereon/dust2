@@ -47,6 +47,34 @@ export function floorPatch(K, mat, [cx, cy], z, r, seed = 1, n = 18) {
   for (let i = 0; i < n; i++) K.poly(mat + '#decal', up([C, P[i], P[(i + 1) % n]]), { col: 0.96, normal: [0, 0, 1] });
 }
 
+/** Faded site plaque (own design): cream board, big orange 'B', a heading bar and text lines. */
+function siteSign(K, [x, y], z, [mx, my], k = 1) {
+  const ux = -my, uy = mx;                         // along the wall (right when facing it from the site)
+  const W = 60 * k, H = 84 * k;
+  const P = (s, zz, off) => [x + ux * s + mx * off, y + uy * s + my * off, zz];
+  const face = (pts, col, off) => {
+    let Q = pts.map(([s, zz]) => P(s, zz, off));
+    let nx = 0, ny = 0;
+    for (let i = 0; i < Q.length; i++) { const a = Q[i], b = Q[(i + 1) % Q.length]; nx += (a[1] - b[1]) * (a[2] + b[2]); ny += (a[2] - b[2]) * (a[0] + b[0]); }
+    if (nx * mx + ny * my < 0) Q = Q.reverse();
+    K.poly('plaster_white#decal', Q, { col, normal: [mx, my, 0] });
+  };
+  const rect = (s0, z0, s1, z1, col, off = 1.2) => face([[s0, z0], [s1, z0], [s1, z1], [s0, z1]], col, off);
+  rect(-W / 2 - 2 * k, z - 2 * k, W / 2 + 2 * k, z + H + 2 * k, [0.42, 0.36, 0.3], 0.8);
+  rect(-W / 2, z, W / 2, z + H, [0.93, 0.89, 0.8]);
+  const or = [0.86, 0.36, 0.2];
+  // the letter B: stem + three bars + two bowls (rect approximations)
+  const s0 = -W * 0.32, s1 = W * 0.18, zb = z + H * 0.36, zt = z + H * 0.9, t = 7 * k;
+  rect(s0, zb, s0 + t, zt, or, 1.4);
+  rect(s0, zt - t, s1 - 4 * k, zt, or, 1.4);
+  rect(s0, (zb + zt) / 2 - t / 2, s1 - 2 * k, (zb + zt) / 2 + t / 2, or, 1.4);
+  rect(s0, zb, s1 - 4 * k, zb + t, or, 1.4);
+  rect(s1 - 6 * k, (zb + zt) / 2 + t / 2, s1 + 1 * k, zt - t, or, 1.4);
+  rect(s1 - 4 * k, zb + t, s1 + 3 * k, (zb + zt) / 2 - t / 2, or, 1.4);
+  // text lines
+  for (let i = 0; i < 3; i++) rect(-W * 0.36, z + H * (0.22 - i * 0.07), W * (0.36 - i * 0.1), z + H * (0.22 - i * 0.07) + 2.4 * k, [0.3, 0.27, 0.24], 1.4);
+}
+
 /** Pillar of rough dressed stone blocks, courses of two or three blocks with ragged joints. */
 function stonePillar(K, [cx, cy], z, [w, d], courses = 4, ch = 27) {
   for (let c = 0; c < courses; c++) {
@@ -237,7 +265,8 @@ export function build(K) {
   crate(K, [-2060, 2482, 32], [34, 70, 36]);
   barrel(K, [-1361, 2344, 4]); barrel(K, [-1358, 2379, 4], 1);
   // the big timber gate in B's north wall and the tarp-covered pallets
-  prop(K, 'bigDoorMetal', [150, 170, 0, { paint: 'teal', arch: true }], [-1620, 2895, 4], 0);
+  prop(K, 'bigDoorMetal', [150, 160, 0, { paint: 'brown' }], [-1620, 2895, 4], 0);
+  siteSign(K, [-1334, 2440], 40, [-1, 0], 1.6);
   prop(K, 'tarp', [84, 64, 56, 'bluegrey'], [-1590, 2776, 4], 2);
   prop(K, 'tarp', [60, 52, 44, 'bluegrey'], [-1420, 2430, 4], -12);
   prop(K, 'stoneBlocks', [48, 40, 5], [-1690, 2600, 4], 0);

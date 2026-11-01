@@ -523,3 +523,7 @@ crouchjump/drop) and `.n` (node index). `nearest(pos)` → node **index** (not a
   `userData.fx = true` (except lights) are drawn after AO/haze, depth-tested against the world.
 * Keep point-light counts FIXED (pool and toggle intensity): a changing light count recompiles every material.
 * Don't share a material between the viewmodel and the world — the viewmodel lighting patch sticks to it.
+
+### 6b. Extra callouts
+`ct_under` — the CT-spawn underpass (Source x 250..400, y 2120..2556, floor z ≈ -122), timber-roofed.
+Zones may overlap vertically; tools that place cameras by zone should prefer an explicit floor hint.

@@ -22,7 +22,8 @@ export const lightUniforms = {
   rpAmbGround: { value: new THREE.Color(0.30, 0.24, 0.17) },
   rpSpecRef: { value: 1 },   // luminance of open-sky irradiance (specular occlusion reference)
   rpIndirect: { value: 1 },  // debug / global ambient multiplier
-  rpIndoor: { value: 2.0 },  // extra ambient where the volume sees no sky (tunnels, under roofs)
+  rpIndoor: { value: 1.5 },
+  rpIndoorFloor: { value: 0.2 }, // min ambient in sealed spaces, as a fraction of open-sky irradiance  // extra ambient where the volume sees no sky (tunnels, under roofs)
   rpVMRot: { value: new THREE.Matrix3() },
   rpVMPos: { value: new THREE.Vector3() },
   rpVMSun: { value: 1 },
@@ -33,7 +34,7 @@ const COMMON_GLSL = /* glsl */`
 uniform vec3 rpSunDir;
 uniform highp sampler3D rpGI0, rpGI1, rpGI2, rpGI3;
 uniform vec3 rpGIMin, rpGIInvSize, rpAmbSky, rpAmbGround;
-uniform float rpGIBias, rpGIOn, rpSpecRef, rpIndirect, rpDebug, rpIndoor;
+uniform float rpGIBias, rpGIOn, rpSpecRef, rpIndirect, rpDebug, rpIndoor, rpIndoorFloor;
 // cosine-weighted sky visibility baked with the volume (1 open, 0 enclosed)
 float rpGISky(vec3 wp) {
   if (rpGIOn < 0.5) return 1.0;
@@ -103,7 +104,9 @@ ${vm ? 'rpSunVis = rpVMSun;' : `
          : 'irradiance = rpGIEval(rpWP + rpGN * rpGIBias, rpWN);'}
     float rpEncl = 1.0 - rpSkyVis;
     // enclosed spaces in Dust II read warm (sand bounce through the openings), not grey
-    irradiance *= rpIndirect * (1.0 + rpIndoor * rpEncl * rpEncl * vec3(1.12, 1.0, 0.78));
+    irradiance *= rpIndirect * (1.0 + rpIndoor * rpEncl * rpEncl * vec3(1.04, 1.0, 0.9));
+    // CS:GO's radiosity never lets a tunnel go black: floor the ambient in sealed spaces
+    irradiance = max(irradiance, vec3(1.04, 1.0, 0.92) * (rpSpecRef * rpIndoorFloor * rpEncl * rpIndirect));
   }
 #endif
 `;
@@ -138,6 +141,7 @@ const ALPHA_OUT = /* glsl */`
       if (rpDebug < 1.5) gl_FragColor.rgb = rpInd;                 // 1: indirect only
       else if (rpDebug < 2.5) gl_FragColor.rgb = vec3(rpSunVis);   // 2: sun visibility
       else if (rpDebug < 3.5) gl_FragColor.rgb = irradiance * 0.3; // 3: raw irradiance
+      else gl_FragColor.rgb = vec3(rpSkyVis, rpSkyVis * rpSkyVis, 0.0) * 4.0;   // 5: baked sky visibility
     }
   }
 #endif

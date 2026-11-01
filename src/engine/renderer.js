@@ -26,17 +26,17 @@ import { FinalPass } from './post/final.js';
 import { makeRT } from './post/common.js';
 
 const CV = {
-  exposure: [0.95, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
+  exposure: [0.9, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
   bloom_strength: [0.05, 0, 1, 'bloom mix'],
   bloom_threshold: [1.6, 0, 20, 'bloom luminance threshold (exposed HDR)'],
   ao_intensity: [1.5, 0, 4, 'GTAO power (0 = off)'],
   ao_radius: [42, 4, 200, 'GTAO world radius (units)'],
-  fog_density: [1.0, 0, 10, 'height fog density (multiplier)'],
+  fog_density: [1.3, 0, 10, 'height fog density (multiplier)'],
   sun_intensity: [1.0, 0, 4, 'sun intensity (x map value)'],
   sky_intensity: [1.0, 0, 4, 'sky light intensity (x) — rebakes GI'],
   bounce_intensity: [1.2, 0, 3, 'bounce light (x) — rebakes GI'],
-  saturation: [1.05, 0, 2, 'grade saturation'],
-  contrast: [1.12, 0.3, 2, 'grade S-curve (1 = neutral)'],
+  saturation: [0.86, 0, 2, 'grade saturation'],
+  contrast: [1.18, 0.3, 2, 'grade S-curve (1 = neutral)'],
   highlights: [0.08, 0, 0.5, 'grade highlight stretch'],
   grain: [0.15, 0, 3, 'film grain amount'],
   vignette: [0.22, 0, 1, 'vignette strength'],
@@ -49,7 +49,7 @@ const CV = {
   r_smaa: [1, 0, 1, 'SMAA'],
   r_gi: [1, 0, 1, 'irradiance volume (0 = flat hemisphere)'],
   r_shadows: [1, 0, 1, 'sun shadows'],
-  r_debugview: [0, 0, 4, '1 indirect, 2 sun vis, 3 irradiance, 4 AO'],
+  r_debugview: [0, 0, 5, '1 indirect, 2 sun vis, 3 irradiance, 4 AO, 5 sky visibility'],
   r_static_cache: [0, 0, 1, 'reuse the world render when nothing moved (on in the harness)'],
 };
 for (const [k, [v, a, b, h]] of Object.entries(CV)) defCvar(k, k === 'r_static_cache' && World.harness ? 1 : v, a, b, h);
@@ -219,6 +219,7 @@ export class RenderPipeline {
     this._scene.add(this.hemi);
     this.env = new SkyEnv(r);
     this.gi = new GIVolume(r);
+    this.lightUniforms = lightUniforms; // debug access (cv/harness)
 
     // viewmodel light rig: sun matching the world direction + soft key so guns read in shade
     this.vmSun = new THREE.DirectionalLight(0xffffff, 3);
@@ -502,7 +503,7 @@ export class RenderPipeline {
     A.uFog.value.x = 0.8e-4 * c.fog_density;
     A.uFogTint.value.copy(this.fogTint);
     A.uDebug.value = c.r_debugview === 4 ? 1 : 0;
-    lightUniforms.rpDebug.value = c.r_debugview < 4 ? c.r_debugview : 0;
+    lightUniforms.rpDebug.value = c.r_debugview !== 4 ? c.r_debugview : 0;
     shadowUniforms.rpShadowOn.value = c.r_shadows ? 1 : 0;
     this.passSMAA.enabled = !!c.r_smaa;
     this.final.material.uniforms.uGrain.value = c.grain;

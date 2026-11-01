@@ -14,7 +14,7 @@ export const skyUniforms = {
   rpSunGlow: { value: new THREE.Color() },     // Mie forward-scatter strength (radiance units)
   rpSunDisc: { value: new THREE.Color() },     // sun disc radiance
   rpSunCos: { value: Math.cos(0.65 * Math.PI / 180) },
-  rpCirrus: { value: 0.55 },
+  rpCirrus: { value: 0.22 },
   rpSkyTime: { value: 0 },
 };
 
