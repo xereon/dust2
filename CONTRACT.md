@@ -509,3 +509,8 @@ crouchjump/drop) and `.n` (node index). `nearest(pos)` → node **index** (not a
 (audio drives tinnitus from it). `shell_land { pos, key, speed }` fires once per bounce. FX objects are
 `userData.fx = true` on layer 5; the renderer composites them after AO/atmosphere and may expose
 `fxDepthTexture` (safe-to-sample scene depth) for soft particles.
+
+### 12a. Character extras
+* `buildWorldModel(key).userData.grip` and `.support` exist for **every** key (characters IK onto them).
+* Planting/defusing state lives on the entity: rules sets `ent.planting` / `ent.defusing` (bool) while the
+  action runs; characters and HUD read those, not `World.match.bomb` internals.
