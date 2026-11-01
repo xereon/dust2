@@ -163,8 +163,8 @@ float sandSurf(vec2 uv, vec4 L, float tone, float s, inout Surf o) {
   d = mat2(cos(a), -sin(a), sin(a), cos(a)) * d;
   float dent = (1.0 - smoothstep(0.1, 0.32, length(d * vec2(1.0, 2.2)))) * step(0.0, sp.y);
   // pebbles
-  vec4 pb = sparse(uv * 70.0, vec2(70.0), 0.22, s + 9.0);
-  float pr = 0.12 + 0.12 * fract(pb.y * 13.0);
+  vec4 pb = sparse(uv * 70.0, vec2(70.0), 0.1, s + 9.0);
+  float pr = 0.08 + 0.14 * fract(pb.y * 13.0);
   float peb = pillow(pr - pb.x, 0.12) * step(0.0, pb.y);
   float h = 0.2 * L.x + 0.05 * mid + 0.012 * fine + 0.004 * grit - 0.12 * dent + 0.25 * peb;
   vec3 c0 = mix(${C('#d4c6aa')}, ${C('#d6ba90')}, tone);
@@ -175,7 +175,7 @@ float sandSurf(vec2 uv, vec4 L, float tone, float s, inout Surf o) {
   c *= 0.97 + 0.04 * L.z + 0.02 * mid + 0.025 * fine;
   c *= 1.0 - 0.06 * smoothstep(0.3, 0.8, grit);              // dark grit specks
   c *= 1.0 - 0.05 * dent;
-  vec3 pc = mix(${C('#8f8272')}, ${C('#b3a58e')}, fract(pb.y * 7.0));
+  vec3 pc = mix(${C('#a89a86')}, ${C('#c4b8a2')}, fract(pb.y * 7.0));
   o.col = mix(c, pc, smoothstep(0.0, 0.25, peb));
   o.rough = 0.95 - 0.05 * smoothstep(0.0, 0.6, L.y) - 0.12 * peb;
   o.h = h;

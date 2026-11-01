@@ -154,7 +154,7 @@ export class FireVolume {
     if (!this.active) return;
     if (now > this.tEnd + 0.1) { this.active = false; this.sys.fx.lights.release(this); return; }
     const fx = this.sys.fx, S = fx.pool.spec, R = this.rand, pool = fx.pool;
-    const rate = 0.15 / Math.max(0.35, fx.scale);
+    const rate = 0.21 / Math.max(0.35, fx.scale);
     for (let i = 0; i < this.n; i++) {
       if (!this.cellBurning(i, now)) continue;
       this.acc[i] += dt;
@@ -167,19 +167,36 @@ export class FireVolume {
       while (this.acc[i] > rate) {
         this.acc[i] -= rate;
         S.reset();
-        const sz = (12 + R() * 9) * (0.6 + 0.4 * intensity);
-        S.pos.set(this.cells[o] + (R() - 0.5) * 22, this.cells[o + 1] + sz * 0.8, this.cells[o + 2] + (R() - 0.5) * 22);
+        const sz = (19 + R() * 13) * (0.6 + 0.4 * intensity);
+        S.pos.set(this.cells[o] + (R() - 0.5) * 22, this.cells[o + 1] + sz * 0.62, this.cells[o + 2] + (R() - 0.5) * 22);
         S.vel.set((R() - 0.5) * 10, 18 + R() * 30, (R() - 0.5) * 10);
         S.gravity = -0.06; S.drag = 0.6;
         S.life = 0.5 + R() * 0.45;
         S.size0 = sz; S.size1 = sz * (1.15 + R() * 0.3);
         S.rot = (R() - 0.5) * 0.35;
-        S.c0.set(0.75 + R() * 0.3 * intensity, 1.0, 0, 0.95); S.c1.set(0.6, 0.8, 0, 0.9);
+        S.c0.set(0.58 + R() * 0.22 * intensity, 1.0, 0, 0.9); S.c1.set(0.45, 0.75, 0, 0.85);
         S.sprite = SPR.FIRE0; S.frames = 16;
         S.flags = PF.FIRE | PF.ADD | PF.SOFT;
         S.fadeIn = 0.06; S.fadeOut = 0.6; S.floorY = this.cells[o + 1] - 2;
         pool.emit(S, now);
       }
+    }
+    // soft ground glow merging the flames into one burning pool
+    this.glowAcc = (this.glowAcc || 0) + dt;
+    while (this.glowAcc > 0.09) {
+      this.glowAcc -= 0.09;
+      const j = (R() * this.n) | 0;
+      if (!this.cellBurning(j, now)) continue;
+      S.reset();
+      S.pos.set(this.cells[j * 4], this.cells[j * 4 + 1] + 1.5, this.cells[j * 4 + 2]);
+      S.vel.set(0, 1, 0);
+      S.life = 0.45 + R() * 0.3;
+      S.size0 = 34 + R() * 18; S.size1 = S.size0 * 1.1; S.rot = R() * 6.283;
+      const k = this.extT >= 0 ? 0.3 : 1;
+      S.c0.set(1.6 * k, 0.5 * k, 0.08 * k, 0.55); S.c1.set(1.2 * k, 0.3 * k, 0.04 * k, 0);
+      S.sprite = SPR.GLOW; S.flags = PF.ADD | PF.FLAT;
+      S.fadeIn = 0.3; S.fadeOut = 0.5;
+      pool.emit(S, now);
     }
     if (this.extT >= 0) return;
     // smoke column

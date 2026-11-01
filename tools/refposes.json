@@ -1,0 +1,1550 @@
+{
+ "ref_a_car": {
+  "eye": [
+   1678.34,
+   113.03,
+   -1998.35
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo a_car looking west (Source 1678.34, 1998.35); pair: csgo/a_car__x1678_y1998__yaw180.png",
+  "ref": "csgo/a_car__x1678_y1998__yaw180.png"
+ },
+ "ref_a_car_e": {
+  "eye": [
+   1678.34,
+   113.03,
+   -1998.35
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo a_car looking east (Source 1678.34, 1998.35); pair: csgo/a_car__x1678_y1998__yaw0.png",
+  "ref": "csgo/a_car__x1678_y1998__yaw0.png"
+ },
+ "ref_a_car_n": {
+  "eye": [
+   1678.34,
+   113.03,
+   -1998.35
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo a_car looking north (Source 1678.34, 1998.35); pair: csgo/a_car__x1678_y1998__yaw90.png",
+  "ref": "csgo/a_car__x1678_y1998__yaw90.png"
+ },
+ "ref_a_car_s": {
+  "eye": [
+   1678.34,
+   113.03,
+   -1998.35
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo a_car looking south (Source 1678.34, 1998.35); pair: csgo/a_car__x1678_y1998__yaw270.png",
+  "ref": "csgo/a_car__x1678_y1998__yaw270.png"
+ },
+ "ref_a_car_w": {
+  "eye": [
+   1678.34,
+   113.03,
+   -1998.35
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo a_car looking west (Source 1678.34, 1998.35); pair: csgo/a_car__x1678_y1998__yaw180.png",
+  "ref": "csgo/a_car__x1678_y1998__yaw180.png"
+ },
+ "ref_a_ramp": {
+  "eye": [
+   1405.85,
+   145.78,
+   -2659.17
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo a_ramp looking west (Source 1405.85, 2659.17); pair: csgo/a_ramp__x1406_y2659__yaw180.png",
+  "ref": "csgo/a_ramp__x1406_y2659__yaw180.png"
+ },
+ "ref_a_ramp_e": {
+  "eye": [
+   1405.85,
+   145.78,
+   -2659.17
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo a_ramp looking east (Source 1405.85, 2659.17); pair: csgo/a_ramp__x1406_y2659__yaw0.png",
+  "ref": "csgo/a_ramp__x1406_y2659__yaw0.png"
+ },
+ "ref_a_ramp_n": {
+  "eye": [
+   1405.85,
+   145.78,
+   -2659.17
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo a_ramp looking north (Source 1405.85, 2659.17); pair: csgo/a_ramp__x1406_y2659__yaw90.png",
+  "ref": "csgo/a_ramp__x1406_y2659__yaw90.png"
+ },
+ "ref_a_ramp_s": {
+  "eye": [
+   1405.85,
+   145.78,
+   -2659.17
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo a_ramp looking south (Source 1405.85, 2659.17); pair: csgo/a_ramp__x1406_y2659__yaw270.png",
+  "ref": "csgo/a_ramp__x1406_y2659__yaw270.png"
+ },
+ "ref_a_ramp_w": {
+  "eye": [
+   1405.85,
+   145.78,
+   -2659.17
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo a_ramp looking west (Source 1405.85, 2659.17); pair: csgo/a_ramp__x1406_y2659__yaw180.png",
+  "ref": "csgo/a_ramp__x1406_y2659__yaw180.png"
+ },
+ "ref_a_site": {
+  "eye": [
+   1161.99,
+   160.03,
+   -2428.34
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo a_site looking north (Source 1161.99, 2428.34); pair: csgo/a_site__x1162_y2428__yaw90.png",
+  "ref": "csgo/a_site__x1162_y2428__yaw90.png"
+ },
+ "ref_a_site_e": {
+  "eye": [
+   1161.99,
+   160.03,
+   -2428.34
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo a_site looking east (Source 1161.99, 2428.34); pair: csgo/a_site__x1162_y2428__yaw0.png",
+  "ref": "csgo/a_site__x1162_y2428__yaw0.png"
+ },
+ "ref_a_site_n": {
+  "eye": [
+   1161.99,
+   160.03,
+   -2428.34
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo a_site looking north (Source 1161.99, 2428.34); pair: csgo/a_site__x1162_y2428__yaw90.png",
+  "ref": "csgo/a_site__x1162_y2428__yaw90.png"
+ },
+ "ref_a_site_s": {
+  "eye": [
+   1161.99,
+   160.03,
+   -2428.34
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo a_site looking south (Source 1161.99, 2428.34); pair: csgo/a_site__x1162_y2428__yaw270.png",
+  "ref": "csgo/a_site__x1162_y2428__yaw270.png"
+ },
+ "ref_a_site_w": {
+  "eye": [
+   1161.99,
+   160.03,
+   -2428.34
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo a_site looking west (Source 1161.99, 2428.34); pair: csgo/a_site__x1162_y2428__yaw180.png",
+  "ref": "csgo/a_site__x1162_y2428__yaw180.png"
+ },
+ "ref_b_doors": {
+  "eye": [
+   -1188.69,
+   80.23,
+   -2397.06
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo b_doors looking south (Source -1188.69, 2397.06); pair: csgo/b_doors__x-1189_y2397__yaw270.png",
+  "ref": "csgo/b_doors__x-1189_y2397__yaw270.png"
+ },
+ "ref_b_doors_e": {
+  "eye": [
+   -1188.69,
+   80.23,
+   -2397.06
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo b_doors looking east (Source -1188.69, 2397.06); pair: csgo/b_doors__x-1189_y2397__yaw0.png",
+  "ref": "csgo/b_doors__x-1189_y2397__yaw0.png"
+ },
+ "ref_b_doors_n": {
+  "eye": [
+   -1188.69,
+   80.23,
+   -2397.06
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo b_doors looking north (Source -1188.69, 2397.06); pair: csgo/b_doors__x-1189_y2397__yaw90.png",
+  "ref": "csgo/b_doors__x-1189_y2397__yaw90.png"
+ },
+ "ref_b_doors_s": {
+  "eye": [
+   -1188.69,
+   80.23,
+   -2397.06
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo b_doors looking south (Source -1188.69, 2397.06); pair: csgo/b_doors__x-1189_y2397__yaw270.png",
+  "ref": "csgo/b_doors__x-1189_y2397__yaw270.png"
+ },
+ "ref_b_doors_w": {
+  "eye": [
+   -1188.69,
+   80.23,
+   -2397.06
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo b_doors looking west (Source -1188.69, 2397.06); pair: csgo/b_doors__x-1189_y2397__yaw180.png",
+  "ref": "csgo/b_doors__x-1189_y2397__yaw180.png"
+ },
+ "ref_b_site": {
+  "eye": [
+   -1509.68,
+   68.03,
+   -2445.89
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo b_site looking north (Source -1509.68, 2445.89); pair: csgo/b_site__x-1510_y2446__yaw90.png",
+  "ref": "csgo/b_site__x-1510_y2446__yaw90.png"
+ },
+ "ref_b_site_e": {
+  "eye": [
+   -1509.68,
+   68.03,
+   -2445.89
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo b_site looking east (Source -1509.68, 2445.89); pair: csgo/b_site__x-1510_y2446__yaw0.png",
+  "ref": "csgo/b_site__x-1510_y2446__yaw0.png"
+ },
+ "ref_b_site_n": {
+  "eye": [
+   -1509.68,
+   68.03,
+   -2445.89
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo b_site looking north (Source -1509.68, 2445.89); pair: csgo/b_site__x-1510_y2446__yaw90.png",
+  "ref": "csgo/b_site__x-1510_y2446__yaw90.png"
+ },
+ "ref_b_site_s": {
+  "eye": [
+   -1509.68,
+   68.03,
+   -2445.89
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo b_site looking south (Source -1509.68, 2445.89); pair: csgo/b_site__x-1510_y2446__yaw270.png",
+  "ref": "csgo/b_site__x-1510_y2446__yaw270.png"
+ },
+ "ref_b_site_w": {
+  "eye": [
+   -1509.68,
+   68.03,
+   -2445.89
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo b_site looking west (Source -1509.68, 2445.89); pair: csgo/b_site__x-1510_y2446__yaw180.png",
+  "ref": "csgo/b_site__x-1510_y2446__yaw180.png"
+ },
+ "ref_b_tunnel_exit": {
+  "eye": [
+   -1680.18,
+   68.03,
+   -1786.41
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo b_tunnel_exit looking north (Source -1680.18, 1786.41); pair: csgo/b_tunnel_exit__x-1680_y1786__yaw90.png",
+  "ref": "csgo/b_tunnel_exit__x-1680_y1786__yaw90.png"
+ },
+ "ref_b_tunnel_exit_e": {
+  "eye": [
+   -1680.18,
+   68.03,
+   -1786.41
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo b_tunnel_exit looking east (Source -1680.18, 1786.41); pair: csgo/b_tunnel_exit__x-1680_y1786__yaw0.png",
+  "ref": "csgo/b_tunnel_exit__x-1680_y1786__yaw0.png"
+ },
+ "ref_b_tunnel_exit_n": {
+  "eye": [
+   -1680.18,
+   68.03,
+   -1786.41
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo b_tunnel_exit looking north (Source -1680.18, 1786.41); pair: csgo/b_tunnel_exit__x-1680_y1786__yaw90.png",
+  "ref": "csgo/b_tunnel_exit__x-1680_y1786__yaw90.png"
+ },
+ "ref_b_tunnel_exit_s": {
+  "eye": [
+   -1680.18,
+   68.03,
+   -1786.41
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo b_tunnel_exit looking south (Source -1680.18, 1786.41); pair: csgo/b_tunnel_exit__x-1680_y1786__yaw270.png",
+  "ref": "csgo/b_tunnel_exit__x-1680_y1786__yaw270.png"
+ },
+ "ref_b_tunnel_exit_w": {
+  "eye": [
+   -1680.18,
+   68.03,
+   -1786.41
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo b_tunnel_exit looking west (Source -1680.18, 1786.41); pair: csgo/b_tunnel_exit__x-1680_y1786__yaw180.png",
+  "ref": "csgo/b_tunnel_exit__x-1680_y1786__yaw180.png"
+ },
+ "ref_b_window": {
+  "eye": [
+   -1258.5,
+   182.03,
+   -2660.41
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo b_window looking west (Source -1258.5, 2660.41); pair: csgo/b_window__x-1258_y2660__yaw180.png",
+  "ref": "csgo/b_window__x-1258_y2660__yaw180.png"
+ },
+ "ref_b_window_e": {
+  "eye": [
+   -1258.5,
+   182.03,
+   -2660.41
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo b_window looking east (Source -1258.5, 2660.41); pair: csgo/b_window__x-1258_y2660__yaw0.png",
+  "ref": "csgo/b_window__x-1258_y2660__yaw0.png"
+ },
+ "ref_b_window_n": {
+  "eye": [
+   -1258.5,
+   182.03,
+   -2660.41
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo b_window looking north (Source -1258.5, 2660.41); pair: csgo/b_window__x-1258_y2660__yaw90.png",
+  "ref": "csgo/b_window__x-1258_y2660__yaw90.png"
+ },
+ "ref_b_window_s": {
+  "eye": [
+   -1258.5,
+   182.03,
+   -2660.41
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo b_window looking south (Source -1258.5, 2660.41); pair: csgo/b_window__x-1258_y2660__yaw270.png",
+  "ref": "csgo/b_window__x-1258_y2660__yaw270.png"
+ },
+ "ref_b_window_w": {
+  "eye": [
+   -1258.5,
+   182.03,
+   -2660.41
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo b_window looking west (Source -1258.5, 2660.41); pair: csgo/b_window__x-1258_y2660__yaw180.png",
+  "ref": "csgo/b_window__x-1258_y2660__yaw180.png"
+ },
+ "ref_catwalk": {
+  "eye": [
+   108.49,
+   64.03,
+   -1432.99
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo catwalk looking west (Source 108.49, 1432.99); pair: csgo/catwalk__x108_y1433__yaw180.png",
+  "ref": "csgo/catwalk__x108_y1433__yaw180.png"
+ },
+ "ref_catwalk_e": {
+  "eye": [
+   108.49,
+   64.03,
+   -1432.99
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo catwalk looking east (Source 108.49, 1432.99); pair: csgo/catwalk__x108_y1433__yaw0.png",
+  "ref": "csgo/catwalk__x108_y1433__yaw0.png"
+ },
+ "ref_catwalk_n": {
+  "eye": [
+   108.49,
+   64.03,
+   -1432.99
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo catwalk looking north (Source 108.49, 1432.99); pair: csgo/catwalk__x108_y1433__yaw90.png",
+  "ref": "csgo/catwalk__x108_y1433__yaw90.png"
+ },
+ "ref_catwalk_s": {
+  "eye": [
+   108.49,
+   64.03,
+   -1432.99
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo catwalk looking south (Source 108.49, 1432.99); pair: csgo/catwalk__x108_y1433__yaw270.png",
+  "ref": "csgo/catwalk__x108_y1433__yaw270.png"
+ },
+ "ref_catwalk_w": {
+  "eye": [
+   108.49,
+   64.03,
+   -1432.99
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo catwalk looking west (Source 108.49, 1432.99); pair: csgo/catwalk__x108_y1433__yaw180.png",
+  "ref": "csgo/catwalk__x108_y1433__yaw180.png"
+ },
+ "ref_cs2_a_site_overview": {
+  "eye": [
+   1480,
+   478.03,
+   -2100
+  ],
+  "pitch": 32,
+  "yaw": 130,
+  "fov": 73.7398,
+  "desc": "REF cs2 a_site looking yaw 130 (Source 1480, 2100); pair: cs2/cs2_a_site_overview.png",
+  "ref": "cs2/cs2_a_site_overview.png"
+ },
+ "ref_cs2_b_site_overview": {
+  "eye": [
+   -1575,
+   359.03,
+   -2885
+  ],
+  "pitch": 40,
+  "yaw": 281,
+  "fov": 73.7398,
+  "desc": "REF cs2 b_site looking yaw 281 (Source -1575, 2885); pair: cs2/cs2_b_site_overview.png",
+  "ref": "cs2/cs2_b_site_overview.png"
+ },
+ "ref_cs2_t_road_to_long": {
+  "eye": [
+   230,
+   220.03,
+   900
+  ],
+  "pitch": 25,
+  "yaw": 75,
+  "fov": 73.7398,
+  "desc": "REF cs2 outside_long looking yaw 75 (Source 230, -900); pair: cs2/cs2_t_road_to_long.png",
+  "ref": "cs2/cs2_t_road_to_long.png"
+ },
+ "ref_cs2_top_mid_courtyard": {
+  "eye": [
+   380,
+   260.03,
+   480
+  ],
+  "pitch": 38,
+  "yaw": 125,
+  "fov": 73.7398,
+  "desc": "REF cs2 top_mid looking yaw 125 (Source 380, -480); pair: cs2/cs2_top_mid_courtyard.png",
+  "ref": "cs2/cs2_top_mid_courtyard.png"
+ },
+ "ref_ct_spawn": {
+  "eye": [
+   296.4,
+   160.03,
+   -2287.22
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_spawn looking east (Source 296.4, 2287.22); pair: csgo/ct_spawn__x296_y2287__yaw0.png",
+  "ref": "csgo/ct_spawn__x296_y2287__yaw0.png"
+ },
+ "ref_ct_spawn_e": {
+  "eye": [
+   296.4,
+   160.03,
+   -2287.22
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_spawn looking east (Source 296.4, 2287.22); pair: csgo/ct_spawn__x296_y2287__yaw0.png",
+  "ref": "csgo/ct_spawn__x296_y2287__yaw0.png"
+ },
+ "ref_ct_spawn_n": {
+  "eye": [
+   296.4,
+   160.03,
+   -2287.22
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_spawn looking north (Source 296.4, 2287.22); pair: csgo/ct_spawn__x296_y2287__yaw90.png",
+  "ref": "csgo/ct_spawn__x296_y2287__yaw90.png"
+ },
+ "ref_ct_spawn_s": {
+  "eye": [
+   296.4,
+   160.03,
+   -2287.22
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_spawn looking south (Source 296.4, 2287.22); pair: csgo/ct_spawn__x296_y2287__yaw270.png",
+  "ref": "csgo/ct_spawn__x296_y2287__yaw270.png"
+ },
+ "ref_ct_spawn_w": {
+  "eye": [
+   296.4,
+   160.03,
+   -2287.22
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_spawn looking west (Source 296.4, 2287.22); pair: csgo/ct_spawn__x296_y2287__yaw180.png",
+  "ref": "csgo/ct_spawn__x296_y2287__yaw180.png"
+ },
+ "ref_ct_to_b": {
+  "eye": [
+   -465.02,
+   -57.63,
+   -2339.34
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_to_b looking west (Source -465.02, 2339.34); pair: csgo/ct_to_b__x-465_y2339__yaw180.png",
+  "ref": "csgo/ct_to_b__x-465_y2339__yaw180.png"
+ },
+ "ref_ct_to_b_e": {
+  "eye": [
+   -465.02,
+   -57.63,
+   -2339.34
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_to_b looking east (Source -465.02, 2339.34); pair: csgo/ct_to_b__x-465_y2339__yaw0.png",
+  "ref": "csgo/ct_to_b__x-465_y2339__yaw0.png"
+ },
+ "ref_ct_to_b_n": {
+  "eye": [
+   -465.02,
+   -57.63,
+   -2339.34
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_to_b looking north (Source -465.02, 2339.34); pair: csgo/ct_to_b__x-465_y2339__yaw90.png",
+  "ref": "csgo/ct_to_b__x-465_y2339__yaw90.png"
+ },
+ "ref_ct_to_b_s": {
+  "eye": [
+   -465.02,
+   -57.63,
+   -2339.34
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_to_b looking south (Source -465.02, 2339.34); pair: csgo/ct_to_b__x-465_y2339__yaw270.png",
+  "ref": "csgo/ct_to_b__x-465_y2339__yaw270.png"
+ },
+ "ref_ct_to_b_w": {
+  "eye": [
+   -465.02,
+   -57.63,
+   -2339.34
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo ct_to_b looking west (Source -465.02, 2339.34); pair: csgo/ct_to_b__x-465_y2339__yaw180.png",
+  "ref": "csgo/ct_to_b__x-465_y2339__yaw180.png"
+ },
+ "ref_goose": {
+  "eye": [
+   1150.85,
+   184.03,
+   -2848.09
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo goose looking south (Source 1150.85, 2848.09); pair: csgo/goose__x1151_y2848__yaw270.png",
+  "ref": "csgo/goose__x1151_y2848__yaw270.png"
+ },
+ "ref_goose_e": {
+  "eye": [
+   1150.85,
+   184.03,
+   -2848.09
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo goose looking east (Source 1150.85, 2848.09); pair: csgo/goose__x1151_y2848__yaw0.png",
+  "ref": "csgo/goose__x1151_y2848__yaw0.png"
+ },
+ "ref_goose_n": {
+  "eye": [
+   1150.85,
+   184.03,
+   -2848.09
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo goose looking north (Source 1150.85, 2848.09); pair: csgo/goose__x1151_y2848__yaw90.png",
+  "ref": "csgo/goose__x1151_y2848__yaw90.png"
+ },
+ "ref_goose_s": {
+  "eye": [
+   1150.85,
+   184.03,
+   -2848.09
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo goose looking south (Source 1150.85, 2848.09); pair: csgo/goose__x1151_y2848__yaw270.png",
+  "ref": "csgo/goose__x1151_y2848__yaw270.png"
+ },
+ "ref_goose_w": {
+  "eye": [
+   1150.85,
+   184.03,
+   -2848.09
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo goose looking west (Source 1150.85, 2848.09); pair: csgo/goose__x1151_y2848__yaw180.png",
+  "ref": "csgo/goose__x1151_y2848__yaw180.png"
+ },
+ "ref_long": {
+  "eye": [
+   1423.31,
+   60.03,
+   -1270.22
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo long looking north (Source 1423.31, 1270.22); pair: csgo/long__x1423_y1270__yaw90.png",
+  "ref": "csgo/long__x1423_y1270__yaw90.png"
+ },
+ "ref_long_corner": {
+  "eye": [
+   637.43,
+   64.03,
+   -819.62
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo long_corner looking north (Source 637.43, 819.62); pair: csgo/long_corner__x637_y820__yaw90.png",
+  "ref": "csgo/long_corner__x637_y820__yaw90.png"
+ },
+ "ref_long_corner_e": {
+  "eye": [
+   637.43,
+   64.03,
+   -819.62
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo long_corner looking east (Source 637.43, 819.62); pair: csgo/long_corner__x637_y820__yaw0.png",
+  "ref": "csgo/long_corner__x637_y820__yaw0.png"
+ },
+ "ref_long_corner_n": {
+  "eye": [
+   637.43,
+   64.03,
+   -819.62
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo long_corner looking north (Source 637.43, 819.62); pair: csgo/long_corner__x637_y820__yaw90.png",
+  "ref": "csgo/long_corner__x637_y820__yaw90.png"
+ },
+ "ref_long_corner_s": {
+  "eye": [
+   637.43,
+   64.03,
+   -819.62
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo long_corner looking south (Source 637.43, 819.62); pair: csgo/long_corner__x637_y820__yaw270.png",
+  "ref": "csgo/long_corner__x637_y820__yaw270.png"
+ },
+ "ref_long_corner_w": {
+  "eye": [
+   637.43,
+   64.03,
+   -819.62
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo long_corner looking west (Source 637.43, 819.62); pair: csgo/long_corner__x637_y820__yaw180.png",
+  "ref": "csgo/long_corner__x637_y820__yaw180.png"
+ },
+ "ref_long_doors": {
+  "eye": [
+   647.13,
+   64.03,
+   -305.59
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo long_doors looking north (Source 647.13, 305.59); pair: csgo/long_doors__x647_y306__yaw90.png",
+  "ref": "csgo/long_doors__x647_y306__yaw90.png"
+ },
+ "ref_long_doors_e": {
+  "eye": [
+   647.13,
+   64.03,
+   -305.59
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo long_doors looking east (Source 647.13, 305.59); pair: csgo/long_doors__x647_y306__yaw0.png",
+  "ref": "csgo/long_doors__x647_y306__yaw0.png"
+ },
+ "ref_long_doors_n": {
+  "eye": [
+   647.13,
+   64.03,
+   -305.59
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo long_doors looking north (Source 647.13, 305.59); pair: csgo/long_doors__x647_y306__yaw90.png",
+  "ref": "csgo/long_doors__x647_y306__yaw90.png"
+ },
+ "ref_long_doors_s": {
+  "eye": [
+   647.13,
+   64.03,
+   -305.59
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo long_doors looking south (Source 647.13, 305.59); pair: csgo/long_doors__x647_y306__yaw270.png",
+  "ref": "csgo/long_doors__x647_y306__yaw270.png"
+ },
+ "ref_long_doors_w": {
+  "eye": [
+   647.13,
+   64.03,
+   -305.59
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo long_doors looking west (Source 647.13, 305.59); pair: csgo/long_doors__x647_y306__yaw180.png",
+  "ref": "csgo/long_doors__x647_y306__yaw180.png"
+ },
+ "ref_long_e": {
+  "eye": [
+   1423.31,
+   60.03,
+   -1270.22
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo long looking east (Source 1423.31, 1270.22); pair: csgo/long__x1423_y1270__yaw0.png",
+  "ref": "csgo/long__x1423_y1270__yaw0.png"
+ },
+ "ref_long_n": {
+  "eye": [
+   1423.31,
+   60.03,
+   -1270.22
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo long looking north (Source 1423.31, 1270.22); pair: csgo/long__x1423_y1270__yaw90.png",
+  "ref": "csgo/long__x1423_y1270__yaw90.png"
+ },
+ "ref_long_s": {
+  "eye": [
+   1423.31,
+   60.03,
+   -1270.22
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo long looking south (Source 1423.31, 1270.22); pair: csgo/long__x1423_y1270__yaw270.png",
+  "ref": "csgo/long__x1423_y1270__yaw270.png"
+ },
+ "ref_long_w": {
+  "eye": [
+   1423.31,
+   60.03,
+   -1270.22
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo long looking west (Source 1423.31, 1270.22); pair: csgo/long__x1423_y1270__yaw180.png",
+  "ref": "csgo/long__x1423_y1270__yaw180.png"
+ },
+ "ref_lower_tunnels": {
+  "eye": [
+   -772.94,
+   -47.97,
+   -1433.13
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo lower_tunnels looking west (Source -772.94, 1433.13); pair: csgo/lower_tunnels__x-773_y1433__yaw180.png",
+  "ref": "csgo/lower_tunnels__x-773_y1433__yaw180.png"
+ },
+ "ref_lower_tunnels_e": {
+  "eye": [
+   -772.94,
+   -47.97,
+   -1433.13
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo lower_tunnels looking east (Source -772.94, 1433.13); pair: csgo/lower_tunnels__x-773_y1433__yaw0.png",
+  "ref": "csgo/lower_tunnels__x-773_y1433__yaw0.png"
+ },
+ "ref_lower_tunnels_n": {
+  "eye": [
+   -772.94,
+   -47.97,
+   -1433.13
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo lower_tunnels looking north (Source -772.94, 1433.13); pair: csgo/lower_tunnels__x-773_y1433__yaw90.png",
+  "ref": "csgo/lower_tunnels__x-773_y1433__yaw90.png"
+ },
+ "ref_lower_tunnels_s": {
+  "eye": [
+   -772.94,
+   -47.97,
+   -1433.13
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo lower_tunnels looking south (Source -772.94, 1433.13); pair: csgo/lower_tunnels__x-773_y1433__yaw270.png",
+  "ref": "csgo/lower_tunnels__x-773_y1433__yaw270.png"
+ },
+ "ref_lower_tunnels_w": {
+  "eye": [
+   -772.94,
+   -47.97,
+   -1433.13
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo lower_tunnels looking west (Source -772.94, 1433.13); pair: csgo/lower_tunnels__x-773_y1433__yaw180.png",
+  "ref": "csgo/lower_tunnels__x-773_y1433__yaw180.png"
+ },
+ "ref_mid": {
+  "eye": [
+   -372.15,
+   1.78,
+   -1009
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo mid looking north (Source -372.15, 1009); pair: csgo/mid__x-372_y1009__yaw90.png",
+  "ref": "csgo/mid__x-372_y1009__yaw90.png"
+ },
+ "ref_mid_doors": {
+  "eye": [
+   -410.62,
+   -63.97,
+   -1552.93
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo mid_doors looking south (Source -410.62, 1552.93); pair: csgo/mid_doors__x-411_y1553__yaw270.png",
+  "ref": "csgo/mid_doors__x-411_y1553__yaw270.png"
+ },
+ "ref_mid_doors_e": {
+  "eye": [
+   -410.62,
+   -63.97,
+   -1552.93
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo mid_doors looking east (Source -410.62, 1552.93); pair: csgo/mid_doors__x-411_y1553__yaw0.png",
+  "ref": "csgo/mid_doors__x-411_y1553__yaw0.png"
+ },
+ "ref_mid_doors_n": {
+  "eye": [
+   -410.62,
+   -63.97,
+   -1552.93
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo mid_doors looking north (Source -410.62, 1552.93); pair: csgo/mid_doors__x-411_y1553__yaw90.png",
+  "ref": "csgo/mid_doors__x-411_y1553__yaw90.png"
+ },
+ "ref_mid_doors_s": {
+  "eye": [
+   -410.62,
+   -63.97,
+   -1552.93
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo mid_doors looking south (Source -410.62, 1552.93); pair: csgo/mid_doors__x-411_y1553__yaw270.png",
+  "ref": "csgo/mid_doors__x-411_y1553__yaw270.png"
+ },
+ "ref_mid_doors_w": {
+  "eye": [
+   -410.62,
+   -63.97,
+   -1552.93
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo mid_doors looking west (Source -410.62, 1552.93); pair: csgo/mid_doors__x-411_y1553__yaw180.png",
+  "ref": "csgo/mid_doors__x-411_y1553__yaw180.png"
+ },
+ "ref_mid_e": {
+  "eye": [
+   -372.15,
+   1.78,
+   -1009
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo mid looking east (Source -372.15, 1009); pair: csgo/mid__x-372_y1009__yaw0.png",
+  "ref": "csgo/mid__x-372_y1009__yaw0.png"
+ },
+ "ref_mid_n": {
+  "eye": [
+   -372.15,
+   1.78,
+   -1009
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo mid looking north (Source -372.15, 1009); pair: csgo/mid__x-372_y1009__yaw90.png",
+  "ref": "csgo/mid__x-372_y1009__yaw90.png"
+ },
+ "ref_mid_s": {
+  "eye": [
+   -372.15,
+   1.78,
+   -1009
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo mid looking south (Source -372.15, 1009); pair: csgo/mid__x-372_y1009__yaw270.png",
+  "ref": "csgo/mid__x-372_y1009__yaw270.png"
+ },
+ "ref_mid_w": {
+  "eye": [
+   -372.15,
+   1.78,
+   -1009
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo mid looking west (Source -372.15, 1009); pair: csgo/mid__x-372_y1009__yaw180.png",
+  "ref": "csgo/mid__x-372_y1009__yaw180.png"
+ },
+ "ref_outside_long": {
+  "eye": [
+   449.99,
+   64.03,
+   -83.13
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo outside_long looking east (Source 449.99, 83.13); pair: csgo/outside_long__x450_y83__yaw0.png",
+  "ref": "csgo/outside_long__x450_y83__yaw0.png"
+ },
+ "ref_outside_long_e": {
+  "eye": [
+   449.99,
+   64.03,
+   -83.13
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo outside_long looking east (Source 449.99, 83.13); pair: csgo/outside_long__x450_y83__yaw0.png",
+  "ref": "csgo/outside_long__x450_y83__yaw0.png"
+ },
+ "ref_outside_long_n": {
+  "eye": [
+   449.99,
+   64.03,
+   -83.13
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo outside_long looking north (Source 449.99, 83.13); pair: csgo/outside_long__x450_y83__yaw90.png",
+  "ref": "csgo/outside_long__x450_y83__yaw90.png"
+ },
+ "ref_outside_long_s": {
+  "eye": [
+   449.99,
+   64.03,
+   -83.13
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo outside_long looking south (Source 449.99, 83.13); pair: csgo/outside_long__x450_y83__yaw270.png",
+  "ref": "csgo/outside_long__x450_y83__yaw270.png"
+ },
+ "ref_outside_long_w": {
+  "eye": [
+   449.99,
+   64.03,
+   -83.13
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo outside_long looking west (Source 449.99, 83.13); pair: csgo/outside_long__x450_y83__yaw180.png",
+  "ref": "csgo/outside_long__x450_y83__yaw180.png"
+ },
+ "ref_pit": {
+  "eye": [
+   1418.32,
+   -64.51,
+   -461.01
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo pit looking north (Source 1418.32, 461.01); pair: csgo/pit__x1418_y461__yaw90.png",
+  "ref": "csgo/pit__x1418_y461__yaw90.png"
+ },
+ "ref_pit_e": {
+  "eye": [
+   1418.32,
+   -64.51,
+   -461.01
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo pit looking east (Source 1418.32, 461.01); pair: csgo/pit__x1418_y461__yaw0.png",
+  "ref": "csgo/pit__x1418_y461__yaw0.png"
+ },
+ "ref_pit_n": {
+  "eye": [
+   1418.32,
+   -64.51,
+   -461.01
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo pit looking north (Source 1418.32, 461.01); pair: csgo/pit__x1418_y461__yaw90.png",
+  "ref": "csgo/pit__x1418_y461__yaw90.png"
+ },
+ "ref_pit_s": {
+  "eye": [
+   1418.32,
+   -64.51,
+   -461.01
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo pit looking south (Source 1418.32, 461.01); pair: csgo/pit__x1418_y461__yaw270.png",
+  "ref": "csgo/pit__x1418_y461__yaw270.png"
+ },
+ "ref_pit_w": {
+  "eye": [
+   1418.32,
+   -64.51,
+   -461.01
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo pit looking west (Source 1418.32, 461.01); pair: csgo/pit__x1418_y461__yaw180.png",
+  "ref": "csgo/pit__x1418_y461__yaw180.png"
+ },
+ "ref_short": {
+  "eye": [
+   407.88,
+   160.03,
+   -2099.15
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo short looking east (Source 407.88, 2099.15); pair: csgo/short__x408_y2099__yaw0.png",
+  "ref": "csgo/short__x408_y2099__yaw0.png"
+ },
+ "ref_short_e": {
+  "eye": [
+   407.88,
+   160.03,
+   -2099.15
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo short looking east (Source 407.88, 2099.15); pair: csgo/short__x408_y2099__yaw0.png",
+  "ref": "csgo/short__x408_y2099__yaw0.png"
+ },
+ "ref_short_n": {
+  "eye": [
+   407.88,
+   160.03,
+   -2099.15
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo short looking north (Source 407.88, 2099.15); pair: csgo/short__x408_y2099__yaw90.png",
+  "ref": "csgo/short__x408_y2099__yaw90.png"
+ },
+ "ref_short_s": {
+  "eye": [
+   407.88,
+   160.03,
+   -2099.15
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo short looking south (Source 407.88, 2099.15); pair: csgo/short__x408_y2099__yaw270.png",
+  "ref": "csgo/short__x408_y2099__yaw270.png"
+ },
+ "ref_short_stairs": {
+  "eye": [
+   394.08,
+   112.03,
+   -1726.37
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo short_stairs looking north (Source 394.08, 1726.37); pair: csgo/short_stairs__x394_y1726__yaw90.png",
+  "ref": "csgo/short_stairs__x394_y1726__yaw90.png"
+ },
+ "ref_short_stairs_e": {
+  "eye": [
+   394.08,
+   112.03,
+   -1726.37
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo short_stairs looking east (Source 394.08, 1726.37); pair: csgo/short_stairs__x394_y1726__yaw0.png",
+  "ref": "csgo/short_stairs__x394_y1726__yaw0.png"
+ },
+ "ref_short_stairs_n": {
+  "eye": [
+   394.08,
+   112.03,
+   -1726.37
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo short_stairs looking north (Source 394.08, 1726.37); pair: csgo/short_stairs__x394_y1726__yaw90.png",
+  "ref": "csgo/short_stairs__x394_y1726__yaw90.png"
+ },
+ "ref_short_stairs_s": {
+  "eye": [
+   394.08,
+   112.03,
+   -1726.37
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo short_stairs looking south (Source 394.08, 1726.37); pair: csgo/short_stairs__x394_y1726__yaw270.png",
+  "ref": "csgo/short_stairs__x394_y1726__yaw270.png"
+ },
+ "ref_short_stairs_w": {
+  "eye": [
+   394.08,
+   112.03,
+   -1726.37
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo short_stairs looking west (Source 394.08, 1726.37); pair: csgo/short_stairs__x394_y1726__yaw180.png",
+  "ref": "csgo/short_stairs__x394_y1726__yaw180.png"
+ },
+ "ref_short_w": {
+  "eye": [
+   407.88,
+   160.03,
+   -2099.15
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo short looking west (Source 407.88, 2099.15); pair: csgo/short__x408_y2099__yaw180.png",
+  "ref": "csgo/short__x408_y2099__yaw180.png"
+ },
+ "ref_t_spawn": {
+  "eye": [
+   -742.06,
+   192.03,
+   859.94
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo t_spawn looking east (Source -742.06, -859.94); pair: csgo/t_spawn__x-742_y-860__yaw0.png",
+  "ref": "csgo/t_spawn__x-742_y-860__yaw0.png"
+ },
+ "ref_t_spawn_e": {
+  "eye": [
+   -742.06,
+   192.03,
+   859.94
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo t_spawn looking east (Source -742.06, -859.94); pair: csgo/t_spawn__x-742_y-860__yaw0.png",
+  "ref": "csgo/t_spawn__x-742_y-860__yaw0.png"
+ },
+ "ref_t_spawn_n": {
+  "eye": [
+   -742.06,
+   192.03,
+   859.94
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo t_spawn looking north (Source -742.06, -859.94); pair: csgo/t_spawn__x-742_y-860__yaw90.png",
+  "ref": "csgo/t_spawn__x-742_y-860__yaw90.png"
+ },
+ "ref_t_spawn_s": {
+  "eye": [
+   -742.06,
+   192.03,
+   859.94
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo t_spawn looking south (Source -742.06, -859.94); pair: csgo/t_spawn__x-742_y-860__yaw270.png",
+  "ref": "csgo/t_spawn__x-742_y-860__yaw270.png"
+ },
+ "ref_t_spawn_w": {
+  "eye": [
+   -742.06,
+   192.03,
+   859.94
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo t_spawn looking west (Source -742.06, -859.94); pair: csgo/t_spawn__x-742_y-860__yaw180.png",
+  "ref": "csgo/t_spawn__x-742_y-860__yaw180.png"
+ },
+ "ref_top_mid": {
+  "eye": [
+   -446.96,
+   64.03,
+   -64.96
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo top_mid looking north (Source -446.96, 64.96); pair: csgo/top_mid__x-447_y65__yaw90.png",
+  "ref": "csgo/top_mid__x-447_y65__yaw90.png"
+ },
+ "ref_top_mid_e": {
+  "eye": [
+   -446.96,
+   64.03,
+   -64.96
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo top_mid looking east (Source -446.96, 64.96); pair: csgo/top_mid__x-447_y65__yaw0.png",
+  "ref": "csgo/top_mid__x-447_y65__yaw0.png"
+ },
+ "ref_top_mid_n": {
+  "eye": [
+   -446.96,
+   64.03,
+   -64.96
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo top_mid looking north (Source -446.96, 64.96); pair: csgo/top_mid__x-447_y65__yaw90.png",
+  "ref": "csgo/top_mid__x-447_y65__yaw90.png"
+ },
+ "ref_top_mid_s": {
+  "eye": [
+   -446.96,
+   64.03,
+   -64.96
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo top_mid looking south (Source -446.96, 64.96); pair: csgo/top_mid__x-447_y65__yaw270.png",
+  "ref": "csgo/top_mid__x-447_y65__yaw270.png"
+ },
+ "ref_top_mid_w": {
+  "eye": [
+   -446.96,
+   64.03,
+   -64.96
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo top_mid looking west (Source -446.96, 64.96); pair: csgo/top_mid__x-447_y65__yaw180.png",
+  "ref": "csgo/top_mid__x-447_y65__yaw180.png"
+ },
+ "ref_upper_tunnels": {
+  "eye": [
+   -1674.93,
+   96.03,
+   -1163.54
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo upper_tunnels looking east (Source -1674.93, 1163.54); pair: csgo/upper_tunnels__x-1675_y1164__yaw0.png",
+  "ref": "csgo/upper_tunnels__x-1675_y1164__yaw0.png"
+ },
+ "ref_upper_tunnels_e": {
+  "eye": [
+   -1674.93,
+   96.03,
+   -1163.54
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo upper_tunnels looking east (Source -1674.93, 1163.54); pair: csgo/upper_tunnels__x-1675_y1164__yaw0.png",
+  "ref": "csgo/upper_tunnels__x-1675_y1164__yaw0.png"
+ },
+ "ref_upper_tunnels_n": {
+  "eye": [
+   -1674.93,
+   96.03,
+   -1163.54
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo upper_tunnels looking north (Source -1674.93, 1163.54); pair: csgo/upper_tunnels__x-1675_y1164__yaw90.png",
+  "ref": "csgo/upper_tunnels__x-1675_y1164__yaw90.png"
+ },
+ "ref_upper_tunnels_s": {
+  "eye": [
+   -1674.93,
+   96.03,
+   -1163.54
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo upper_tunnels looking south (Source -1674.93, 1163.54); pair: csgo/upper_tunnels__x-1675_y1164__yaw270.png",
+  "ref": "csgo/upper_tunnels__x-1675_y1164__yaw270.png"
+ },
+ "ref_upper_tunnels_w": {
+  "eye": [
+   -1674.93,
+   96.03,
+   -1163.54
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo upper_tunnels looking west (Source -1674.93, 1163.54); pair: csgo/upper_tunnels__x-1675_y1164__yaw180.png",
+  "ref": "csgo/upper_tunnels__x-1675_y1164__yaw180.png"
+ },
+ "ref_xbox": {
+  "eye": [
+   -239,
+   64.03,
+   -1400.98
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo xbox looking south (Source -239, 1400.98); pair: csgo/xbox__x-239_y1401__yaw270.png",
+  "ref": "csgo/xbox__x-239_y1401__yaw270.png"
+ },
+ "ref_xbox_e": {
+  "eye": [
+   -239,
+   64.03,
+   -1400.98
+  ],
+  "pitch": 0,
+  "yaw": 0,
+  "fov": 73.7398,
+  "desc": "REF csgo xbox looking east (Source -239, 1400.98); pair: csgo/xbox__x-239_y1401__yaw0.png",
+  "ref": "csgo/xbox__x-239_y1401__yaw0.png"
+ },
+ "ref_xbox_n": {
+  "eye": [
+   -239,
+   64.03,
+   -1400.98
+  ],
+  "pitch": 0,
+  "yaw": 90,
+  "fov": 73.7398,
+  "desc": "REF csgo xbox looking north (Source -239, 1400.98); pair: csgo/xbox__x-239_y1401__yaw90.png",
+  "ref": "csgo/xbox__x-239_y1401__yaw90.png"
+ },
+ "ref_xbox_s": {
+  "eye": [
+   -239,
+   64.03,
+   -1400.98
+  ],
+  "pitch": 0,
+  "yaw": 270,
+  "fov": 73.7398,
+  "desc": "REF csgo xbox looking south (Source -239, 1400.98); pair: csgo/xbox__x-239_y1401__yaw270.png",
+  "ref": "csgo/xbox__x-239_y1401__yaw270.png"
+ },
+ "ref_xbox_w": {
+  "eye": [
+   -239,
+   64.03,
+   -1400.98
+  ],
+  "pitch": 0,
+  "yaw": 180,
+  "fov": 73.7398,
+  "desc": "REF csgo xbox looking west (Source -239, 1400.98); pair: csgo/xbox__x-239_y1401__yaw180.png",
+  "ref": "csgo/xbox__x-239_y1401__yaw180.png"
+ }
+}

@@ -27,7 +27,7 @@ export const plaster_wall = {
   lowGlsl: PLASTER_LOW(7),
   glsl: /* glsl */`
 void surface(vec2 uv, inout Surf o) {
-  limePlaster(uv, LOWA(uv), LOWB(uv), ${C('#dccaa6')}, ${C('#cbb38a')}, 0.42, 1.0, 7.0, o);
+  limePlaster(uv, LOWA(uv), LOWB(uv), ${C('#dccaa6')}, ${C('#cbb38a')}, 0.47, 1.0, 7.0, o);
   float cr = crackNet(uv, 5.0, 0.4, 1.2, 40.0) * step(0.99, o.h);
   o.h -= cr * 0.15; o.col *= 1.0 - cr * 0.3; o.ao = 1.0 - cr * 0.35;
 }
@@ -308,17 +308,20 @@ void surface(vec2 uv, inout Surf o) {
   float fine = fbmU(uv, 110.0, 2, 0.55, 2.0);
   vec2 g = abs(fract(uv * 2.0) - 0.5);
   float joint = 1.0 - smoothstep(0.494, 0.4975, max(g.x, g.y));
-  float cr = crackNet(uv, 4.0, 0.35, 1.3, 3.0);
+  float cr = crackNet(uv, 5.0, 0.2, 0.9, 3.0);
   vec4 pw = sparse(uv * 150.0, vec2(150.0), 0.35, 4.0);
+  vec4 ag = sparse(uv * 260.0, vec2(260.0), 0.5, 9.0);
+  float agg = (1.0 - smoothstep(0.15, 0.4, ag.x)) * step(0.0, ag.y);
   float pores = (1.0 - smoothstep(0.06, 0.2, pw.x)) * step(0.0, pw.y);
-  o.h = 0.5 + 0.05 * L.x + 0.008 * fine - 0.25 * joint - 0.15 * cr - 0.06 * pores;
+  o.h = 0.5 + 0.05 * L.x + 0.008 * fine - 0.2 * joint - 0.06 * cr - 0.06 * pores + 0.015 * agg;
   vec3 c = mix(${C('#c9c1b2')}, ${C('#b9b09f')}, sat(L.x * 0.6 + 0.5));
   c *= 0.97 + 0.03 * L.y + 0.012 * fine;
   float wet = smoothstep(0.2, 0.6, L.z);
   c *= mix(vec3(1.0), vec3(0.74, 0.74, 0.73), wet * 0.5);
   float dust = smoothstep(0.0, 0.6, L.w);
   c = mix(c, ${C('#d8ccb4')}, dust * 0.35);
-  c *= 1.0 - 0.3 * joint - 0.35 * cr - 0.2 * pores;
+  c = mix(c, c * mix(0.88, 1.1, fract(ag.y * 7.0)), agg);
+  c *= 1.0 - 0.15 * joint - 0.16 * cr - 0.15 * pores;
   o.col = c;
   o.rough = 0.88 - 0.08 * wet + 0.05 * dust;
   o.ao = 1.0 - cr * 0.3;

@@ -119,12 +119,12 @@ export class FX {
     this.smokes.update(dt, this.now, World.camera);
     this.fires.update(dt, this.now);
     this.shells.update(dt, this.now);
-    this.flashes.update(dt);
     this.pool.flush();
     this.vpool?.flush();
     this.decals.flush();
     this.tracers.flush();
     this.smokes.flush();
+    this.flashes.update(dt);   // after flushes: the afterimage capture must see this frame
   }
 
   muzzleFlash(worldPos, dir, key, opts = {}) {

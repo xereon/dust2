@@ -42,6 +42,9 @@ for (const k of Object.keys(FALLBACK)) DEFS[k] = ALL[k] || placeholder(k);
 // soft for continuous surfaces (plaster, sand) so seams never read as straight cuts
 const BLEND = { rock: 0.14, brick: 0.12, gravel: 0.12, tile: 0.14 };
 for (const d of Object.values(DEFS)) d.blendDepth ??= BLEND[d.surface] ?? 0.35;
+// strictly gridded layouts: offset copies would break course alignment -> macro variation only
+for (const k of ['tile_wall', 'tile_floor', 'brick_tan', 'brick_red', 'paving_setts', 'wood_planks', 'roof_tile', 'curb_redwhite'])
+  if (DEFS[k]) DEFS[k].antiTile = false;
 
 export const DECALS = DECAL_DEFS;
 export const DETAIL = DETAIL_DEF;

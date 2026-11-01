@@ -179,8 +179,15 @@ test('round 2: survivors keep kit, bomb plant -> defuse, plant bonus for Ts', ()
   const tIdx = Ts.indexOf(c) === 0 ? 1 : 0;
   assert.equal(Ts[tIdx].money, moneyBefore[tIdx] + 1400 + 800);
 });
-test('time runs out: CT win, surviving Ts get $0', () => {
+test('exactly one C4 per round even when the old carrier survives', () => {
+  // surviving Ts still hold a C4 from last round when round 3 starts
+  for (const t of Ts) t.inventory.c4 = 'c4';
   tickUntil(() => m.phase === 'live');
+  const holders = Ts.filter((t) => t.inventory?.c4);
+  assert.equal(holders.length, 1);
+  assert.equal(m.bomb.carrier, holders[0]);
+});
+test('time runs out: CT win, surviving Ts get $0', () => {
   const before = Ts[3].money;
   kill(CTs[0], Ts[4]);
   const deadBefore = Ts[4].money;

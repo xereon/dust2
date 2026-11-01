@@ -41,6 +41,11 @@ World.on('round_end', (e) => {
   const line = `R${e.round} ${e.winner.padEnd(2)} ${e.reason.padEnd(13)} score T${M.score.T}-CT${M.score.CT}  $min ${Math.min(...money)} max ${Math.max(...money)} loss T${M.economy.lossLevel.T} CT${M.economy.lossLevel.CT}  mvp ${e.mvp?.name ?? '-'}`;
   console.log(line);
 });
+const c4Errors = [];
+World.on('round_start', () => {
+  const n = World.entities.filter((e) => (e.inventory?.c4?.key ?? e.inventory?.c4) === 'c4').length;
+  if (n !== 1) c4Errors.push(`round ${M.history.length + 1}: ${n} C4 holders`);
+});
 World.on('match_end', (e) => console.log('MATCH END', e.winner, JSON.stringify(e.score)));
 
 World.cvar.mp_freezetime = 3;
@@ -72,4 +77,6 @@ console.log(log.slice(0, 40).join('\n'));
 const reasons = {};
 for (const h of M.history) reasons[h.reason] = (reasons[h.reason] || 0) + 1;
 console.log('reasons', JSON.stringify(reasons));
+if (c4Errors.length) errors.push(...c4Errors);
+console.log('C4 holder check:', c4Errors.length ? c4Errors.join('; ') : 'exactly one every round');
 if (errors.length) { console.log(`${errors.length} errors, first:`, errors.slice(0, 5)); process.exit(1); }

@@ -35,7 +35,7 @@ const CV = {
   sun_intensity: [1.0, 0, 4, 'sun intensity (x map value)'],
   sky_intensity: [1.0, 0, 4, 'sky light intensity (x) — rebakes GI'],
   bounce_intensity: [1.0, 0, 3, 'bounce light (x) — rebakes GI'],
-  saturation: [0.96, 0, 2, 'grade saturation'],
+  saturation: [1.05, 0, 2, 'grade saturation'],
   contrast: [1.0, 0.3, 2, 'grade S-curve (1 = neutral)'],
   grain: [0.15, 0, 3, 'film grain amount'],
   vignette: [0.22, 0, 1, 'vignette strength'],
