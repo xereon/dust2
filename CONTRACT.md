@@ -474,3 +474,14 @@ Prop factories return `{ object, colliders }` in local space (Y-up, base at y=0)
 `{min,max}` or `{prism:[{x,z}], y0, y1}` and may carry `surface` (a §4 key), `grate: true`
 (→ CONTENTS_GRATE, shoot-through) or `ladder: true` (→ CONTENTS_PLAYERCLIP|CONTENTS_LADDER).
 Wall-mounted props face local +z out of the wall. Materials named `*label*`/`*bulb*` never cast shadows.
+
+### 13a. Viewmodel extras (shipped)
+`muzzleView(out)` (muzzle in view-camera space), `setSilencer(on)`, `silenced` map, `root`;
+extra anims `zoom_out`, `bolt`, `silencer_on`, `silencer_off`, `plant`.
+`buildWorldModel(key)` → Object3D in inches, muzzle toward −Z, with
+`userData.{ muzzle, eject, grip, support }` attachment points.
+
+### 16. Navigation — `World.nav` (src/ai/navmesh.js)
+`findPath(from, to)` → `Vector3[]` waypoints, each carrying `.t` (link type: walk/step/jump/
+crouchjump/drop) and `.n` (node index). `nearest(pos)` → node **index** (not an object).
+`areaOf(pos)` → callout name, `randomPointIn(zone)`, `visibleFrom(pos)`, `hidingSpots`.
