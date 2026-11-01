@@ -52,7 +52,9 @@ void main() {
   vec3 pu = vpos(vUv + vec2(0.0, uTexel.y), Z(vUv + vec2(0.0, uTexel.y)));
   vec3 dx = abs(pr.z - P.z) < abs(P.z - pl.z) ? pr - P : P - pl;
   vec3 dy = abs(pu.z - P.z) < abs(P.z - pd.z) ? pu - P : P - pd;
-  vec3 N = normalize(cross(dx, dy));
+  vec3 cn = cross(dx, dy);
+  if (dot(cn, cn) < 1e-12) { gl_FragColor = vec4(1.0); return; }
+  vec3 N = normalize(cn);
   vec3 V = normalize(-P);
   float rpx = min(uRadius * uProjScale / z, uMaxPx);
   if (rpx < 1.0) { gl_FragColor = vec4(1.0); return; }
@@ -69,7 +71,7 @@ void main() {
     vec2 om = vec2(cos(phi), sin(phi));
     vec3 dir = vec3(om, 0.0);
     vec3 ortho = dir - dot(dir, V) * V;
-    vec3 axis = normalize(cross(ortho, dir));
+    vec3 axis = normalize(cross(ortho, V));
     vec3 pn = N - axis * dot(N, axis);
     float pnl = max(length(pn), 1e-4);
     float sgn = sign(dot(ortho, pn));
@@ -85,7 +87,7 @@ void main() {
       vec2 u0 = vUv + off, u1 = vUv - off;
       vec3 D0 = vpos(u0, Z(u0)) - P;
       vec3 D1 = vpos(u1, Z(u1)) - P;
-      float l0 = length(D0), l1 = length(D1);
+      float l0 = max(length(D0), 1e-3), l1 = max(length(D1), 1e-3);
       float c0 = dot(D0, V) / l0, c1 = dot(D1, V) / l1;
       float w0 = clamp(l0 * falloffMul + falloffAdd, 0.0, 1.0);
       float w1 = clamp(l1 * falloffMul + falloffAdd, 0.0, 1.0);
@@ -101,7 +103,8 @@ void main() {
     float a1 = (cosn + 2.0 * h1 * sn - cos(2.0 * h1 - n)) * 0.25;
     vis += pnl * (a0 + a1);
   }
-  vis = clamp(vis / float(SLICES), 0.0, 1.0);
+  vis = vis / float(SLICES);
+  vis = (isnan(vis) || isinf(vis)) ? 1.0 : clamp(vis, 0.0, 1.0);
   gl_FragColor = vec4(pow(vis, uPower), 0.0, 0.0, 1.0);
 }`;
 

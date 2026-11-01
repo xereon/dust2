@@ -5,6 +5,8 @@
 import { zx, zy, zc } from './util.js';
 
 const KERB = { h: 8, out: 12, mat: 'curb_redwhite' };
+// raised sidewalk along the street walls: paved top, red/white kerb on its edge, lane line beside it
+const WALK = { h: 8, out: 70, mat: 'curb_redwhite', topMat: 'paving_setts', walk: true, line: 26 };
 
 export function build(K) {
   const ochre = { h: 56, mat: 'plaster_band_ochre' };
@@ -17,7 +19,7 @@ export function build(K) {
     [37, 2399], [-43, 2318], [-316, 2318],
   ], -126), { mat: 'paving_setts', top: 210, tops: { 6: 230, 7: 200, 8: 200, 9: 200 }, paint: teal, cornice: {} });
   K.region('ct_under', zc([[275, 2041], [489, 2041], [489, 2556], [250, 2556], [250, 2087], [275, 2087]], -122),
-    { mat: 'concrete_floor', ceil: 36, ceilTop: 96, roof: false, ceilMat: 'plaster_wall', headerMat: 'stone_wall', paint: white });
+    { mat: 'concrete_floor', ceil: 36, ceilTop: 96, roof: false, ceilMat: 'wood_planks', beams: { dir: 'x', step: 64 }, headerMat: 'stone_wall', paint: white });
   K.region('ct_under_mouth', zc([[489, 2042], [513, 2042], [513, 2404], [489, 2404]], -122),
     { mat: 'concrete_floor', arch: { spring: -40, crown: 36 }, ceilTop: 96, roof: false, wallMat: 'stone_wall', paint: white });
 
@@ -49,11 +51,11 @@ export function build(K) {
   K.region('longa_n', zc([
     [1228, 1833], [1806, 1833], [1806, 2069], [1800, 2099], [1800, 2145], [1793, 2156], [1793, 2262], [1785, 2297],
     [1629, 2297], [1265, 2297], [1265, 2314], [1228, 2314],
-  ], -2), { base: KERB, mat: 'asphalt', top: 330, tops: { 10: 128, 11: 128 }, paint: teal, cornice: {} });
+  ], -2), { base: WALK, mat: 'asphalt', top: 330, tops: { 10: 128, 11: 128 }, paint: teal, cornice: {} });
   K.region('longa_m', zc([
     [1228, 1230], [1598, 1230], [1598, 1397], [1612, 1412], [1612, 1668], [1673, 1784], [1729, 1784], [1729, 1833],
     [1228, 1833], [1228, 1806], [1210, 1801], [1210, 1537], [1228, 1532],
-  ], -4), { base: KERB, mat: 'asphalt', top: 330, paint: teal, cornice: {} });
+  ], -4), { base: WALK, mat: 'asphalt', top: 330, paint: teal, cornice: {} });
   K.region('longhall', zc([
     [482, 784], [883, 784], [936, 731], [936, 810], [1245, 810], [1262, 810], [1588, 810], [1600, 810],
     [1790, 810], [1790, 1042], [1754, 1047], [1719, 1047], [1708, 1054], [1622, 1054], [1598, 1060], [1598, 1230],
@@ -72,16 +74,23 @@ export function build(K) {
   K.stairs('side_st', [[1600, 690], [1790, 690], [1790, 810], [1600, 810]], 56, 0, 7, { mat: 'stone_block', tops: { w: 80, e: 360 } });
 
   // ---- long doors ---------------------------------------------------------------------------------
+  // roofed sandstone-block passage with arched doorways and a checker tile floor
   K.region('ld_corr', zc([[507, 314], [550, 314], [722, 314], [772, 314], [772, 746], [723, 746], [550, 746], [507, 746]], 0),
-    { mat: 'cobblestone', top: 300, paint: ochre, cornice: {} });
+    { mat: 'stone_block', wallMat: 'stone_wall', ceil: 214, ceilTop: 290, ceilMat: 'wood_planks', beams: { dir: 'x', step: 72 }, headerMat: 'stone_wall', paint: null, base: { h: 10, out: 3, mat: 'stone_block' } });
+  for (let y = 314, r = 0; y < 746; y += 24, r++) for (let x = 507, c = 0; x < 772; x += 24, c++) {
+    const k = (r + c) % 2 ? 2 : (r % 2 ? 0 : 1);
+    const col = [[0.52, 0.72, 0.58], [0.86, 0.52, 0.42], [1, 0.98, 0.94]][k];
+    const x1 = Math.min(772, x + 24), y1 = Math.min(746, y + 24);
+    K.poly('tile_floor#decal', [[x, y, 0.1], [x1, y, 0.1], [x1, y1, 0.1], [x, y1, 0.1]], { col, normal: [0, 0, 1], uv: (p) => [p[0] / 24, p[1] / 24] });
+  }
   K.region('ld_door1', zc([[550, 272], [722, 272], [722, 314], [550, 314]], 0),
-    { mat: 'concrete_floor', ceil: 136, ceilMat: 'wood_planks', headerMat: 'plaster_wall' });
+    { mat: 'stone_block', wallMat: 'stone_wall', arch: { spring: 130, crown: 190 }, ceilTop: 290, archMat: 'stone_wall' });
   K.region('ld_door2', zc([[550, 746], [723, 746], [723, 784], [550, 784]], 0),
-    { mat: 'concrete_floor', ceil: 136, ceilMat: 'wood_planks', headerMat: 'plaster_wall' });
+    { mat: 'stone_block', wallMat: 'stone_wall', arch: { spring: 130, crown: 190 }, ceilTop: 290, archMat: 'stone_wall' });
 
   // ---- outside long ---------------------------------------------------------------------------------
   K.region('olong', zc([
     [82, -400], [388, -400], [388, -382], [529, -382], [529, -417], [776, -417], [776, 272], [722, 272], [550, 272],
     [469, 272], [469, 287], [113, 287], [113, -233], [82, -238],
-  ], 0), { base: KERB, mat: 'asphalt', top: 330, tops: { 11: 260, 12: 260, 13: 260 }, paint: teal, cornice: {} });
+  ], 0), { base: WALK, mat: 'asphalt', top: 330, tops: { 5: 100, 11: 260, 12: 260, 13: 260 }, wallMats: { 6: 'stone_wall', 8: 'stone_wall' }, paint: teal, cornice: {} });
 }

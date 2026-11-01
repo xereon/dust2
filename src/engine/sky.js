@@ -147,12 +147,12 @@ export function setSkyParams({ sunDir, sunColor, E, sky = 1 }) {
   u.rpSunDir.value.copy(sunDir).normalize();
   const elev = Math.max(0.05, u.rpSunDir.value.y);
   const k = E * sky;
-  // Colours chosen to read as CS2 Dust II noon: pale-to-medium blue overhead, milky cream
-  // horizon, warm dust at the very bottom.
-  u.rpSkyZenith.value.setRGB(0.040, 0.100, 0.245).multiplyScalar(k);
-  u.rpSkyHorizon.value.setRGB(0.120, 0.160, 0.215).multiplyScalar(k);
-  u.rpSkyHaze.value.setRGB(0.205, 0.195, 0.175).multiplyScalar(k);
-  u.rpSkyGround.value.setRGB(0.120, 0.105, 0.085).multiplyScalar(k);
+  // Calibrated against pose-matched CS:GO frames (ACES, exposure 0.95): ~#6f9fd0 at 30 deg up,
+  // a warm-grey (not white) horizon haze, warm dust below.
+  u.rpSkyZenith.value.setRGB(0.017, 0.062, 0.172).multiplyScalar(k);
+  u.rpSkyHorizon.value.setRGB(0.104, 0.118, 0.122).multiplyScalar(k);
+  u.rpSkyHaze.value.setRGB(0.128, 0.118, 0.100).multiplyScalar(k);
+  u.rpSkyGround.value.setRGB(0.070, 0.060, 0.047).multiplyScalar(k);
   u.rpSunGlow.value.copy(sunColor).multiplyScalar(k * (0.9 + 0.6 * (1 - elev)));
   u.rpSunDisc.value.copy(sunColor).multiplyScalar(E * 60);
 }

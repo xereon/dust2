@@ -51,7 +51,7 @@ void renderCoat(vec2 uv, out float h, out vec3 col, out float rough) {
   float g = fbmU(uv, 64.0, 3, 0.6, 81.0);
   float m = fbmU(uv, 10.0, 3, 0.5, 82.0);
   h = 0.35 + 0.04 * g + 0.025 * m;
-  col = mix(${C('#b09172')}, ${C('#9a785a')}, sat(m * 0.6 + 0.5));
+  col = mix(${C('#a8957c')}, ${C('#968470')}, sat(m * 0.6 + 0.5));
   col = mix(col, ${C('#c0a585')}, sat(g) * 0.4);
   col *= 0.92 + 0.12 * vnU(uv, 180.0, 83.0);
   rough = 0.96;
@@ -61,7 +61,7 @@ void renderCoat(vec2 uv, out float h, out vec3 col, out float rough) {
 //   a: x flake base (warped), y hue drift, z grime stains, w run-off streaks
 //   b: x smooth relief (world units), y colour mottle, z paint fade, w paint-failure density
 void plasterLow(vec2 uv, float s, out vec4 a, out vec4 b) {
-  float fl = 0.75 * warpFbm(uv, 4.0, 0.22, 4, s + 10.0) + 0.45 * fbmU(uv, 2.0, 3, 0.5, s + 11.0);
+  float fl = 0.5 * warpFbm(uv, 4.0, 0.22, 4, s + 10.0) + 0.75 * fbmU(uv, 2.0, 2, 0.5, s + 11.0);
   a = vec4(fl, fbmU(uv, 2.0, 3, 0.5, s + 20.0), stainField(uv, 3.0, s + 22.0), streaks(uv, 30.0, 2.0, s + 23.0));
   float relief = 0.12 * fbmU(uv, 3.0, 3, 0.5, s + 1.0) + 0.035 * fbmU(uv, 12.0, 3, 0.5, s + 2.0);
   b = vec4(relief, fbmU(uv, 20.0, 3, 0.5, s + 21.0), fbmU(uv, 3.0, 3, 0.5, 60.0), warpFbm(uv, 3.0, 0.25, 3, 66.0));
@@ -74,15 +74,15 @@ float limePlaster(vec2 uv, vec4 L, vec4 L2, vec3 pc0, vec3 pc1, float loss, floa
   float grain = fbmU(uv, 90.0, 2, 0.6, s + 3.0);
   float peel = gnU(uv, 200.0, s + 4.0);
   float tro = fbm(uv * vec2(6.0, 48.0), vec2(6.0, 48.0), 2, 0.5, s + 5.0);
-  float hP = 0.85 + L2.x + 0.02 * grain + 0.006 * peel + 0.01 * tro;
+  float hP = 0.6 + L2.x + 0.02 * grain + 0.006 * peel + 0.01 * tro;
 
-  // big clustered flakes + a scatter of small chips near them
+  // few, large clustered losses with soft feathered edges (no secondary chip scatter:
+  // that read as leopard spots); thin plaster step so edges don't emboss
   float det = fbmU(uv, 24.0, 3, 0.5, s + 15.0);
-  float n = L.x + 0.18 * det + 0.03 * gnU(uv, 96.0, s + 16.0);
-  float n2 = fbmU(uv, 14.0, 3, 0.5, s + 14.0) + 0.05 * gnU(uv, 110.0, s + 17.0) + 0.5 * L.x;
-  float lostP = max(smoothstep(loss, loss + 0.01, n), smoothstep(loss + 0.42, loss + 0.43, n2));
-  float lostR = smoothstep(loss + 0.22, loss + 0.23, n + 0.2 * L2.x);
-  float halo = smoothstep(loss - 0.12, loss, n) * (1.0 - lostP);
+  float n = L.x + 0.16 * det + 0.03 * gnU(uv, 96.0, s + 16.0);
+  float lostP = smoothstep(loss, loss + 0.05, n);
+  float lostR = smoothstep(loss + 0.25, loss + 0.3, n + 0.2 * L2.x);
+  float halo = smoothstep(loss - 0.15, loss, n) * (1.0 - lostP);
 
   // under-layers only where something is missing (branch is coherent: big patches)
   float hR = 0.35, rR = 0.96, hB = 0.0, rB = 0.9; vec3 cR = vec3(0.4), cB = vec3(0.3);
@@ -95,7 +95,7 @@ float limePlaster(vec2 uv, vec4 L, vec4 L2, vec3 pc0, vec3 pc1, float loss, floa
   pc *= 0.975 + 0.028 * L2.y + 0.015 * grain;
   pc *= mix(vec3(1.0), vec3(0.83, 0.81, 0.77), L.z * stain);
   pc *= mix(vec3(1.0), vec3(0.87, 0.86, 0.83), L.w * stain * 0.8);
-  pc *= mix(vec3(1.0), vec3(0.9, 0.87, 0.82), halo * 0.8);
+  pc *= mix(vec3(1.0), vec3(0.92, 0.9, 0.86), halo * 0.6);   // grime collects around breaks
 
   o.h = mix(hP, mix(hR, hB, lostR), lostP);
   o.col = mix(pc, mix(cR, cB, lostR), lostP);

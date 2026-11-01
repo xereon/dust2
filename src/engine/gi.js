@@ -154,6 +154,7 @@ uniform highp usampler3D uValid;
 layout(location = 0) out vec4 o0;
 layout(location = 1) out vec4 o1;
 layout(location = 2) out vec4 o2;
+layout(location = 3) out vec4 o3;
 
 vec3 prevE(vec3 p, vec3 n) {
   vec3 uvw = (p - uPrevMin) * uPrevInv;
@@ -166,10 +167,11 @@ vec3 prevE(vec3 p, vec3 n) {
 void main() {
   ivec2 pix = ivec2(gl_FragCoord.xy);
   int iz = pix.y;
-  if (texelFetch(uValid, ivec3(pix.x, uLayer, iz), 0).r == 0u) { o0 = vec4(0.0); o1 = vec4(0.0); o2 = vec4(0.0); return; }
+  if (texelFetch(uValid, ivec3(pix.x, uLayer, iz), 0).r == 0u) { o0 = vec4(0.0); o1 = vec4(0.0); o2 = vec4(0.0); o3 = vec4(0.0); return; }
   vec3 P = uPMin + (vec3(float(pix.x), float(uLayer), float(iz)) + 0.5) * uPStep;
   vec3 o = (P - uVMin) / uVSize;
   vec3 A = vec3(0.0), BX = vec3(0.0), BY = vec3(0.0), BZ = vec3(0.0);
+  float skyW = 0.0, skyN = 0.0;
   const int K = ${rays};
   for (int k = 0; k < K; k++) {
     float fk = float(k);
@@ -228,6 +230,9 @@ void main() {
       L = mix(vec3(dot(L, vec3(0.2126, 0.7152, 0.0722))), L, uSkySat);
     }
     A += L; BX += L * d.x; BY += L * d.y; BZ += L * d.z;
+    // cosine-weighted sky visibility over the upper hemisphere (1 = open sky, 0 = enclosed)
+    float wy = max(d.y, 0.0);
+    skyN += wy; if (!hit) skyW += wy;
   }
   const float PI = 3.14159265;
   A *= PI / float(K);
@@ -236,6 +241,7 @@ void main() {
   o0 = vec4(A, BX.r);
   o1 = vec4(BX.gb, BY.rg);
   o2 = vec4(BY.b, BZ);
+  o3 = vec4(skyW / max(skyN, 1e-4), 0.0, 0.0, 1.0);
 }
 `;
 }
@@ -330,7 +336,7 @@ export class GIVolume {
     // ---- GPU gather ----
     const r = this.renderer;
     const rt = new THREE.WebGLRenderTarget(nx, nz, {
-      type: THREE.FloatType, format: THREE.RGBAFormat, count: 3, depthBuffer: false,
+      type: THREE.FloatType, format: THREE.RGBAFormat, count: 4, depthBuffer: false,
       minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter,
     });
     const u = {
@@ -357,7 +363,7 @@ export class GIVolume {
     const cam = new THREE.Camera();
     const prevRT = r.getRenderTarget();
     const layer = new Float32Array(nx * nz * 4);
-    const raw = [new Float32Array(nP * 4), new Float32Array(nP * 4), new Float32Array(nP * 4)];
+    const raw = [0, 1, 2, 3].map(() => new Float32Array(nP * 4));
     let tex = null;
     for (let it = 0; it < P.iters; it++) {
       if (tex) { u.uP0.value = tex[0]; u.uP1.value = tex[1]; u.uP2.value = tex[2]; u.uPrevOn.value = 1; }
@@ -365,7 +371,7 @@ export class GIVolume {
         u.uLayer.value = iy;
         r.setRenderTarget(rt);
         r.render(quad, cam);
-        for (let t = 0; t < 3; t++) {
+        for (let t = 0; t < 4; t++) {
           r.readRenderTargetPixels(rt, 0, 0, nx, nz, layer, undefined, t);
           const dst = raw[t];
           for (let iz = 0; iz < nz; iz++) {
@@ -387,7 +393,7 @@ export class GIVolume {
     this.textures = tex;
     if (old && old !== tex) for (const t of old) t.dispose();
     const L = lightUniforms;
-    L.rpGI0.value = tex[0]; L.rpGI1.value = tex[1]; L.rpGI2.value = tex[2];
+    L.rpGI0.value = tex[0]; L.rpGI1.value = tex[1]; L.rpGI2.value = tex[2]; L.rpGI3.value = tex[3];
     L.rpGIMin.value.copy(gmin);
     L.rpGIInvSize.value.set(1 / gext.x, 1 / gext.y, 1 / gext.z);
     L.rpGIBias.value = P.sh * 0.55;
@@ -418,7 +424,8 @@ export class GIVolume {
     const ok = valid.slice();
     const idx = (x, y, z) => x + y * nx + z * nx * ny;
     const nb = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
-    const acc = new Float32Array(12);
+    const T = raw.length, NC = T * 4;
+    const acc = new Float32Array(NC);
     for (let pass = 0; pass < 8; pass++) {
       const fill = [];
       for (let z = 0; z < nz; z++) for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
@@ -432,27 +439,27 @@ export class GIVolume {
           if (!ok[j]) continue;
           // prefer neighbours above (open air) over those to the side
           const wt = dy > 0 ? 1.5 : 1;
-          for (let t = 0; t < 3; t++) for (let c = 0; c < 4; c++) acc[t * 4 + c] += raw[t][j * 4 + c] * wt;
+          for (let t = 0; t < T; t++) for (let c = 0; c < 4; c++) acc[t * 4 + c] += raw[t][j * 4 + c] * wt;
           w += wt;
         }
         if (w > 0) fill.push(i, ...Array.from(acc, (v) => v / w));
       }
       if (!fill.length) break;
-      for (let k = 0; k < fill.length; k += 13) {
+      for (let k = 0; k < fill.length; k += NC + 1) {
         const i = fill[k];
-        for (let t = 0; t < 3; t++) for (let c = 0; c < 4; c++) raw[t][i * 4 + c] = fill[k + 1 + t * 4 + c];
+        for (let t = 0; t < T; t++) for (let c = 0; c < 4; c++) raw[t][i * 4 + c] = fill[k + 1 + t * 4 + c];
         ok[i] = 1;
       }
     }
     // anything still invalid (deep inside big solids): global mean of valid probes
-    let m = new Float32Array(12), n = 0;
-    for (let i = 0; i < nP; i++) if (ok[i]) { for (let t = 0; t < 3; t++) for (let c = 0; c < 4; c++) m[t * 4 + c] += raw[t][i * 4 + c]; n++; }
-    if (n) for (let i = 0; i < nP; i++) if (!ok[i]) for (let t = 0; t < 3; t++) for (let c = 0; c < 4; c++) raw[t][i * 4 + c] = m[t * 4 + c] / n;
+    let m = new Float32Array(NC), n = 0;
+    for (let i = 0; i < nP; i++) if (ok[i]) { for (let t = 0; t < T; t++) for (let c = 0; c < 4; c++) m[t * 4 + c] += raw[t][i * 4 + c]; n++; }
+    if (n) for (let i = 0; i < nP; i++) if (!ok[i]) for (let t = 0; t < T; t++) for (let c = 0; c < 4; c++) raw[t][i * 4 + c] = m[t * 4 + c] / n;
   }
 
   _upload(raw, nx, ny, nz) {
     const out = [];
-    for (let t = 0; t < 3; t++) {
+    for (let t = 0; t < raw.length; t++) {
       const src = raw[t];
       const half = new Uint16Array(src.length);
       for (let i = 0; i < src.length; i++) half[i] = THREE.DataUtils.toHalfFloat(src[i]);

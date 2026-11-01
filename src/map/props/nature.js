@@ -66,15 +66,15 @@ export function palm(h = 260, variant = 0) {
   const crown = top.clone().add(new THREE.Vector3(0, 4, 0));
   for (let k = 0; k < 7; k++) frond(pb, 'frond:dead', crown.clone().add(new THREE.Vector3(0, -4, 0)), r.f(0, Math.PI * 2), r.f(-80, -62) * DEG, r.f(45, 65), r.f(16, 22), 2, 0.5, 8, [0.95, 0.9, 0.85], r.f(-0.5, 0.5));
   // live fronds (golden-angle spiral)
-  const nf = 22 + r.i(0, 5);
+  const nf = 14 + r.i(0, 2); // 14–16 big arching fronds
   for (let k = 0; k < nf; k++) {
     const az = k * 2.39996 + r.f(-0.2, 0.2);
     const tier = k / nf;
-    const elev = lerp(72, 18, tier) * DEG + r.f(-6, 6) * DEG;
+    const elev = lerp(58, 8, tier) * DEG + r.f(-6, 6) * DEG;
     const len = r.f(70, 96) * (0.8 + 0.2 * (1 - Math.abs(tier - 0.6) * 1.6));
     const g = r.f(0.85, 1.05);
-    const droop = len * lerp(0.25, 0.95, tier) * r.f(0.85, 1.15);
-    frond(pb, 'frond', crown.clone().add(new THREE.Vector3(0, r.f(-2.5, 2.5), 0)), az, elev, len, r.f(30, 40), droop, 0.85, 12, [g, g, g * 0.95], r.f(-0.35, 0.35));
+    const droop = len * lerp(0.55, 1.15, tier) * r.f(0.85, 1.15);
+    frond(pb, 'frond', crown.clone().add(new THREE.Vector3(0, r.f(-2.5, 2.5), 0)), az, elev, len * 1.22, r.f(40, 50), droop * 1.22, 0.75, 14, [g, g, g * 0.95], r.f(-0.35, 0.35));
   }
   // date clusters
   for (let k = 0; k < 4; k++) {

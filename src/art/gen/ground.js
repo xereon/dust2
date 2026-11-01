@@ -98,14 +98,18 @@ void surface(vec2 uv, inout Surf o) {
   float hJ = 0.1 + 0.02 * fbmU(uv, 120.0, 2, 0.5, 8.0);
   o.h = max(hS, hJ);
   float inJ = 1.0 - smoothstep(0.0, 0.05, hS - hJ);
-  vec3 sc = mix(${C('#bcb3a3')}, ${C('#a59c8d')}, hr.y);
-  sc = mix(sc, ${C('#958c80')}, smoothstep(0.8, 1.0, hr.x) * 0.7);
-  sc *= 0.96 + 0.04 * bump + 0.02 * fbmU(uv, 70.0, 2, 0.5, 9.0);
-  float dust = smoothstep(0.0, 0.6, warpFbm(uv, 3.0, 0.3, 3, 10.0));
-  sc = mix(sc, ${C('#cdbfa2')}, dust * 0.4);
+  vec3 sc = mix(${C('#a89f90')}, ${C('#918879')}, hr.y);
+  sc = mix(sc, ${C('#7a7166')}, smoothstep(0.7, 1.0, hr.x) * 0.8);
+  sc *= 0.88 + 0.24 * hr.z;                                    // +-12% per slab
+  sc *= 0.96 + 0.04 * bump + 0.03 * fbmU(uv, 70.0, 2, 0.5, 9.0);
+  sc *= 1.0 - 0.18 * (1.0 - prof);                             // grime worked into arrises
+  float drift = smoothstep(0.15, 0.7, warpFbm(uv, 3.0, 0.3, 3, 10.0) + 0.25 * fbmU(uv, 18.0, 2, 0.5, 11.0));
+  sc = mix(sc, ${C('#b9a888')}, drift * 0.55);
   sc *= 1.0 - 0.3 * cr;
-  o.col = mix(sc, ${C('#c8b99c')}, inJ);
-  o.rough = mix(0.8 + 0.08 * dust, 0.96, inJ);
+  vec3 jc = mix(${C('#7d7366')}, ${C('#c8b99c')}, drift);         // dark grime joints unless sanded over
+  o.col = mix(sc, jc, inJ);
+  o.h = mix(o.h, max(o.h, 0.35), drift * 0.6);
+  o.rough = mix(0.8 + 0.1 * drift, 0.96, inJ);
 }
 `,
 };
@@ -132,23 +136,24 @@ void surface(vec2 uv, inout Surf o) {
   vec4 rp = sparse(uv * 5.0, vec2(5.0), 0.12, 9.0);
   vec2 rd = abs(rp.zw) - vec2(0.18 + 0.2 * fract(rp.y * 7.0), 0.12 + 0.15 * fract(rp.y * 3.0));
   float patchM = (1.0 - smoothstep(-0.01, 0.0, max(rd.x, rd.y))) * step(0.0, rp.y);
-  // pale sandy blotches with crisp, ragged edges
+  // tar: crack-sealant bands along the big cracks + irregular dark tar patches
   float bl = L.y + 0.3 * fbmU(uv, 30.0, 3, 0.5, 10.0) + 0.05 * gnU(uv, 120.0, 11.0);
-  float blot = smoothstep(0.66, 0.69, bl);
+  float tar = smoothstep(0.62, 0.66, bl);
+  float seal = sat(crackNet(uv, 4.0, 0.15, 2.5, 7.0)) * (1.0 - tar);
   float dusty = smoothstep(0.1, 0.8, L.w);
-  vec4 oil = sparse(uv * 7.0, vec2(7.0), 0.15, 12.0);
+  vec4 oil = sparse(uv * 7.0, vec2(7.0), 0.35, 12.0);
   float oilM = (1.0 - smoothstep(0.1, 0.4, oil.x * (1.0 + 0.4 * gnU(uv, 40.0, 13.0)))) * step(0.0, oil.y);
-  o.h = 0.4 + 0.04 * L.x + 0.012 * fine + 0.03 * agg - 0.15 * cr + 0.03 * patchM + 0.02 * blot;
-  vec3 c = mix(${C('#857d74')}, ${C('#7a736c')}, sat(L.z * 0.5 + 0.5));
+  o.h = 0.4 + 0.04 * L.x + 0.012 * fine + 0.03 * agg - 0.15 * cr * (1.0 - seal) + 0.03 * patchM + 0.04 * tar + 0.03 * seal;
+  vec3 c = mix(${C('#77736e')}, ${C('#6b6865')}, sat(L.z * 0.5 + 0.5));
   c = mix(c, ${C('#67615c')}, patchM * 0.8);
   c *= 0.97 + 0.03 * fine;
   c = mix(c, ${C('#a39a8e')}, agg * 0.3);
   c = mix(c, ${C('#9d9282')}, dusty * 0.25);
-  c = mix(c, ${C('#5a5550')}, oilM * 0.5);
-  c = mix(c, ${C('#b8ac98')} * (0.95 + 0.06 * fine), blot * 0.8);
-  c *= 1.0 - 0.35 * cr;
+  c = mix(c, ${C('#4e4a46')}, oilM * 0.55);
+  c = mix(c, ${C('#4f4b48')} * (0.95 + 0.06 * fine), max(tar * 0.8, seal * 0.55));
+  c *= 1.0 - 0.35 * cr * (1.0 - seal);
   o.col = c;
-  o.rough = 0.86 + 0.06 * dusty + 0.05 * blot - 0.04 * patchM;
+  o.rough = 0.86 + 0.06 * dusty - 0.2 * max(tar, seal) - 0.15 * oilM - 0.04 * patchM;
   o.ao = 1.0 - cr * 0.3;
 }
 `,
@@ -292,11 +297,12 @@ void surface(vec2 uv, inout Surf o) {
   float inJ = 1.0 - smoothstep(0.0, 0.25, prof);
   vec3 tc = mix(${C('#b8744e')}, ${C('#a8603e')}, hr.y);
   tc = mix(tc, ${C('#c88c62')}, smoothstep(0.7, 1.0, hr.x) * 0.7);
-  tc *= 0.95 + 0.04 * fine + 0.03 * wearN;
-  float dust = smoothstep(-0.1, 0.6, wearN);
-  tc = mix(tc, ${C('#c9ad8a')}, dust * 0.35);
+  tc *= (0.88 + 0.24 * hr.z) * (0.96 + 0.04 * fine + 0.03 * wearN);
+  tc *= 1.0 - 0.15 * (1.0 - prof);
+  float dust = smoothstep(0.1, 0.7, wearN + 0.3 * fbmU(uv, 3.0, 2, 0.5, 7.0));
+  tc = mix(tc, ${C('#c9ad8a')}, dust * 0.45);
   tc *= 1.0 - 0.3 * cr;
-  o.col = mix(tc, ${C('#bca888')}, inJ);
+  o.col = mix(tc, mix(${C('#6e5e4c')}, ${C('#bca888')}, dust), inJ);
   o.rough = mix(0.7 + 0.15 * dust, 0.96, inJ);
 }
 `,

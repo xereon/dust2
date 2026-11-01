@@ -13,7 +13,7 @@ import { SHADOW_GLSL, shadowUniforms, shadowConfig } from './csm.js';
 
 export const lightUniforms = {
   rpSunDir: null, // bound to skyUniforms.rpSunDir by the pipeline
-  rpGI0: { value: null }, rpGI1: { value: null }, rpGI2: { value: null },
+  rpGI0: { value: null }, rpGI1: { value: null }, rpGI2: { value: null }, rpGI3: { value: null },
   rpGIMin: { value: new THREE.Vector3() },
   rpGIInvSize: { value: new THREE.Vector3(1, 1, 1) },
   rpGIBias: { value: 32 },
@@ -22,6 +22,7 @@ export const lightUniforms = {
   rpAmbGround: { value: new THREE.Color(0.30, 0.24, 0.17) },
   rpSpecRef: { value: 1 },   // luminance of open-sky irradiance (specular occlusion reference)
   rpIndirect: { value: 1 },  // debug / global ambient multiplier
+  rpIndoor: { value: 2.0 },  // extra ambient where the volume sees no sky (tunnels, under roofs)
   rpVMRot: { value: new THREE.Matrix3() },
   rpVMPos: { value: new THREE.Vector3() },
   rpVMSun: { value: 1 },
@@ -30,9 +31,16 @@ export const lightUniforms = {
 
 const COMMON_GLSL = /* glsl */`
 uniform vec3 rpSunDir;
-uniform highp sampler3D rpGI0, rpGI1, rpGI2;
+uniform highp sampler3D rpGI0, rpGI1, rpGI2, rpGI3;
 uniform vec3 rpGIMin, rpGIInvSize, rpAmbSky, rpAmbGround;
-uniform float rpGIBias, rpGIOn, rpSpecRef, rpIndirect, rpDebug;
+uniform float rpGIBias, rpGIOn, rpSpecRef, rpIndirect, rpDebug, rpIndoor;
+// cosine-weighted sky visibility baked with the volume (1 open, 0 enclosed)
+float rpGISky(vec3 wp) {
+  if (rpGIOn < 0.5) return 1.0;
+  return clamp(texture(rpGI3, (wp - rpGIMin) * rpGIInvSize).r, 0.0, 1.0);
+}
+// normalize() of a zero vector is NaN, and a single NaN pixel becomes a bloom blob
+vec3 rpSafeN(vec3 v, vec3 fb) { float l = dot(v, v); return l > 1e-12 ? v * inversesqrt(l) : fb; }
 vec3 rpGIEval(vec3 wp, vec3 wn) {
   if (rpGIOn < 0.5) return mix(rpAmbGround, rpAmbSky, wn.y * 0.5 + 0.5);
   vec3 uvw = (wp - rpGIMin) * rpGIInvSize;
@@ -59,11 +67,15 @@ function buildLightsBegin(vm) {
   if (a < 0 || b < 0) return null;
   const pre = /* glsl */`
 vec3 rpWP = (vec4(-vViewPosition, 0.0) * viewMatrix).xyz + cameraPosition;
-vec3 rpGN = normalize((vec4(nonPerturbedNormal, 0.0) * viewMatrix).xyz);
+vec3 rpGN = rpSafeN((vec4(nonPerturbedNormal, 0.0) * viewMatrix).xyz, vec3(0.0, 1.0, 0.0));
 float rpSunVis = 1.0;
+float rpSkyVis = ${vm ? 'rpGISky(rpVMPos)' : 'rpGISky(rpWP + rpGN * rpGIBias)'};
 ${vm ? 'rpSunVis = rpVMSun;' : `
 #if defined( USE_SHADOWMAP ) && ( NUM_DIR_LIGHT_SHADOWS > 0 )
   rpSunVis = rpSunShadow( rpWP, rpGN, vViewPosition.z, rpSunDir );
+  // sealed interiors can't see the sun: kills 1px light leaks along ceiling/wall seams while
+  // sun patches under skylights/openings (which do see sky) survive
+  rpSunVis *= smoothstep(0.004, 0.035, rpSkyVis);
 #endif`}
 `;
   const dir = /* glsl */`
@@ -86,10 +98,12 @@ ${vm ? 'rpSunVis = rpVMSun;' : `
   const post = /* glsl */`
 #if defined( RE_IndirectDiffuse )
   {
-    vec3 rpWN = normalize((vec4(geometryNormal, 0.0) * viewMatrix).xyz);
+    vec3 rpWN = rpSafeN((vec4(geometryNormal, 0.0) * viewMatrix).xyz, rpGN);
     ${vm ? 'irradiance = rpGIEval(rpVMPos, normalize(rpVMRot * rpWN));'
          : 'irradiance = rpGIEval(rpWP + rpGN * rpGIBias, rpWN);'}
-    irradiance *= rpIndirect;
+    float rpEncl = 1.0 - rpSkyVis;
+    // enclosed spaces in Dust II read warm (sand bounce through the openings), not grey
+    irradiance *= rpIndirect * (1.0 + rpIndoor * rpEncl * rpEncl * vec3(1.12, 1.0, 0.78));
   }
 #endif
 `;

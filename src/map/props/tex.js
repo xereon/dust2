@@ -353,10 +353,10 @@ function frondTex(dead) {
     const u = (x / W) * 2 - 1, v = y / H; // v: 0 base -> 1 tip
     const au = Math.abs(u);
     const maxLen = Math.sin(Math.min(1, v * 1.08) * Math.PI) * 0.95 * (0.3 + 0.7 * Math.min(1, v * 3));
-    const n = 34;
+    const n = 30;
     const phase = (v + au * 0.55) * n;
     const f = phase - Math.floor(phase);
-    const wid = 0.3 * (1 - au / (maxLen + 0.001)) + 0.12;
+    const wid = 0.24 * (1 - au / (maxLen + 0.001)) + 0.08;
     const jag = vn(Math.floor(phase) * 3.3, 1, 256) * 0.25;
     const leaf = au < maxLen * (1 - jag) && Math.abs(f - 0.5) < wid;
     const rib = au < 0.035 * (1 - v * 0.6) && v < 0.99;

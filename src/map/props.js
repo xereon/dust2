@@ -12,9 +12,13 @@
 //
 // Local frames ("floor" = centred on x/z, base on y = 0; "opening" = hole x ∈ [-w/2, w/2],
 // y ∈ [0, h], wall centre plane z = 0; "wall" = origin on the wall face, prop sticks out +z):
-//   crate(size=64, variant=0)            floor   size number | [sx, sy(height), sz]; variants 0..3
+//   crate(size=64, variant=0, opts)      floor   size number | [sx, sy(height), sz]; variant 0..5 or name:
+//        0 'classic' pale 2×2 panels · 1 'diag' tan brace+caps · 2 'xbrace' grey X+bands · 3 'plain' tan
+//        4 'cs2' grey-white 2×2 panels + steel bands + caps (A site / goose) · 5 'cs2grey' grey brace + bands
+//        opts override any field: {tint, frameTint, bandTint, bands, caps, panel:'cross'|'diag'|'x'|'mid'|'plain',
+//        planks:'h'|'v', noLabels, gap, plankW}
 //   crateStack(layout|'a_site'|'steps'|'tower'|'small')  floor, merged (≤3 draws)
-//   tarpCrate(size=64, color='teal', variant=0)   floor   crate + roped canvas over the top
+//   tarpCrate(size=64, color='teal', variant=4, {hang=0.34, ropes=true, crate:{...}})   floor   CS2 banded crate + roped teal canvas
 //   slatCrate(w=56, h=96, d=56)          floor   slatted timber crate / tower
 //   barrel(variant=0..5)                 floor   Ø22.5 × 34.5 drum: galv, blue-grey, 2-tone, blue, red, olive
 //   doubleDoor(w=112, h=108, open=0|[l,r], {depth=16, gap=1.4, paint})   opening, frame+leaves
@@ -28,7 +32,7 @@
 //   satelliteDish({roof})                wall bracket (default) or roof tripod (floor)
 //   hangingRope(len=48)                  wall, peg at y = 0, rope hangs to -len
 //   ladder(h=120)                        floor against a wall at z = 0 (collider flagged ladder)
-//   utilityPole(h=300)                   floor; userData.wireAttach = insulator tops (local)
+//   utilityPole(h=300, {arms=2, transformer=true})   floor; userData.wireAttach = insulator tops (local)
 //   palm(h=260, variant) / plant(0 agave pot | 1 dry shrub | 2 potted palm) / urn(0..2)   floor
 //   rubble(radius=32)                    floor, walkable (no colliders)
 //   car(variant 0 white | 1 blue | 2 sand | 3 red)   floor, 166 × 64 × 51, front toward +x
@@ -38,7 +42,7 @@
 //   woodenBeam(len=96, size=8) (along x) / archKeystone(w=14, h=16, depth=18)
 //   wireSpan(a, b, sag=24, r=0.35) / wireSpans([{a,b,sag}]) / pipe(a, b, r=2)   PARENT space
 import * as THREE from 'three';
-import { mat, transformColliders, prismPlanes, DEG, merge } from './props/core.js';
+import { mat, transformColliders, prismPlanes, DEG, merge, sanitize } from './props/core.js';
 import { material } from './props/tex.js';
 import { crateProp, CRATE_VARIANTS } from './props/crate.js';
 import * as P from './props/catalog.js';
@@ -125,7 +129,7 @@ export function wireSpan(a, b, sag = 24, radius = 0.35) { return toObject('wireS
  */
 export function wireSpans(spans) {
   const list = spans.map((s) => P.BUILDERS.wireSpan(s.a, s.b, s.sag ?? 24, s.radius ?? 0.35).parts[0][1]);
-  const g = merge(list); g.computeBoundingSphere(); g.computeBoundingBox();
+  const g = sanitize(merge(list)); g.computeBoundingSphere(); g.computeBoundingBox();
   return toObject('wireSpans', { parts: [['plain:0.55', g]], colliders: [] });
 }
 /** Pipe from a to b (PARENT space) with collars/flanges. Not cached. */
@@ -160,7 +164,7 @@ export function crateStack(layout = 'a_site') {
     }
     colliders.push(...transformColliders(b.colliders, m));
   }
-  const parts = [...buckets].map(([k, list]) => { const g = merge(list); g.computeBoundingSphere(); g.computeBoundingBox(); return [k, g]; });
+  const parts = [...buckets].map(([k, list]) => { const g = sanitize(merge(list)); g.computeBoundingSphere(); g.computeBoundingBox(); return [k, g]; });
   return toObject('crateStack', { parts, colliders });
 }
 

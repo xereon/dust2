@@ -110,7 +110,7 @@ void surface(vec2 uv, inout Surf o) {
 
 // Double-door leaf: vertical planks, rails + Z-brace, iron strap hinges, faded teal paint.
 export const wood_door = {
-  world: 108, normal: 1.0, ao: 1.0, aoRadius: 6, cavity: 0.5, cavRough: 0.04,
+  hero: true, world: 108, normal: 1.0, ao: 1.0, aoRadius: 6, cavity: 0.5, cavRough: 0.04,
   antiTile: false, surface: 'wood', seed: 321,
   glsl: /* glsl */`
 float railMask(vec2 uv, float y0, float y1) { return step(y0, uv.y) * step(uv.y, y1); }

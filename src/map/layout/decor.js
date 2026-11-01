@@ -66,7 +66,7 @@ export function decorate(K, walls) {
     for (const zr of storeys) {
       const n = Math.floor((L - 80) / (arched ? 105 : 150));
       for (let k = 0; k < n; k++) {
-        if (r() > (arched ? 0.95 : 0.62)) continue;
+        if (r() > (arched ? 0.95 : 0.78)) continue;
         const d = 60 + (k + 0.5) * ((L - 120) / n);
         if (!free(d, 30)) continue;
         const ww = 34 + Math.round(r() * 3) * 4, wh = 52 + Math.round(r() * 3) * 4;
@@ -74,7 +74,7 @@ export function decorate(K, walls) {
         if (z + wh > w.top - 24) continue;
         window_(K, w, at(d), ux, uy, mx, my, z, ww, wh, yaw, r() < 0.7 ? style : null, r, false, w.R.o.windows === 'arched');
         nWin++;
-        if (zr > 200 || r() > 0.82) continue;
+        if (zr > 300 || r() > 0.62) continue;
         // small balcony: stone slab on two corbels with an iron railing
         const bw = ww + 28, bd = 22;
         const a = at(d - bw / 2, 0), b = at(d + bw / 2, 0);
@@ -89,11 +89,34 @@ export function decorate(K, walls) {
       const d = 50 + r() * (L - 100);
       if (free(d, 30)) { window_(K, w, at(d), ux, uy, mx, my, floorAt(d) + 56, 36, 48, yaw, null, r, true); take(d, 30); nWin++; }
     }
-    if (L > 140 && H > 170 && r() < 0.3) {
+    // ---- roller-shuttered shop front at street level
+    if (L > 200 && H > 150 && r() < 0.32) {
+      const d = 70 + r() * (L - 140);
+      const z = floorAt(d), sw = r() < 0.5 ? 88 : 104;
+      if (free(d, sw / 2 + 10) && Math.abs(w.zfB - w.zfA) / L < 0.08 && !blocked(K, [at(d, 24), at(d - sw / 2, 24), at(d + sw / 2, 24)], z + 40)) {
+        const [px, py] = at(d);
+        K.prop('shopShutter', [sw, 100, r() < 0.25 ? 0.35 : 0, r() < 0.5 ? 'grey' : 'teal'], [px, py, z], yaw);
+        take(d, sw / 2 + 10);
+        if (r() < 0.5) { const [ax, ay] = at(d); K.prop('awning', [sw + 30, 34, { color: r() < 0.5 ? 'teal' : 'stripe' }], [ax, ay, z + 132], yaw); }
+      }
+    }
+    // ---- wall lamps (one or two per wall)
+    for (let q = 0; q < (L > 360 ? 2 : 1); q++) {
+      if (!(L > 120 && H > 170 && r() < 0.62)) continue;
       const d = 40 + r() * (L - 80);
       if (free(d, 16)) { const [px, py] = at(d); K.prop('lamp', [], [px, py, floorAt(d) + 150], yaw); take(d, 16); nLamp++; }
     }
-    if (L > 120 && r() < 0.18) {
+    // ---- street sign plate
+    if (L > 160 && H > 160 && r() < 0.14) {
+      const d = 50 + r() * (L - 100);
+      if (free(d, 34)) { sign(K, at, d, floorAt(d) + 112 + r() * 20, mx, my, r); take(d, 34); }
+    }
+    // ---- satellite dish on a wall bracket high up
+    if (H > 260 && L > 140 && r() < 0.22) {
+      const d = 40 + r() * (L - 80);
+      if (free(d, 20)) { const [px, py] = at(d); K.prop('satelliteDish', [], [px, py, w.top - 60 - r() * 40], yaw); take(d, 20); }
+    }
+    if (L > 120 && r() < 0.3) {
       const d = 40 + r() * (L - 80);
       if (free(d, 14)) {
         const [px, py] = at(d); const box = r() < 0.5 ? 'meterBox' : 'electricBox';
@@ -101,7 +124,7 @@ export function decorate(K, walls) {
         if (box === 'electricBox') K.emitter('amb_powerbox', [px, py, floorAt(d) + 70], 500);
       }
     }
-    if (L > 160 && H > 230 && r() < 0.16) {
+    if (L > 140 && H > 230 && r() < 0.4) {
       const d = 50 + r() * (L - 100);
       if (free(d, 24)) { const [px, py] = at(d); K.prop('acUnit', [], [px, py, zf + 190 + r() * 40], yaw); take(d, 24); }
     }
@@ -158,6 +181,26 @@ export function decorate(K, walls) {
     nWire++;
   }
   K.decorStats = { windows: nWin, doors: nDoor, lamps: nLamp, wires: nWire };
+}
+
+/** Enamel street sign: dark blue plate with a white border, arrow and lettering bars. */
+function sign(K, at, d, z, mx, my, r) {
+  const W = 56 + Math.round(r() * 2) * 8, H = 16, dir = r() < 0.5 ? -1 : 1;
+  const plate = r() < 0.75 ? [0.13, 0.22, 0.33] : [0.12, 0.3, 0.22];
+  const P = (s, zz, off) => { const [x, y] = at(d + s, off); return [x, y, zz]; };
+  const face = (pts, col, off) => K.poly('plaster_white#decal', faceToward(pts.map(([s, zz]) => P(s, zz, off)), mx, my), { col });
+  // plate body (thin slab) + face
+  K.slab([P(-W / 2, 0, 1.2)[0], P(-W / 2, 0, 1.2)[1]], [P(W / 2, 0, 1.2)[0], P(W / 2, 0, 1.2)[1]], z, z + H, 2.4, 'window_frame', { col: false, color: 0.3 });
+  face([[-W / 2, z], [W / 2, z], [W / 2, z + H], [-W / 2, z + H]], [0.95, 0.94, 0.9], 2.5);
+  face([[-W / 2 + 1.2, z + 1.2], [W / 2 - 1.2, z + 1.2], [W / 2 - 1.2, z + H - 1.2], [-W / 2 + 1.2, z + H - 1.2]], plate, 2.6);
+  // arrow
+  const ax = dir * (W / 2 - 12), zc = z + H / 2;
+  face([[ax - 7 * dir, zc - 1], [ax + 3 * dir, zc - 1], [ax + 3 * dir, zc + 1], [ax - 7 * dir, zc + 1]].map((q) => dir < 0 ? q : q), [0.95, 0.94, 0.9], 2.7);
+  face([[ax + 6 * dir, zc], [ax + 1 * dir, zc - 4.5], [ax + 1 * dir, zc + 4.5]], [0.95, 0.94, 0.9], 2.7);
+  // lettering bars
+  const x0 = dir < 0 ? -W / 2 + 6 : -W / 2 + 22, x1 = dir < 0 ? W / 2 - 22 : W / 2 - 6;
+  face([[x0, zc + 1.5], [x1, zc + 1.5], [x1, zc + 4.5], [x0, zc + 4.5]], [0.92, 0.92, 0.88], 2.7);
+  face([[x0 + 4, zc - 4.5], [x1 - 6, zc - 4.5], [x1 - 6, zc - 2.5], [x0 + 4, zc - 2.5]], [0.85, 0.85, 0.82], 2.7);
 }
 
 /** Recessed dark window with a timber frame, stone sill and (optionally) shutters or bars. */
@@ -229,7 +272,7 @@ export function decorateRoofs(K, g) {
     for (const [di, dj] of [[3, 0], [-3, 0], [0, 3], [0, -3]]) if (i + di >= 0 && j + dj >= 0 && i + di < nx && j + dj < ny && open[(j + dj) * nx + i + di]) near = [di, dj];
     if (!near || !isRoof(i + Math.sign(near[0]), j + Math.sign(near[1]))) continue;
     const r = R();
-    if (r > 0.1) continue;
+    if (r > 0.22) continue;
     const z = h[j * nx + i];
     // all four neighbours at the same height (flat spot)
     if (![[1, 0], [-1, 0], [0, 1], [0, -1]].every(([a, b]) => isRoof(i + a, j + b) && h[(j + b) * nx + i + a] === z)) continue;
@@ -241,5 +284,54 @@ export function decorateRoofs(K, g) {
     else K.obox([px, py, z], [40, 40, 44], R() * 90, 'metal_barrel', { col: false, color: 0.8 });
     n++;
   }
-  K.decorStats = { ...(K.decorStats || {}), roofProps: n };
+  // ---- stepped roof storeys, water tanks and antennas: breaks up the flat-topped skyline
+  const Rb = rng(0x51e7);
+  const dist = new Int16Array(nx * ny).fill(999);
+  {
+    // BFS distance (cells) from the open street footprint
+    const q = [];
+    for (let c = 0; c < nx * ny; c++) if (open[c]) { dist[c] = 0; q.push(c); }
+    for (let k = 0; k < q.length; k++) {
+      const c = q[k], i = c % nx, j = (c - i) / nx;
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const a = i + di, b = j + dj; if (a < 0 || b < 0 || a >= nx || b >= ny) continue;
+        const e = b * nx + a; if (dist[e] > dist[c] + 1) { dist[e] = dist[c] + 1; q.push(e); }
+      }
+    }
+  }
+  let nb = 0;
+  const S = 9;
+  for (let j = 4; j < ny - S - 4; j += S + 2) for (let i = 4; i < nx - S - 4; i += S + 2) {
+    const oi = i + Math.floor(Rb() * 3), oj = j + Math.floor(Rb() * 3);
+    const w = 4 + Math.floor(Rb() * (S - 3)), d = 4 + Math.floor(Rb() * (S - 3));
+    const z = h[oj * nx + oi];
+    let ok = !Number.isNaN(z);
+    for (let b = oj; ok && b < oj + d; b++) for (let a = oi; ok && a < oi + w; a++) { const c = b * nx + a; if (a >= nx || b >= ny || open[c] || h[c] !== z || dist[c] < 4) ok = false; }
+    if (!ok || Rb() > 0.55) continue;
+    const xa = x0 + oi * G, ya = y0 + oj * G, xb = xa + w * G, yb = ya + d * G;
+    const ht = 70 + Math.floor(Rb() * 3) * 40;
+    const mat = Rb() < 0.7 ? 'plaster_white' : 'plaster_wall';
+    K.box([xa, ya, z - 1], [xb, yb, z + ht], mat, { col: false, color: 0.92 });
+    // coping rim
+    K.box([xa - 3, ya - 3, z + ht], [xb + 3, yb + 3, z + ht + 5], 'plaster_trim', { col: false, color: 0.95 });
+    // a dark window or door on each long side
+    for (const [p0, p1, nxv, nyv] of [[[xa, ya], [xb, ya], 0, -1], [[xb, yb], [xa, yb], 0, 1], [[xb, ya], [xb, yb], 1, 0], [[xa, yb], [xa, ya], -1, 0]]) {
+      const L = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]); if (L < 80 || Rb() < 0.3) continue;
+      const ux = (p1[0] - p0[0]) / L, uy = (p1[1] - p0[1]) / L, m = L / 2 + (Rb() - 0.5) * (L - 60), ww = 26, wz = z + (Rb() < 0.3 ? 0 : 30), wh = wz === z ? 64 : 34;
+      const P = (s, zz) => [p0[0] + ux * s + nxv * 0.5, p0[1] + uy * s + nyv * 0.5, zz];
+      K.poly('window_frame', faceToward([P(m - ww / 2, wz), P(m + ww / 2, wz), P(m + ww / 2, wz + wh), P(m - ww / 2, wz + wh)], nxv, nyv), { col: 0.12 });
+    }
+    // water tank on legs or an antenna on top
+    const cx = (xa + xb) / 2 + (Rb() - 0.5) * 20, cy = (ya + yb) / 2 + (Rb() - 0.5) * 20, zt = z + ht + 5;
+    if (Rb() < 0.6) {
+      for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) K.box([cx + sx * 14 - 1.5, cy + sy * 14 - 1.5, zt], [cx + sx * 14 + 1.5, cy + sy * 14 + 1.5, zt + 18], 'metal_beam', { col: false, color: 0.6 });
+      const oct = []; for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; oct.push([cx + 19 * Math.cos(a), cy + 19 * Math.sin(a)]); }
+      K.prismSolid(oct, zt + 18, zt + 52, Rb() < 0.5 ? 'plaster_white' : 'metal_barrel', { col: false, color: 0.85 });
+    } else {
+      K.box([cx - 1.2, cy - 1.2, zt], [cx + 1.2, cy + 1.2, zt + 90 + Rb() * 60], 'metal_beam', { col: false, color: 0.5 });
+      for (const k of [0.55, 0.8]) K.box([cx - 16, cy - 0.8, zt + 90 * k], [cx + 16, cy + 0.8, zt + 90 * k + 1.6], 'metal_beam', { col: false, color: 0.5 });
+    }
+    nb++;
+  }
+  K.decorStats = { ...(K.decorStats || {}), roofProps: n, roofBlocks: nb };
 }

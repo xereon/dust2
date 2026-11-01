@@ -17,19 +17,21 @@ function tarpCrate(K, pos, size = 64, yaw = 0, color = 'teal', variant = 0) {
 }
 
 /** Sprayed bombsite marker (orange circle and cross) lying on a flat floor at z. */
+const up = (P) => { let a = 0; for (let i = 0; i < P.length; i++) { const p = P[i], q = P[(i + 1) % P.length]; a += p[0] * q[1] - q[0] * p[1]; } return a < 0 ? P.slice().reverse() : P; };
+
 export function bombMark(K, [cx, cy], z, r = 44, rot = 20) {
   const mat = 'plaster_white#decal', col = [1.0, 0.36, 0.08], w = 5, N = 40, zz = z + 0.15;
   const a0 = rot * Math.PI / 180;
   for (let i = 0; i < N; i++) {
     const a = (i / N) * 2 * Math.PI, b = ((i + 1) / N) * 2 * Math.PI;
     const ri = r - w + 1.2 * Math.sin(i * 1.7), ro = r + 1.4 * Math.sin(i * 2.3 + 1);
-    K.poly(mat, [[cx + ri * Math.cos(a), cy + ri * Math.sin(a), zz], [cx + ri * Math.cos(b), cy + ri * Math.sin(b), zz],
-      [cx + ro * Math.cos(b), cy + ro * Math.sin(b), zz], [cx + ro * Math.cos(a), cy + ro * Math.sin(a), zz]], { col, normal: [0, 0, 1] });
+    K.poly(mat, up([[cx + ri * Math.cos(a), cy + ri * Math.sin(a), zz], [cx + ri * Math.cos(b), cy + ri * Math.sin(b), zz],
+      [cx + ro * Math.cos(b), cy + ro * Math.sin(b), zz], [cx + ro * Math.cos(a), cy + ro * Math.sin(a), zz]]), { col, normal: [0, 0, 1] });
   }
   for (const k of [0, 1]) {
     const a = a0 + Math.PI / 4 + k * Math.PI / 2, ux = Math.cos(a), uy = Math.sin(a), L = r * 0.92, t = w * 0.6;
-    K.poly(mat, [[cx - ux * L - uy * t, cy - uy * L + ux * t, zz + 0.05], [cx - ux * L + uy * t, cy - uy * L - ux * t, zz + 0.05],
-      [cx + ux * L + uy * t, cy + uy * L - ux * t, zz + 0.05], [cx + ux * L - uy * t, cy + uy * L + ux * t, zz + 0.05]], { col, normal: [0, 0, 1] });
+    K.poly(mat, up([[cx - ux * L - uy * t, cy - uy * L + ux * t, zz + 0.05], [cx - ux * L + uy * t, cy - uy * L - ux * t, zz + 0.05],
+      [cx + ux * L + uy * t, cy + uy * L - ux * t, zz + 0.05], [cx + ux * L - uy * t, cy + uy * L + ux * t, zz + 0.05]]), { col, normal: [0, 0, 1] });
   }
 }
 
@@ -42,7 +44,7 @@ export function floorPatch(K, mat, [cx, cy], z, r, seed = 1, n = 18) {
     P.push([cx + r * k * Math.cos(a), cy + r * k * Math.sin(a) * 0.85, z + 0.1]);
   }
   const C = [cx, cy, z + 0.1];
-  for (let i = 0; i < n; i++) K.poly(mat + '#decal', [C, P[i], P[(i + 1) % n]], { col: 0.96, normal: [0, 0, 1] });
+  for (let i = 0; i < n; i++) K.poly(mat + '#decal', up([C, P[i], P[(i + 1) % n]]), { col: 0.96, normal: [0, 0, 1] });
 }
 
 /** Pillar of rough dressed stone blocks, courses of two or three blocks with ragged joints. */
@@ -161,7 +163,14 @@ export function build(K) {
   barrel(K, [-300, 610, 0]); barrel(K, [-276, 612, 0], 1);
 
   // ---------------------------------------------------------------- outside long / long doors / long
-  metalCrate(K, [657, -44, 0], [79, 206, 88], 15.9, 0);                // the big container
+  car(K, [657, -44, 0], 105.9, 2);                                        // old yellow sedan
+  // beyond the waist-high wall at the east end of outside long: palm, olive, a house
+  K.clip([776, -417, 100], [800, 272, 420]);
+  palm(K, [860, -300, 99], 280, 1);
+  prop(K, 'plant', [1], [850, 80, 99], 30);
+  K.box([900, -260, -40], [1120, -40, 300], 'plaster_white', { col: false, color: 0.9 });
+  K.box([896, -264, 300], [1124, -36, 318], 'plaster_trim', { col: false, color: 0.95 });
+  K.box([880, 20, -40], [1060, 190, 240], 'plaster_white', { col: false, color: 0.86 });
   crate(K, [162, -52, 0], [74, 74, 64], 0, 1);
   crate(K, [200, -40, 0], [64, 48, 48], 0, 2);
   crate(K, [142, 53, 0], 34);

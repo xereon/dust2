@@ -359,6 +359,39 @@ export function merge(list) {
   return out;
 }
 
+/**
+ * Drop zero-area / non-finite triangles and repair zero or NaN normals in an indexed geometry.
+ * A zero normal becomes NaN after normalize() in the shader (→ NaN bloom blobs), so every prop
+ * geometry goes through here.
+ */
+export function sanitize(g) {
+  const P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array;
+  const keep = [];
+  let fixed = 0;
+  const fn = new Float32Array(P.length); // accumulated face normals per vertex (fallback)
+  for (let t = 0; t < I.length; t += 3) {
+    const a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+    const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2];
+    const vx = P[c] - P[a], vy = P[c + 1] - P[a + 1], vz = P[c + 2] - P[a + 2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const l = Math.hypot(nx, ny, nz);
+    if (!(l > 1e-7)) continue; // degenerate or NaN
+    keep.push(I[t], I[t + 1], I[t + 2]);
+    for (const v of [a, b, c]) { fn[v] += nx / l; fn[v + 1] += ny / l; fn[v + 2] += nz / l; }
+  }
+  for (let v = 0; v < N.length; v += 3) {
+    let x = N[v], y = N[v + 1], z = N[v + 2], l = Math.hypot(x, y, z);
+    if (!(l > 1e-4) || !Number.isFinite(l)) { fixed++; x = fn[v]; y = fn[v + 1]; z = fn[v + 2]; l = Math.hypot(x, y, z); if (!(l > 1e-6)) { x = 0; y = 1; z = 0; l = 1; } }
+    N[v] = x / l; N[v + 1] = y / l; N[v + 2] = z / l;
+    if (!Number.isFinite(P[v]) || !Number.isFinite(P[v + 1]) || !Number.isFinite(P[v + 2])) { P[v] = P[v + 1] = P[v + 2] = 0; }
+  }
+  g.userData.sanitized = { dropped: (I.length - keep.length) / 3, fixedNormals: fixed };
+  if (keep.length !== I.length) g.setIndex(new THREE.BufferAttribute(P.length / 3 > 65535 ? new Uint32Array(keep) : new Uint16Array(keep), 1));
+  const uv = g.attributes.uv?.array; if (uv) for (let i = 0; i < uv.length; i++) if (!Number.isFinite(uv[i])) uv[i] = 0;
+  const col = g.attributes.color?.array; if (col) for (let i = 0; i < col.length; i++) if (!Number.isFinite(col[i])) col[i] = 1;
+  return g;
+}
+
 // ---- builder -----------------------------------------------------------------------------------
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3();
 /** Matrix from position + euler (radians) + optional uniform/vec scale. */
@@ -404,7 +437,7 @@ export class PropBuilder {
   finish() {
     const parts = [];
     for (const [k, list] of this.buckets) {
-      const g = merge(list);
+      const g = sanitize(merge(list));
       g.computeBoundingBox(); g.computeBoundingSphere();
       parts.push([k, g]);
     }

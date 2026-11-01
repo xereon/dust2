@@ -125,30 +125,37 @@ export function plankFence(len = 128, h = 40) {
  * utilityPole(h = 300): tapered timber pole with a crossarm, insulators, pole steps and a
  * small transformer. userData.wireAttach = insulator tops (local) for wireSpan().
  */
-export function utilityPole(h = 300) {
-  const pb = new PropBuilder('utilityPole', String(h)), r = pb.rand;
+export function utilityPole(h = 300, opts = {}) {
+  const pb = new PropBuilder('utilityPole', `${h}:${JSON.stringify(opts)}`), r = pb.rand;
   const prof = [[6.2, 0, true], [6.0, h * 0.3], [5.2, h * 0.7], [4.4, h - 1.2], [3.8, h, true], [0.01, h + 0.6]];
   const pole = lathe(prof, 12);
   // grain runs up the pole: remap lathe UVs (u around, v along) into one atlas strip
   const uv = pole.attributes.uv;
   for (let i = 0; i < uv.count; i++) { const around = uv.getX(i) / (Math.PI * 2 * 6.2); uv.setXY(i, (uv.getY(i) * WOOD.PX_PER_UNIT) / WOOD.W, (5 * 128 + 4 + around * 118) / WOOD.H); }
   pb.add(GREY, pole, null, [0.72, 0.64, 0.56]);
-  // crossarm + braces
-  const ya = h - 14;
-  beamBox(pb, GREY, [-34, ya - 2.5, 5.2], [34, ya + 2.5, 9.6], { thickAxis: 2, chamfer: 0.5, angle: 0, tint: [0.75, 0.7, 0.64] });
-  for (const s of [-1, 1]) pb.add('iron', paint(rod([0, ya - 22, 6], [s * 18, ya - 2.5, 7.4], 0.5, 5), [0.35, 0.33, 0.3]));
+  // crossarms (upper long, lower short) with steel braces and big pale ceramic insulators
   const attach = [];
-  for (const x of [-30, -12, 12, 30]) {
-    const ins = lathe([[0.4, 0, true], [1.3, 0.4], [1.3, 1.2], [0.8, 1.6], [1.5, 2.1], [1.5, 2.8], [0.9, 3.2], [0.5, 3.9], [0.01, 4.1]], 8);
-    ins.translate(x, ya + 2.5, 7.4); pb.add('plain:0.3', ins, null, [0.82, 0.86, 0.8]);
-    attach.push([x, ya + 6.2, 7.4]);
+  const arms = opts.arms ?? 2;
+  const spec = [[h - 14, 36, [-31, -12, 12, 31]], [h - 40, 24, [-19, 19]]].slice(0, arms);
+  for (const [ya, half, xs] of spec) {
+    beamBox(pb, GREY, [-half, ya - 2.8, 5.2], [half, ya + 2.8, 10.2], { thickAxis: 2, chamfer: 0.6, angle: 0, tint: [0.7, 0.66, 0.6] });
+    for (const s of [-1, 1]) pb.add('iron', paint(rod([0, ya - 20, 6.4], [s * half * 0.55, ya - 2.8, 7.6], 0.6, 5), [0.32, 0.31, 0.3]));
+    pb.add('iron', paint(cbox([-3, ya - 4, 4.2], [3, ya + 4, 5.4], 0.2), [0.32, 0.31, 0.3]));
+    for (const x of xs) {
+      const ins = lathe([[0.6, 0, true], [2.0, 0.5], [2.0, 1.6], [1.1, 2.2], [2.2, 2.9], [2.2, 3.9], [1.2, 4.5], [0.7, 5.4], [0.01, 5.7]], 10);
+      ins.translate(x, ya + 2.8, 7.7); pb.add('plain:0.3', ins, null, [0.86, 0.88, 0.84]);
+      pb.add('iron', paint(rod([x, ya + 2.2, 7.7], [x, ya + 3.4, 7.7], 0.5, 5), [0.3, 0.3, 0.3]));
+      attach.push([x, ya + 8.4, 7.7]);
+    }
   }
   // pole steps
   for (let y = 70; y < h - 30; y += 16) { const s = (y / 16) % 2 ? 1 : -1; pb.add('iron', paint(rod([s * 4, y, 0], [s * 11, y + 0.6, 0], 0.45, 4), [0.35, 0.33, 0.3])); }
   // pole-top transformer can
-  const tr = lathe([[7, 0, true], [7, 20, true], [7.4, 20.5, true], [6.8, 22.5], [0.01, 23]], 14);
-  tr.translate(0, h - 52, -12); uvXform(tr, 1 / 48, 1 / 48); pb.add('paint:grey', tr);
-  pb.add('iron', paint(cbox([-2, h - 46, -6], [2, h - 34, 0], 0.3), [0.35, 0.33, 0.3]));
+  if (opts.transformer !== false) {
+    const tr = lathe([[7, 0, true], [7, 20, true], [7.4, 20.5, true], [6.8, 22.5], [0.01, 23]], 14);
+    tr.translate(0, h - 76, -12); uvXform(tr, 1 / 48, 1 / 48); pb.add('paint:grey', tr);
+    pb.add('iron', paint(cbox([-2, h - 70, -6], [2, h - 58, 0], 0.3), [0.35, 0.33, 0.3]));
+  }
   pb.weather((x, y) => lerp(0.62, 1, smooth(0, 20, y)));
   pb.userData.wireAttach = attach;
   const pts = []; for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2; pts.push([Math.cos(a) * 6.6, Math.sin(a) * 6.6]); }

@@ -11,17 +11,27 @@ export function build(K) {
     { ...tun, arch: { spring: 120, crown: 176 }, ceilTop: 330 });
   K.region('utun_corr', zc([[-1736, 744], [-1588, 744], [-1588, 958], [-1736, 958]], 30),
     { ...tun, ceil: 176, beams: { dir: 'x', step: 96 } });
-  K.region('utun_hall', zc([
-    [-2194, 1022], [-1867, 1022], [-1867, 958], [-1736, 958], [-1588, 958], [-1537, 958], [-1537, 1020],
-    [-1293, 1020], [-1293, 1180], [-1293, 1298], [-1653, 1298], [-1653, 1425], [-1906, 1425], [-2057, 1425], [-2194, 1425],
-  ], 32), { ...tun, ceil: 182, beams: { dir: 'y', step: 128 } });
-  K.region('utun_exit', zc([[-2057, 1425], [-1906, 1425], [-1906, 1765], [-2057, 1765]], 32),
-    { ...tun, ceil: 170, beams: { dir: 'x', step: 96 } });
-  K.region('utun_exit_mouth', zc([[-2057, 1765], [-1906, 1765], [-1906, 1789], [-2057, 1789]], 32),
-    { ...tun, arch: { spring: 118, crown: 170 }, ceilTop: 330, wallMat: 'adobe' });
+  // the hall is tall, with a broken timber skylight letting sun patches onto the floor
+  const uhall = { ...tun, ceil: 300, ceilTop: 360, beams: { dir: 'y', step: 128 } };
+  K.region('utun_hall_w', zc([[-2194, 1022], [-1867, 1022], [-1867, 958], [-1860, 958], [-1860, 1425], [-1906, 1425], [-2057, 1425], [-2194, 1425]], 32), uhall);
+  K.region('utun_hall_s', zc([[-1860, 958], [-1736, 958], [-1700, 958], [-1700, 1100], [-1860, 1100]], 32), uhall);
+  K.region('utun_hall_n', zc([[-1860, 1250], [-1700, 1250], [-1700, 1425], [-1860, 1425]], 32), uhall);
+  K.region('utun_hall_e', zc([
+    [-1700, 958], [-1588, 958], [-1537, 958], [-1537, 1020], [-1293, 1020], [-1293, 1180], [-1293, 1298], [-1653, 1298], [-1653, 1425], [-1700, 1425],
+  ], 32), uhall);
+  K.region('utun_sky', zc([[-1860, 1100], [-1700, 1100], [-1700, 1250], [-1860, 1250]], 32), { ...tun, top: 360, decor: false });
+  // skylight timber grid (some joists missing) over the open bay
+  for (const [i, x] of [-1840, -1800, -1760, -1720].entries()) if (i !== 2) K.box([x - 4, 1094, 296], [x + 4, 1256, 306], 'wood_planks', { col: false, color: 0.7 });
+  for (const y of [1140, 1210]) K.box([-1866, y - 3, 300], [-1694, y + 3, 306], 'wood_planks', { col: false, color: 0.7 });
+  // shallow arched recesses in the side walls
+  for (const [x0, x1, y] of [[-2185, -2075, 1425], [-2010, -1930, 1022]]) {
+    const ys = y > 1200 ? y - 0.5 : y + 0.5, sg = y > 1200 ? -1 : 1;
+    const P = [[x0, ys, 32], [x1, ys, 32], [x1, ys, 150], [(x0 + x1) / 2, ys, 150 + (x1 - x0) * 0.35], [x0, ys, 150]];
+    K.poly('plaster_wall#dark', sg > 0 ? P.slice().reverse() : P, { col: 0.55, normal: [0, sg, 0] });
+  }
   // support posts in the hall
-  K.box([-1798, 1042, 32], [-1782, 1058, 182], 'wood_planks', { color: 0.8 });
-  K.box([-1798, 1292, 32], [-1782, 1308, 182], 'wood_planks', { color: 0.8 });
+  K.box([-1798, 1042, 32], [-1782, 1058, 300], 'wood_planks', { color: 0.8 });
+  K.box([-1798, 1292, 32], [-1782, 1308, 300], 'wood_planks', { color: 0.8 });
 
   // ---- B site -------------------------------------------------------------------------------
   K.stairs('b_tunst', [[-2057, 1789], [-1906, 1789], [-1906, 1840], [-2057, 1840]], 32, 4, 4,

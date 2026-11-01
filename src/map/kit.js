@@ -93,6 +93,7 @@ function newell(P) {
   const l = Math.hypot(nx, ny, nz) || 1;
   return [nx / l, ny / l, nz / l];
 }
+const faceUp = (P) => (area2(P.map((p) => ({ x: p[0], y: p[1] }))) < 0 ? P.slice().reverse() : P);
 const area2 = (P) => { let a = 0; for (let i = 0; i < P.length; i++) { const p = P[i], q = P[(i + 1) % P.length]; a += p.x * q.y - q.x * p.y; } return a / 2; };
 
 export class Kit {
@@ -130,6 +131,11 @@ export class Kit {
     const [key, variant] = String(spec).split('#');
     const T = this.T;
     const tint = variant && PAINT[variant] != null ? PAINT[variant] : 0xfffffe;
+    if (key === 'lamp_glow') {
+      const g = new THREE.MeshStandardMaterial({ color: 0xfff2d8, emissive: 0xffdca0, emissiveIntensity: 6, roughness: 0.6 });
+      g.vertexColors = true;
+      return g;
+    }
     let m = null;
     try { m = T?.material?.(key, { tint }) || null; } catch { m = null; }
     if (!m) {
@@ -765,9 +771,42 @@ export class Kit {
     // front
     this.quad(mat, [b2[0], b2[1], zB0], [a2[0], a2[1], zA0], [a2[0], a2[1], zA1], [b2[0], b2[1], zB1],
       [s1, zB0 / S], [s0, zA0 / S], [s0, zA1 / S], [s1, zB1 / S], c0, c0, c1, c1, n);
-    // top ledge
-    this.quad(mat, [A.x, A.y, zA1], [B.x, B.y, zB1], [b2[0], b2[1], zB1], [a2[0], a2[1], zA1],
-      [s0, 0], [s1, 0], [s1, t.out / S], [s0, t.out / S], c1, c1, c1, c1, [0, 0, 1]);
+    // top ledge (a sidewalk gets its own paving and collision)
+    if (t.topMat) {
+      const Tm = t.topMat, St = this.texWorld(Tm);
+      const wuv = (p) => [p[0] / St, p[1] / St];
+      this.poly(Tm, faceUp([[A.x, A.y, zA1], [B.x, B.y, zB1], [b2[0], b2[1], zB1], [a2[0], a2[1], zA1]]), { uv: wuv, col: 0.95, normal: [0, 0, 1] });
+    } else {
+      this.quad(mat, [A.x, A.y, zA1], [B.x, B.y, zB1], [b2[0], b2[1], zB1], [a2[0], a2[1], zA1],
+        [s0, 0], [s1, 0], [s1, t.out / S], [s0, t.out / S], c1, c1, c1, c1, [0, 0, 1]);
+    }
+    if (t.walk) {
+      // collision in short pieces so a sloping street keeps a level-enough kerb
+      const L = Math.hypot(B.x - A.x, B.y - A.y), n = Math.max(1, Math.ceil(L / 16) * (Math.abs(zB1 - zA1) > 1 ? 1 : 0) || 1);
+      for (let i = 0; i < n; i++) {
+        const f0 = i / n, f1 = (i + 1) / n;
+        const p = (P, Q, f) => [P[0] + (Q[0] - P[0]) * f, P[1] + (Q[1] - P[1]) * f];
+        const q0 = p([A.x, A.y], [B.x, B.y], f0), q1 = p([A.x, A.y], [B.x, B.y], f1), q2 = p(a2, b2, f1), q3 = p(a2, b2, f0);
+        const zt = Math.max(zA1 + (zB1 - zA1) * f0, zA1 + (zB1 - zA1) * f1);
+        let poly = [q0, q1, q2, q3];
+        if (area2(poly.map(([x, y]) => ({ x, y }))) < 0) poly = poly.reverse();
+        this.colPrism(poly, Math.min(zA0, zB0) - 32, zt, surfOf(t.topMat || mat));
+      }
+      if (t.line) {
+        // painted lane edge line on the road beside the kerb
+        const o0 = t.out + t.line, o1 = o0 + 4;
+        const P0 = [A.x - e.nx * o0, A.y - e.ny * o0], P1 = [B.x - e.nx * o0, B.y - e.ny * o0];
+        const P2 = [B.x - e.nx * o1, B.y - e.ny * o1], P3 = [A.x - e.nx * o1, A.y - e.ny * o1];
+        const ins = u0 > 1e-6 || capA ? 40 : 0, ine = u1 < 1 - 1e-6 || capB ? 40 : 0;
+        const Lq = Math.hypot(P1[0] - P0[0], P1[1] - P0[1]);
+        if (Lq > ins + ine + 30) {
+          const f = (P, Q, d) => [P[0] + (Q[0] - P[0]) * d / Lq, P[1] + (Q[1] - P[1]) * d / Lq];
+          const za = zA0 + (zB0 - zA0) * ins / Lq, zb = zA0 + (zB0 - zA0) * (Lq - ine) / Lq;
+          const a0 = f(P0, P1, ins), a1 = f(P0, P1, Lq - ine), a3 = f(P3, P2, ins), a2b = f(P3, P2, Lq - ine);
+          this.poly('plaster_white#decal', faceUp([[a0[0], a0[1], za + 0.1], [a1[0], a1[1], zb + 0.1], [a2b[0], a2b[1], zb + 0.1], [a3[0], a3[1], za + 0.1]]), { col: 0.92, normal: [0, 0, 1] });
+        }
+      }
+    }
     if (kind === 'cornice') {
       this.quad(mat, [B.x, B.y, zB0], [A.x, A.y, zA0], [a2[0], a2[1], zA0], [b2[0], b2[1], zB0],
         [s1, 0], [s0, 0], [s0, t.out / S], [s1, t.out / S], 0.7, 0.7, 0.7, 0.7, [0, 0, -1]);

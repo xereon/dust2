@@ -45,6 +45,26 @@ export function build(K) {
     [-1234, 1320], [-1135, 1320], [-1014, 1320], [-1014, 1309], [-548, 1309], [-548, 1363], [-548, 1498],
     [-548, 1552], [-1190, 1552], [-1204, 1544], [-1234, 1544],
   ], -112), { ...tun, ceil: 16, beams: { dir: 'y', step: 110 } });
+  // pendant lamps (glowing bulb under a tin shade) and arched bays in the side walls
+  for (const x of [-1010, -650]) {
+    const y = 1432;
+    K.box([x - 0.6, y - 0.6, -22], [x + 0.6, y + 0.6, 16], 'metal_beam', { col: false, color: 0.3 });
+    const ring = (r, z) => { const P = []; for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2; P.push([x + r * Math.cos(a), y + r * Math.sin(a)]); } return P; };
+    K.prismSolid(ring(4, 0), -24, -22, 'metal_beam', { col: false, color: 0.35 });
+    const lo = ring(13), hi = ring(4);
+    for (let k = 0; k < 10; k++) {
+      const a = lo[k], b = lo[(k + 1) % 10], c = hi[(k + 1) % 10], d = hi[k];
+      const Pq = [[a[0], a[1], -34], [b[0], b[1], -34], [c[0], c[1], -24], [d[0], d[1], -24]];
+      K.poly('metal_beam', Pq, { col: 0.4 });
+      K.poly('metal_beam', Pq.slice().reverse(), { col: 0.9 });
+    }
+    K.prismSolid(ring(5), -38, -30, 'lamp_glow', { col: false, bottomFace: true });
+  }
+  for (const [x0, x1, y, sg] of [[-960, -880, 1309, 1], [-760, -680, 1309, 1], [-1110, -1030, 1552, -1], [-900, -820, 1552, -1]]) {
+    const ys = y + sg * 0.5;
+    const P = [[x0, ys, -112], [x1, ys, -112], [x1, ys, -20], [(x0 + x1) / 2, ys, -20 + (x1 - x0) * 0.4], [x0, ys, -20]];
+    K.poly('plaster_wall#dark', sg > 0 ? P.slice().reverse() : P, { col: 0.5, normal: [0, sg, 0] });
+  }
   K.region('ltun_door', zc([[-548, 1363], [-518, 1363], [-518, 1498], [-548, 1498]], -116),
     { ...tun, arch: { spring: -36, crown: 14 }, ceilTop: 230, dark: 0 });
   K.region('tst_exit', zc([[-1135, 1230], [-1014, 1230], [-1014, 1320], [-1135, 1320]], -104),

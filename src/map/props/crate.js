@@ -11,8 +11,14 @@ const VARIANTS = [
   { panel: 'diag', planks: 'h', caps: true, bands: false, tint: [0.98, 0.9, 0.78], labels: [['arrows', 'ul'], ['stamp', 'lr']] },
   { panel: 'x', planks: 'v', caps: false, bands: true, tint: [0.84, 0.84, 0.83], labels: [['num07', 'top']] },
   { panel: 'plain', planks: 'v', caps: true, bands: true, tint: [1.0, 0.85, 0.66], labels: [['care', 'c']] },
+  // 4 — CS2 A-site / goose look: sun-bleached grey-white boards, 2×2 panels, steel bands + caps
+  { panel: 'cross', planks: 'h', caps: true, bands: true, tint: [1.16, 1.15, 1.12], frameTint: [1.04, 1.03, 1.0], bandTint: [0.72, 0.74, 0.76], labels: [['num14', 'ul'], ['star', 'lr']] },
+  // 5 — CS2 grey crate with a diagonal brace and bands (stacked small grey crates by the ramp)
+  { panel: 'diag', planks: 'h', caps: true, bands: true, tint: [1.0, 1.0, 0.98], frameTint: [0.92, 0.92, 0.9], bandTint: [0.68, 0.7, 0.72], labels: [['num14', 'ul']] },
 ];
 export const CRATE_VARIANTS = VARIANTS.length;
+/** Named variants accepted wherever a crate variant is: crate(64, 'cs2'). */
+export const CRATE_NAMES = { classic: 0, diag: 1, xbrace: 2, plain: 3, cs2: 4, cs2grey: 5 };
 
 /**
  * Build crate geometry into builder pb. size: number | [sx, sy, sz]. Crate occupies
@@ -20,6 +26,7 @@ export const CRATE_VARIANTS = VARIANTS.length;
  */
 export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
   const [sx, sy, sz] = Array.isArray(size) ? size : [size, size, size];
+  if (typeof variant === 'string') variant = CRATE_NAMES[variant] ?? 0;
   const V = { ...VARIANTS[((variant % VARIANTS.length) + VARIANTS.length) % VARIANTS.length], ...opts };
   const r = pb.rand;
   const S = Math.min(sx, sy, sz);
@@ -28,7 +35,7 @@ export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
   const pt = clamp(S * 0.022, 0.7, 1.8);      // plank thickness
   const gap = V.gap ?? clamp(S * 0.007, 0.22, 0.7);
   const tint = V.tint;
-  const frameTint = [tint[0] * 0.93, tint[1] * 0.92, tint[2] * 0.9];
+  const frameTint = V.frameTint || [tint[0] * 0.93, tint[1] * 0.92, tint[2] * 0.9];
   const W = V.mat || 'wood:crate';
 
   const faces = [
@@ -135,7 +142,7 @@ export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
         const yc = -hh + F.h * fy;
         const ext = F.k === '+z' || F.k === '-z' ? bt : 0;
         const g = slab(rect(-hw - ext, yc - bh / 2, hw + ext, yc + bh / 2), bt, 0.05, false);
-        paint(g, [0.6, 0.58, 0.55]);
+        paint(g, V.bandTint || [0.6, 0.58, 0.55]);
         pb.add('galv', g, M);
         // band clips/nails
         for (const fx of [-hw + fw * 0.5, hw - fw * 0.5]) {

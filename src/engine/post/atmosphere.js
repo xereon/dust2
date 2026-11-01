@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { fsMaterial } from './common.js';
 import { DEPTH_GLSL } from './common.js';
 import { SKY_GLSL, skyUniforms } from '../sky.js';
+import { lightUniforms } from '../lighting.js';
 
 const FS = DEPTH_GLSL + SKY_GLSL + /* glsl */`
 uniform sampler2D tColor, tDepth, tAO, tAOZ;
@@ -17,7 +18,18 @@ uniform vec3 uCamPos;
 uniform vec4 uFog;       // x density, y height falloff (1/H), z base height, w max opacity
 uniform vec3 uFogTint;
 uniform float uDebug;
+uniform highp sampler3D rpGI3;
+uniform vec3 rpGIMin, rpGIInvSize;
+uniform float rpGIOn;
 varying vec2 vUv;
+
+// 0 in sealed interiors, 1 in the open (from the baked sky visibility)
+float outdoors(vec3 wp) {
+  if (rpGIOn < 0.5) return 1.0;
+  float v = texture(rpGI3, (wp - rpGIMin) * rpGIInvSize).r;
+  return smoothstep(0.02, 0.22, v);
+}
+bool bad(vec3 c) { return any(isnan(c)) || any(isinf(c)); }
 
 float aoUpsample(vec2 uv, float z) {
   if (uAOHalf < 0.5) return texture(tAO, uv).r;
@@ -45,6 +57,8 @@ vec3 multiBounce(float v, vec3 alb) {
 
 void main() {
   vec4 c = texture(tColor, vUv);
+  if (bad(c.rgb) || isnan(c.a)) c = vec4(0.0, 0.0, 0.0, 1.0);
+  c.rgb = min(c.rgb, vec3(6.0e4));
   float d = texture(tDepth, vUv).r;
   if (d >= 1.0) { gl_FragColor = vec4(c.rgb, 1.0); return; }
   float z = rpLinearDepth(d);
@@ -67,6 +81,8 @@ void main() {
   float dy = rd.y * dist;
   float fy = abs(dy * k) > 1e-4 ? (1.0 - exp(-dy * k)) / (dy * k) : 1.0;
   float tau = uFog.x * exp(-h0 * k) * dist * fy;
+  // no haze inside tunnels/under roofs: weight by how open both ends of the ray are
+  tau *= 0.5 * (outdoors(uCamPos) + outdoors(uCamPos + rd * dist));
   float fog = min(1.0 - exp(-tau), uFog.w);
   // inscatter: sky radiance just above the horizon in this azimuth (so distant walls melt into
   // the horizon haze) tinted by the map's haze colour
@@ -91,6 +107,8 @@ export class AtmospherePass {
         uFog: { value: new THREE.Vector4(1.2e-4, 1 / 700, 0, 0.82) },
         uFogTint: { value: new THREE.Color(1, 1, 1) },
         uDebug: { value: 0 },
+        rpGI3: lightUniforms.rpGI3, rpGIMin: lightUniforms.rpGIMin,
+        rpGIInvSize: lightUniforms.rpGIInvSize, rpGIOn: lightUniforms.rpGIOn,
       },
     });
   }

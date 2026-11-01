@@ -20,6 +20,16 @@ void main() {
   vec3 l = texture(tSrc, vUv + t * vec2(-1, -1)).rgb, m = texture(tSrc, vUv + t * vec2(1, -1)).rgb;
   vec3 o;
   if (uPrefilter > 0.5) {
+    // NaN/Inf guard: a single bad HDR texel would otherwise smear into a screen-size blob
+    if (any(isnan(a + b + c + d + e + f + g + h + i + j + k + l + m)) || any(isinf(a + b + c + d + e + f + g + h + i + j + k + l + m))) {
+      a = any(isnan(a)) || any(isinf(a)) ? vec3(0.0) : a; b = any(isnan(b)) || any(isinf(b)) ? vec3(0.0) : b;
+      c = any(isnan(c)) || any(isinf(c)) ? vec3(0.0) : c; d = any(isnan(d)) || any(isinf(d)) ? vec3(0.0) : d;
+      e = any(isnan(e)) || any(isinf(e)) ? vec3(0.0) : e; f = any(isnan(f)) || any(isinf(f)) ? vec3(0.0) : f;
+      g = any(isnan(g)) || any(isinf(g)) ? vec3(0.0) : g; h = any(isnan(h)) || any(isinf(h)) ? vec3(0.0) : h;
+      i = any(isnan(i)) || any(isinf(i)) ? vec3(0.0) : i; j = any(isnan(j)) || any(isinf(j)) ? vec3(0.0) : j;
+      k = any(isnan(k)) || any(isinf(k)) ? vec3(0.0) : k; l = any(isnan(l)) || any(isinf(l)) ? vec3(0.0) : l;
+      m = any(isnan(m)) || any(isinf(m)) ? vec3(0.0) : m;
+    }
     vec3 g0 = (a + b + d + e) * 0.25, g1 = (b + c + e + f) * 0.25, g2 = (d + e + g + h) * 0.25, g3 = (e + f + h + i) * 0.25, g4 = (j + k + l + m) * 0.25;
     // Karis average: luma-weighted so one hot texel can't flicker a whole bloom tile
     float w0 = kw(g0) * 0.125, w1 = kw(g1) * 0.125, w2 = kw(g2) * 0.125, w3 = kw(g3) * 0.125, w4 = kw(g4) * 0.5;

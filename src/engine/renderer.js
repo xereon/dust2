@@ -26,7 +26,7 @@ import { FinalPass } from './post/final.js';
 import { makeRT } from './post/common.js';
 
 const CV = {
-  exposure: [1.25, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
+  exposure: [0.95, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
   bloom_strength: [0.05, 0, 1, 'bloom mix'],
   bloom_threshold: [1.6, 0, 20, 'bloom luminance threshold (exposed HDR)'],
   ao_intensity: [1.5, 0, 4, 'GTAO power (0 = off)'],
@@ -36,7 +36,7 @@ const CV = {
   sky_intensity: [1.0, 0, 4, 'sky light intensity (x) — rebakes GI'],
   bounce_intensity: [1.2, 0, 3, 'bounce light (x) — rebakes GI'],
   saturation: [1.05, 0, 2, 'grade saturation'],
-  contrast: [1.0, 0.3, 2, 'grade S-curve (1 = neutral)'],
+  contrast: [1.12, 0.3, 2, 'grade S-curve (1 = neutral)'],
   highlights: [0.08, 0, 0.5, 'grade highlight stretch'],
   grain: [0.15, 0, 3, 'film grain amount'],
   vignette: [0.22, 0, 1, 'vignette strength'],

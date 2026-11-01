@@ -10,6 +10,8 @@ import { build as buildBSide } from './layout/bside.js';
 import { build as buildASide } from './layout/aside.js';
 import { build as buildProps } from './layout/props.js';
 import { decorate, decorateRoofs } from './layout/decor.js';
+import { build as buildPoles } from './layout/poles.js';
+import { build as buildSkyline } from './layout/skyline.js';
 
 const S = (x, y, z) => new THREE.Vector3(x, z, -y);
 /** Zone from a Source-space box. */
@@ -36,6 +38,7 @@ export const CALLOUTS = [
   ['a_site', 1001, 2330, 80, 1245, 2780, 300],
   ['goose', 1150, 2650, 80, 1245, 2780, 300],
   ['a_plat', 1001, 2790, 100, 1598, 3089, 320],
+  ['ct_under', 250, 2041, -140, 513, 2556, 36],
   ['short', 239, 1655, -20, 1001, 2794, 300],
   ['catwalk', -250, 737, -20, 513, 1760, 180],
   ['xbox', -340, 1380, -140, -275, 1480, 60],
@@ -71,6 +74,8 @@ export async function buildDust2(opts = {}) {
   buildBSide(K);
   buildASide(K);
   try { buildProps(K); } catch (err) { console.warn('[map] prop placement failed:', err); }
+  try { buildPoles(K); } catch (err) { console.warn('[map] utility poles failed:', err); }
+  try { buildSkyline(K); } catch (err) { console.warn('[map] skyline failed:', err); }
   if (opts.decor !== false) { K.decorators.push(decorate); K.roofDecorators.push(decorateRoofs); }
   const out = K.finish();
 

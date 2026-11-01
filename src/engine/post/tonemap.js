@@ -47,7 +47,10 @@ vec3 toSRGB(vec3 c) {
 }
 void main() {
   vec3 c = texture(tColor, vUv).rgb;
-  c += texture(tBloom, vUv).rgb * uBloom;
+  vec3 bl = texture(tBloom, vUv).rgb;
+  if (any(isnan(c)) || any(isinf(c))) c = vec3(0.0);
+  if (any(isnan(bl)) || any(isinf(bl))) bl = vec3(0.0);
+  c += bl * uBloom;
   c = max(c * uExposure * uWB, 0.0);
   c = uTonemap > 0.5 ? agx(c) : acesFitted(c);
   c = toSRGB(c);

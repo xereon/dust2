@@ -3,6 +3,8 @@
 import { rect, zx, zc } from './util.js';
 
 const KERB = { h: 8, out: 12, mat: 'curb_redwhite' };
+// raised sidewalk along the street walls: paved top, red/white kerb on its edge, lane line beside it
+const WALK = { h: 8, out: 70, mat: 'curb_redwhite', topMat: 'paving_setts', walk: true, line: 26 };
 
 export function build(K) {
   const ochre = { h: 56, mat: 'plaster_band_ochre' };
@@ -23,12 +25,12 @@ export function build(K) {
 
   // ---- the road: slopes east from the plateau down to outside long ---------------------------
   K.region('road_slope', zx([[-520, -1067], [-337, -1067], [-337, -1180], [30, -1180], [30, -620], [-520, -620]], -520, 124, 30, 0),
-    { base: KERB, mat: 'asphalt', top: 380, tops: { 1: 330, 2: 300, 3: 300 }, paint: teal, cornice: {} });
+    { base: WALK, mat: 'asphalt', top: 380, tops: { 1: 330, 2: 300, 3: 300 }, paint: teal, cornice: {} });
   K.region('road_flat', zc([[30, -1180], [194, -1180], [194, -1015], [463, -1015], [463, -620], [388, -620], [30, -620]], 0),
-    { base: KERB, mat: 'asphalt', top: 300, paint: teal, cornice: {} });
+    { base: WALK, mat: 'asphalt', top: 300, paint: teal, cornice: {} });
   // the road carries on east past a fenced gate (out of bounds, seen from T spawn)
   K.region('road_beyond', zc([[463, -960], [1060, -960], [1060, -700], [463, -700]], 0),
-    { base: KERB, mat: 'asphalt', top: 280, paint: teal, cornice: {}, nav: false });
+    { base: WALK, mat: 'asphalt', top: 280, paint: teal, cornice: {}, nav: false });
   K.clip([458, -962, -20], [476, -698, 420]);
   for (const y of [-960, -830, -700]) K.box([460, y - 3, 0], [466, y + 3, 124], 'metal_beam', { col: false, color: 0.7 });
   K.slab([463, -957], [463, -833], 0, 120, 2, 'metal_grate', { col: false });

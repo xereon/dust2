@@ -14,7 +14,7 @@ export const plaster_white = {
   glsl: /* glsl */`
 void surface(vec2 uv, inout Surf o) {
   limePlaster(uv, LOWA(uv), LOWB(uv), ${C('#e0dacd')}, ${C('#d4c9b4')}, 0.5, 0.9, 0.0, o);
-  float cr = crackNet(uv, 5.0, 0.3, 1.1, 40.0) * step(0.99, o.h);
+  float cr = crackNet(uv, 5.0, 0.3, 1.1, 40.0) * step(0.52, o.h);
   o.h -= cr * 0.12; o.col *= 1.0 - cr * 0.25; o.ao = 1.0 - cr * 0.3;
 }
 `,
@@ -38,7 +38,7 @@ void surface(vec2 uv, inout Surf o) {
   o.col = mix(o.col, o.col * g, cover);
   o.col = mix(o.col, vec3(luma(o.col)), 0.15 * cover);
   o.rough = mix(o.rough, o.rough + 0.04 * grime, cover);
-  float cr = crackNet(uv, 5.0, 0.4, 1.2, 40.0) * step(0.99, o.h);
+  float cr = crackNet(uv, 5.0, 0.4, 1.2, 40.0) * step(0.52, o.h);
   o.h -= cr * 0.15; o.col *= 1.0 - cr * 0.35; o.ao = 1.0 - cr * 0.35;
 }
 `,
