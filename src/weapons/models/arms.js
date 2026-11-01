@@ -34,7 +34,7 @@ const THUMB_REST = thumbRest();
 
 const STYLE = {
   CT: { glove: 'glove_ct', palm: 'leather_ct', armor: 'armor_ct', sleeve: 'sleeve_ct', bareTips: 0, skin: 'skin', cuff: 'glove_ct' },
-  T: { glove: 'glove_t2', palm: 'glove_t', armor: null, sleeve: 'sleeve_t', bareTips: 2, skin: 'skin', cuff: 'glove_t' },
+  T: { glove: 'glove_t2', palm: 'glove_t', armor: null, knuckleStrip: 'glove_t', sleeve: 'sleeve_t', bareTips: 2, skin: 'skin', cuff: 'glove_t' },
 };
 
 // Tapered capsule along -Z from 0 (radius r0) to L (radius r1), flattened dorsally.
@@ -149,8 +149,15 @@ function template(team) {
   sb.add(st.palm, G.sphere(0.62, 14, 10), root, world[root], { m: M([0.95, -0.28, -1.5], [0, 0, 0], [0.75, 0.85, 1.9]) });
   // knuckles
   FINGERS.forEach((f) => {
-    sb.add(st.glove, G.sphere(f.R[0] * 1.05, 12, 8), root, world[root], { m: M([f.k[0], f.k[1] + 0.1, f.k[2] + 0.12], [0, 0, 0], [1.05, 0.9, 1.1]) });
+    // subtle knuckle bumps (mostly buried in the back of the hand)
+    sb.add(st.glove, G.sphere(f.R[0] * 0.78, 12, 8), root, world[root], { m: M([f.k[0], f.k[1] + 0.02, f.k[2] + 0.1], [0, 0, 0], [1.0, 0.7, 1.0]) });
   });
+  if (st.knuckleStrip) {
+    // T: stitched leather reinforcement strip across the knuckles + thumb-side palm patch
+    const strip = G.deform(G.box(2.75, 0.09, 0.62, { r: 0.04 }), (v) => { v.y -= 0.14 * v.x * v.x; v.z += 0.11 * v.x; }, 60);
+    sb.add(st.knuckleStrip, strip, root, world[root], { m: M([-0.02, 0.5, -3.2], [4, 0, -1]) });
+    sb.add(st.knuckleStrip, G.deform(G.box(1.4, 0.08, 1.6, { r: 0.05 }), (v) => { v.y += 0.12 * v.x * v.x; }, 60), root, world[root], { m: M([-0.55, -0.66, -1.6]) });
+  }
   if (st.armor) {
     // hard knuckle guard across the MCP line + wrist-side vent plate
     const guard = G.deform(G.box(2.9, 0.15, 0.78, { r: 0.07 }), (v) => { v.y -= 0.15 * v.x * v.x; v.z += 0.12 * v.x; }, 60);

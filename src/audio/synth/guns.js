@@ -6,14 +6,18 @@
 //   mech   (bolt carrier / slide clank)
 //   early  (discrete slapbacks off nearby walls) + tail (rolling diffuse decay)
 // Modes: 'close' (mono, 3D), 'stereo' (local player 2D), 'far' (mono, >~1000u).
-import { S, white, pink, svf, mix, copy, softclip, dcblock, fadeOut, envAD, wander, TAU, sweepSine, scale, peak, compress } from './dsp.js';
+import { S, white, pink, svf, biquad, modal, mix, copy, softclip, dcblock, fadeOut, envAD, wander, TAU, sweepSine, scale, peak, compress } from './dsp.js';
 
 const unit = (x) => { const p = peak(x); return p > 1e-9 ? scale(x, 1 / p) : x; };
-import { clack, burst } from './mech.js';
+import { clack, burst, rattle } from './mech.js';
 
 const BASE = {
   pitch: 1,
   crack: 0.8, crackHP: 2200, crackDec: 0.0011,
+  nwave: 0.55,             // supersonic bullet N-wave, offset from the muzzle blast
+  ground: 1,               // ground-reflection comb (shooter height -> 1-3 ms echo)
+  ring: 0.18, ringF: 1900, // receiver / barrel ring (short inharmonic partials)
+  rattle: 0, spring: 0, springF: 2900,
   sizzle: 0.65, sizzleHP: 2200, sizzleDec: 0.014,
   comp: 1, tailHP: 150, cluster: 0.5, clusterLen: 0.045,
   blast: 0.9, blastT: 0.0022, blastLP: 4000,
@@ -49,7 +53,7 @@ const FAM = {
     drive: 2.8, tail: 1.6, tailAmt: 0.38, tailT60: 1.3, farLP: 1400 },
   lmg: { body: 0.8, bodyDec: 0.034, barkF: 480, bark: 0.5, thump: 0.95, thumpF: [165, 52], thumpDec: 0.04, mech: 0.32, mechF: 2800,
     mechRing: 0.03, mech2: 0.2, mech2Delay: 0.04, drive: 2.6, tail: 1.3, tailAmt: 0.32, tailT60: 1.05 },
-  supp: { supp: 1, crack: 0, sizzle: 0.25, sizzleHP: 3500, sizzleDec: 0.006, tailHP: 220, comp: 0.5, cluster: 0.25, clusterLen: 0.02, blast: 0.12, body: 0, bark: 0.15, barkF: 1500, barkQ: 1.2, bark2: 0, thump: 0.35, thumpF: [160, 70], thumpDec: 0.02,
+  supp: { supp: 1, crack: 0, nwave: 0, ground: 0.6, ring: 0.1, sizzle: 0.25, sizzleHP: 3500, sizzleDec: 0.006, tailHP: 220, comp: 0.5, cluster: 0.25, clusterLen: 0.02, blast: 0.12, body: 0, bark: 0.15, barkF: 1500, barkQ: 1.2, bark2: 0, thump: 0.35, thumpF: [160, 70], thumpDec: 0.02,
     thwip: 1, thwipF: [2600, 900], thwipTau: 0.006, thwipDec: 0.012, pew: 0.3, pewF: [1900, 700],
     mech: 0.8, mechF: 3600, mechDelay: 0.004, mechRing: 0.02, mech2: 0.55, mech2Delay: 0.04, mech2F: 2600, mechBody: 0.6,
     drive: 1.4, tail: 0.4, tailAmt: 0.12, tailLP: [1800, 500], tailT60: 0.3, echoes: [[0.012, 0.1], [0.03, 0.06]],
@@ -87,13 +91,14 @@ export const GUN_DEFS = {
   ak47: ['rifle', { crack: 1.0, crackHP: 1900, crackDec: 0.0012, sizzle: 1.0, sizzleDec: 0.017, blast: 1.0, blastT: 0.0026, blastLP: 3500,
     body: 0.8, bodyDec: 0.04, bodyLP: [7500, 2100], bark: 0.5, barkF: 430, barkQ: 2.4, barkDec: 0.045,
     bark2: 0.5, bark2F: 1150, bark2Q: 2.6, thump: 0.95, thumpF: [165, 52], thumpTau: 0.022, thumpDec: 0.042,
-    mech: 0.18, mechF: 2600, mechRing: 0.025, mechBody: 0.6, drive: 2.6, tail: 1.3, tailAmt: 0.32, tailT60: 1.0, farLP: 1600 }],
+    mech: 0.18, mechF: 2600, mechRing: 0.025, mechBody: 0.6, drive: 2.6, tail: 1.3, tailAmt: 0.32, tailT60: 1.0, farLP: 1600,
+    rattle: 0.4, ring: 0.22, ringF: 1350 }],
   m4a4: ['rifle', { crack: 1.15, crackHP: 2800, crackDec: 0.0009, sizzle: 1.0, sizzleHP: 2800, sizzleDec: 0.015, blast: 0.75, blastT: 0.0019, blastLP: 4800,
     body: 0.75, bodyDec: 0.021, bodyLP: [9500, 2800], bodyTau: 0.014, bark: 0.35, barkF: 820, barkQ: 1.8, barkDec: 0.03,
-    bark2: 0.42, bark2F: 2400, thump: 0.6, thumpF: [205, 68], thumpDec: 0.03, mech: 0.2, mechF: 3600, mechRing: 0.018,
+    bark2: 0.42, bark2F: 2400, thump: 0.6, thumpF: [205, 68], thumpDec: 0.03, mech: 0.2, mechF: 3600, mechRing: 0.018, spring: 0.22, ring: 0.2, ringF: 2500,
     drive: 2.3, tail: 1.1, farLP: 1900 }],
   m4a1s: ['rifle+supp', { thwipF: [2800, 1000], thwipTau: 0.007, thwipDec: 0.014, pew: 0.35, pewF: [2100, 800], thump: 0.4,
-    thumpF: [150, 65], thumpDec: 0.022, mech: 0.85, mechF: 3000, mechDelay: 0.005, mech2: 0.6, mech2Delay: 0.042, mech2F: 2400 }],
+    thumpF: [150, 65], thumpDec: 0.022, mech: 0.85, mechF: 3000, mechDelay: 0.005, mech2: 0.6, mech2Delay: 0.042, mech2F: 2400, spring: 0.3 }],
   m4a1s_unsil: ['rifle', { crack: 1.0, crackHP: 2600, barkF: 720, bark2F: 2200, bark: 0.35, thumpF: [200, 66] }],
   ssg08: ['sniper', { crack: 1.2, crackHP: 2200, blast: 1.0, thump: 0.85, thumpF: [175, 52], thumpDec: 0.055, tail: 1.9, tailAmt: 0.38 }],
   aug: ['rifle', { bark: 0.4, barkF: 700, barkQ: 2, bodyLP: [7000, 1700], crack: 0.9, crackHP: 2400, thumpF: [195, 64] }],
@@ -202,6 +207,31 @@ export function gunshot(s, P0, mode = 'close') {
     mix(dry, unit(t), P.thump * 0.45 * (stereo ? 1.1 : 1) * (far ? 1.2 : 1) * j(1, 0.08));
   }
 
+  // --- supersonic N-wave: a separate sharp doublet a fraction of a ms off the muzzle blast
+  if (P.nwave > 0 && !far) {
+    const at = Math.round(s.rand(0.0003, 0.0016) * sr), w = Math.max(3, Math.round(s.rand(0.00022, 0.0004) * sr));
+    const nw = new Float32Array(w + 8);
+    for (let i = 0; i <= w; i++) nw[i] = 1 - 2 * i / w; // linear ramp + -> -
+    svf(nw, sr, 'hp', 1500, 0.7);
+    mix(dry, unit(nw), P.nwave * s.rand(0.7, 1.1), at);
+  }
+  // --- receiver / barrel ring: short inharmonic partials excited by the blast
+  if (P.ring > 0) {
+    const f = P.ringF * pit * j(1, 0.06);
+    const md = [[f, 1, 0.022], [f * 1.37, 0.7, 0.017], [f * 2.11, 0.5, 0.012], [f * 2.73, 0.35, 0.009], [f * 3.6, 0.2, 0.006]]
+      .map(([ff, a, t]) => [ff * j(1, 0.02), a * s.rand(0.6, 1.1), t * s.rand(0.7, 1.4), s.rand(0, TAU)]);
+    const rg = new Float32Array(s.n(0.12));
+    modal(rg, sr, 0, md, 1, 0.0004);
+    mix(dry, unit(rg), P.ring * j(1, 0.2));
+  }
+  // --- ground reflection: a 1-3 ms delayed, slightly dull copy -> the comb notches every
+  //     outdoor recording has (varies with the shooter's stance, so per variation)
+  if (P.ground > 0) {
+    const gd = Math.round(s.rand(0.0011, 0.0032) * sr * (far ? 2 : 1));
+    const gc = svf(copy(dry), sr, 'lp', s.rand(5000, 9000), 0.7);
+    mix(dry, gc, P.ground * s.rand(0.35, 0.6) * (s.r() < 0.5 ? 1 : -0.8), gd);
+  }
+
   // compress + saturate the dry blast: dense, loud, "recorded through a preamp" character
   unit(dry);
   if (P.comp > 0) { compress(dry, sr, -6, 20, 0.00002, 0.004, 0.0006); unit(dry); compress(dry, sr, -18 * P.comp, 3, 0.0008, 0.06, 0.0008); unit(dry); }
@@ -224,6 +254,20 @@ export function gunshot(s, P0, mode = 'close') {
       const g = stereo ? (ch ? 1 : 0.7) : 1;
       if (P.mech > 0) clack(o, s, mt, { amp: P.mech * g * 0.5, f: P.mechF * j(1, 0.05), ring: P.mechRing, body: P.mechBody });
       if (P.mech2 > 0) clack(o, s, P.mech2Delay * j(1, 0.15), { amp: P.mech2 * g * 0.45, f: P.mech2F * j(1, 0.05), ring: P.mechRing * 0.8, body: P.mechBody * 0.8 });
+      // AK: loose furniture / magazine rattle after the carrier slams
+      if (P.rattle > 0) rattle(o, s, mt + s.rand(0.004, 0.012), s.rand(0.04, 0.07), { amp: P.rattle * g * 0.35, count: 4 + Math.floor(s.r() * 4), f: 2300, ring: 0.008 });
+      // AR-15 family: the buffer spring "sproing" as the carrier returns
+      if (P.spring > 0) {
+        const sn = s.n(0.14), sp = new Float32Array(sn);
+        const f0 = P.springF * j(1, 0.05);
+        let ph = 0;
+        for (let i = 0; i < sn; i++) {
+          const t = i / sr;
+          ph += TAU * f0 * (1 + 0.06 * Math.exp(-t / 0.01)) / sr;
+          sp[i] = (Math.sin(ph) + 0.4 * Math.sin(2.02 * ph)) * Math.exp(-t / 0.035) * (0.75 + 0.25 * Math.sin(TAU * 31 * t)) * Math.min(1, t / 0.0008);
+        }
+        mix(o, sp, P.spring * g * 0.3, s.n(P.mech2Delay * j(1, 0.1) + 0.004));
+      }
     });
   }
 
@@ -279,7 +323,13 @@ export function gunshot(s, P0, mode = 'close') {
     mix(o, unit(tl), tAmt);
   });
 
-  for (const o of outs) { dcblock(o, sr, 25); fadeOut(o, sr, Math.min(0.25, len * 0.3)); }
+  // per-take EQ variance (mic distance / angle never repeats exactly)
+  const tilt = s.rand(-1.8, 1.8), pf = s.rand(600, 1800), pg = s.rand(-2.5, 2.5);
+  for (const o of outs) {
+    biquad(o, sr, 'highshelf', 3500, 0.7, tilt);
+    biquad(o, sr, 'peak', pf, 1.2, pg);
+    dcblock(o, sr, 25); fadeOut(o, sr, Math.min(0.25, len * 0.3));
+  }
   return outs;
 }
 

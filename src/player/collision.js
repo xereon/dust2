@@ -296,7 +296,7 @@ export class CollisionWorld {
       const d2 = p.n.x * end.x + p.n.y * end.y + p.n.z * end.z - dist;
       if (d2 > 0) getout = true;
       if (d1 > 0) startout = true;
-      if (d1 > 0 && (d2 >= DIST_EPSILON || d2 >= d1)) return;
+      if (d1 > 0 && d2 > 0) return; // Source cmodel: completely in front of this face
       if (d1 <= 0 && d2 <= 0) continue;
       if (d1 > d2) {
         const f = Math.max(0, (d1 - DIST_EPSILON) / (d1 - d2));

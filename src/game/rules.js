@@ -261,7 +261,7 @@ export class MatchController {
     this.timer = 0;
     this.roundTime = World.cvar.mp_roundtime;
     this.buyTimeLeft = World.cvar.mp_buytime;
-    World.emit('round_live', { round: this.history.length + 1 });
+    World.emit('freeze_end', { round: this.history.length + 1 }); // canonical (audio radio, bots)
   }
 
   _respawn(e, sp) {
@@ -420,13 +420,18 @@ export class MatchController {
     this.bombModel.update(dt);
   }
 
-  /** LED blink on the CS beep cadence (the audio module plays the beeps from bomb_planted). */
+  /** CS beep cadence (~1 s shrinking to 0.15 s): LED blink + bomb_beep / sound events, the
+   *  final 1 s plays the arming whine once. Audio stops self-timing once bomb_beep arrives. */
   _beep() {
     const b = this.bomb;
-    if (World.time < b.beepAt || b.timer <= 0) return;
-    const frac = Math.max(0, b.timer / World.cvar.mp_c4timer);
+    if (World.time < b.beepAt || b.timer <= 0 || b.finalBeep) return;
+    const left = b.timer;
+    const frac = Math.max(0, left / World.cvar.mp_c4timer);
     b.beepAt = World.time + Math.max(0.15, 0.1 + 0.9 * frac);
+    if (left < 1) b.finalBeep = true;
     this.bombModel.blink();
+    World.emit('bomb_beep', { pos: b.pos.clone(), timeLeft: left });
+    World.emit('sound', { name: left < 1 ? 'bomb_final' : 'bomb_beep', pos: b.pos.clone() });
   }
 
   _lockFreeze() {
@@ -512,6 +517,7 @@ export class MatchController {
     this._settleBombToGround(b.pos);
     b.timer = World.cvar.mp_c4timer;
     b.beepAt = World.time;
+    b.finalBeep = false;
     b.plantProgress = 0;
     c.frozen = false;
     if (c.inventory?.c4) { try { World.weapons?.remove?.(c, 'c4'); } catch {} if (c.inventory.c4 === 'c4') c.inventory.c4 = null; }
@@ -546,6 +552,7 @@ export class MatchController {
     b.site = e?.site || this.siteAt(pos) || 'A';
     b.timer = World.cvar.mp_c4timer;
     b.beepAt = World.time;
+    b.finalBeep = false;
     if (who) {
       who.money = clampMoney((who.money || 0) + ECON.PLANT_PLAYER);
       const s = this.stat(who); s.plants++; s.score += 2;

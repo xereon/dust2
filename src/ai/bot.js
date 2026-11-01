@@ -261,6 +261,20 @@ export class BotManager {
     return out;
   }
 
+  /** Any living player (either team) within `r` in front of the bot — players are solid. */
+  playerAhead(bot, r = 72) {
+    const o = bot.ent.origin, md = bot.moveDir;
+    let best = null, bd = r * r;
+    for (const e of World.entities) {
+      if (e === bot.ent || !e.alive || e.solid === false || e.spectator || !e.origin) continue;
+      const dx = e.origin.x - o.x, dz = e.origin.z - o.z, d2 = dx * dx + dz * dz;
+      if (d2 > bd || Math.abs(e.origin.y - o.y) > 72) continue;
+      if (dx * md.x + dz * md.z < -8) continue;
+      bd = d2; best = e;
+    }
+    return best;
+  }
+
   /** A living teammate within `r` in front of the bot (movement direction)? */
   friendAhead(bot, r = 56) {
     const o = bot.ent.origin, md = bot.moveDir;

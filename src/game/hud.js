@@ -100,7 +100,7 @@ export class Hud {
     World.on('killfeed', (e) => this._onKill(e));
     World.on('damage', (e) => this._onDamage(e));
     World.on('round_start', (e) => this._onRoundStart(e));
-    World.on('round_live', () => this._onLive());
+    World.on('freeze_end', () => this._onLive());
     World.on('round_end', (e) => this._onRoundEnd(e));
     World.on('match_end', (e) => this._onMatchEnd(e));
     World.on('bomb_planted', (e) => this._alert(`Bomb planted${e?.site ? ' at ' + e.site : ''}`, 'bomb', 4));

@@ -455,3 +455,13 @@ Audio subscribes to World events (`fire`, `footstep`, `impact`, `damage`, `death
 `bomb_*`, `round_*`, `buy`) itself — other modules just emit events. Sound names follow
 `weapon_<key>_fire`, `footstep_<surface>`, `impact_<surface>`, `hit_head`, `bomb_beep`, etc.
 Everything is synthesised with WebAudio (no sample files).
+
+### 11a. Player fields added by the movement implementation
+* `renderOrigin` — tick-interpolated origin for rendering (use it for models, not `origin`).
+* `duckAmount` (0..1), `speed2D` (horizontal speed, u/s).
+* `takeDamage(info)` applies hitgroup multipliers and armour itself; callers pass raw damage.
+* `ent.frozen` — set by rules during freeze time (no movement, can still look/buy).
+* `ent.maxSpeedOverride` — set while planting/defusing (e.g. 0), cleared after.
+* `ent.fov` — set by weapons when scoped; `active.zoomLevel` + `def.maxSpeedAlt` give scoped speed.
+* `BotManager.frame(dt, alpha)` must call `ent.frame(dt, alpha)` for every bot.
+* Ladders are brushes with `CONTENTS_PLAYERCLIP | CONTENTS_LADDER`.

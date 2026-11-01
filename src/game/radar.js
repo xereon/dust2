@@ -69,8 +69,9 @@ export class Radar {
   }
 
   _heightColor(t, a = 1) {
-    // low areas cool/dark, high areas warm/light (reads like a CS overview)
-    const r = Math.round(104 + t * 104), g = Math.round(108 + t * 98), b = Math.round(114 + t * 82);
+    // CS2 overview palette: low ground deep teal, high ground muted olive
+    t = Math.max(0, Math.min(1, t));
+    const r = Math.round(60 + t * 66), g = Math.round(102 + t * 30), b = Math.round(114 - t * 22);
     return `rgba(${r},${g},${b},${a})`;
   }
 
@@ -95,14 +96,29 @@ export class Radar {
     const r = (cell * 0.5 + 12) * s;
     const re = r + 16 * s;
     const TAU = Math.PI * 2;
-    ctx.fillStyle = 'rgba(236,238,240,0.95)';
+    // wall line: a light-grey band (like the CS2 overview's wall strokes) around every floor
+    ctx.fillStyle = 'rgba(150,154,158,0.95)';
     for (const i of order) { ctx.beginPath(); ctx.arc((X[i] - x0) * s, (Z[i] - z0) * s, re, 0, TAU); ctx.fill(); }
-    ctx.fillStyle = 'rgba(20,22,26,0.9)';
-    for (const i of order) { ctx.beginPath(); ctx.arc((X[i] - x0) * s, (Z[i] - z0) * s, r + 7 * s, 0, TAU); ctx.fill(); }
     for (const i of order) {
       ctx.fillStyle = this._heightColor((Y[i] - y0) / dy);
       ctx.beginPath(); ctx.arc((X[i] - x0) * s, (Z[i] - z0) * s, r, 0, TAU); ctx.fill();
     }
+    this._zones(ctx);
+  }
+
+  /** Bombsites (orange) and buy zones (green) outlined like the CS2 overview. */
+  _zones(ctx) {
+    const map = World.map, B = this.bounds;
+    if (!map || !B) return;
+    const s = B.s;
+    const box = (z, color) => {
+      if (!z?.min) return;
+      const x = (z.min.x - B.x0) * s, y = (z.min.z - B.z0) * s, w = (z.max.x - z.min.x) * s, h = (z.max.z - z.min.z) * s;
+      ctx.fillStyle = color.replace('1)', '0.12)'); ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(2, 9 * s); ctx.strokeRect(x, y, w, h);
+    };
+    box(map.bombsites?.A, 'rgba(236,104,30,1)'); box(map.bombsites?.B, 'rgba(236,104,30,1)');
+    box(map.buyzones?.T, 'rgba(70,200,60,1)'); box(map.buyzones?.CT, 'rgba(70,200,60,1)');
   }
 
   _fromTriangles(t) {

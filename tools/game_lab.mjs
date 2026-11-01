@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Fast HUD iteration without WebGL: renders tools/game_lab.html (real HUD modules) over a
 // captured game frame.   node tools/game_lab.mjs --bg /tmp/hud/bg.png --map /tmp/hud/map.json
-//   --modes hud,buymenu --sizes 1600x900,1920x1080 --outdir /tmp/hud/lab
+//   --modes hud,buymenu --sizes 1600x900,1920x1080 --outdir /tmp/hud/lab [--clip x,y,w,h --dpr 2]
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -32,7 +32,7 @@ const errors = [];
 const browser = await chromium.launch({ headless: true });
 try {
   for (const [W, H] of SIZES) {
-    const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+    const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: +opt.dpr || 1 });
     page.on('console', (m) => { if (m.type() === 'error') errors.push('console.error: ' + m.text()); else if (opt.verbose) console.log(m.text()); });
     page.on('pageerror', (e) => errors.push('pageerror: ' + e.message + '\n' + e.stack));
     const q = new URLSearchParams({ hud: '1' });
@@ -44,7 +44,8 @@ try {
       await page.evaluate((mode) => window.__hud.demo(mode), m);
       await page.evaluate(() => window.__harness.frames(3));
       const out = path.join(outdir, `${m}_${W}x${H}.png`);
-      await page.screenshot({ path: out });
+      const clip = opt.clip ? (([x, y, width, height]) => ({ x, y, width, height }))(String(opt.clip).split(',').map(Number)) : undefined;
+      await page.screenshot({ path: out, clip });
       console.log('wrote', out);
     }
     await page.close();

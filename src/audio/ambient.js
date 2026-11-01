@@ -48,7 +48,11 @@ export class Ambient {
     const list = [];
     const src = World.map?.soundEmitters;
     if (Array.isArray(src)) {
-      for (const e of src) if (e?.pos && e.type) list.push({ type: e.type.startsWith('amb_') ? e.type : `amb_${e.type}`, pos: e.pos.clone ? e.pos.clone() : new THREE.Vector3(e.pos.x, e.pos.y, e.pos.z) });
+      for (const e of src) {
+        const t = e?.name || e?.type;
+        if (!e?.pos || !t) continue;
+        list.push({ type: t.startsWith('amb_') ? t : `amb_${t}`, pos: e.pos.clone ? e.pos.clone() : new THREE.Vector3(e.pos.x, e.pos.y, e.pos.z), radius: e.radius });
+      }
     } else if (World.collision?.rayTrace && World.map?.callouts) {
       for (const [type, zone] of ANCHORS) {
         const z = World.map.callouts[zone];
@@ -98,8 +102,8 @@ export class Ambient {
       if (!this.emitters) this._buildEmitters();
       for (const e of this.emitters) {
         const d = e.pos.distanceTo(listener);
-        const max = a.profileOf(e.type).max;
-        if (d < max && !e.handle?.active) e.handle = a.startLoop(e.type, e.pos, { fadeIn: 1.0, random: true });
+        const max = e.radius || a.profileOf(e.type).max;
+        if (d < max && !e.handle?.active) e.handle = a.startLoop(e.type, e.pos, { fadeIn: 1.0, random: true, range: e.radius ? e.radius / a.profileOf(e.type).max : 1 });
         else if (d > max * 1.15 && e.handle?.active) { e.handle.stop(0.6); e.handle = null; }
       }
     }

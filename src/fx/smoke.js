@@ -365,7 +365,7 @@ export class SmokeSystem {
     };
     this.material = new THREE.ShaderMaterial({
       name: 'fx-smoke', uniforms: this.uniforms, vertexShader: SMOKE_VERT, fragmentShader: SMOKE_FRAG,
-      transparent: true, depthWrite: false, fog: true, side: THREE.DoubleSide,
+      transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: true, side: THREE.DoubleSide,
       blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
       blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
     });

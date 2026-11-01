@@ -214,7 +214,7 @@ export class Audio {
       for (let i = D.length - 1; i >= 0; i--) {
         if (D[i].name !== name) continue;
         const d = D.splice(i, 1)[0];
-        if (performance.now() - d.t < 250) this._start(d.name, d.pos, d.opts);
+        if (performance.now() - d.t < d.max) this._start(d.name, d.pos, d.opts);
       }
     });
     this._wire();
@@ -351,7 +351,7 @@ export class Audio {
     const spatial = pos != null && p.spatial && !opts.force2D;
     if (!this.bank.need(name)) {
       if (!opts.loop && !opts.noDefer && this.bank.pending.has(name) && this.deferred.length < 24) {
-        this.deferred.push({ name, pos: pos != null ? toVec(pos, new THREE.Vector3()) : null, opts: { ...opts, noDefer: true }, t: performance.now() });
+        this.deferred.push({ name, pos: pos != null ? toVec(pos, new THREE.Vector3()) : null, opts: { ...opts, noDefer: true }, t: performance.now(), max: opts.deferMs ?? 250 });
       }
       return null;
     }
@@ -634,9 +634,18 @@ export class Audio {
       this.seen.shell = performance.now();
       const pt = p.pos || p.point || p.position;
       if (!pt) return;
+      // FX emits one event per bounce; our casing sound already contains the bounce train
+      if (p.bounce > 0) return;
       const key = weaponKey(p.weapon || p.key);
       const kind = p.kind || SHELL_KIND[FAM[key]] || 'rifle';
-      this.playAt(`shell_${kind}_${shellCls(p.surface)}`, pt, { volume: p.volume ?? 1 });
+      const surf = p.surface || this._surfaceBelow(pt);
+      const vol = p.volume ?? (p.speed != null ? Math.min(1, Math.max(0.3, p.speed / 160)) : 1);
+      if (this._isLocal(p.ent) || (World.local && toVec(pt, _v).distanceTo(this.listenerPos) < 90)) this.play(`shell_${kind}_${shellCls(surf)}`, { volume: vol * 0.6 });
+      else this.playAt(`shell_${kind}_${shellCls(surf)}`, pt, { volume: vol });
+    });
+    on('flashed', (p) => {
+      this.seen.flashedEvent = true;
+      if (p.ent && p.ent === World.local && p.amount > 0.1) this.flashed(p.amount, p.duration ?? (0.6 + 4.2 * p.amount));
     });
     on('reload', (p) => { if (p.ent) this._trk(p.ent).reloadEmpty = !!p.empty; this.reloadSounds(p.ent, p.weapon, p); });
     on('weapon_shell_in', (p) => { this.seen.shellIn = true; this._entSound('wpn_shell_shotgun', p.ent, { jitter: 0.04 }); });
@@ -726,7 +735,10 @@ export class Audio {
     });
 
     // bomb
-    on('bomb_plant_start bomb_planting', (p) => { const h = this._entSound('bomb_plant', p.ent, {}); if (h) this.loops.set('plant', h); });
+    on('bomb_plant_start bomb_planting', (p) => {
+      this.bank.bump(['bomb_final', 'stinger_bomb10', 'bomb_explode', 'bomb_explode_far']);
+      const h = this._entSound('bomb_plant', p.ent, {}); if (h) this.loops.set('plant', h);
+    });
     on('bomb_plant_abort', () => this._stopLoop({ id: 'plant' }, 0.05));
     on('bomb_planted', (p) => this._bombPlanted(p));
     on('bomb_defuse_start bomb_defusing', (p) => {
@@ -744,11 +756,14 @@ export class Audio {
     on('bomb_exploded', (p) => {
       const pos = this._bombPos(p) || this.bomb?.pos;
       this.bomb = null; this._stopWarning();
-      if (pos) this.explosion(pos, 'c4');
+      if (pos) { this.bank.bump(['bomb_explode', 'bomb_explode_far']); this.explosion(pos, 'c4'); }
     });
 
     // round flow
-    on('freeze_end round_freeze_end round_live', () => { this.seen.freeze = true; this.play('radio_go'); });
+    on('freeze_end round_freeze_end round_live', () => {
+      this.seen.freeze = true; this.play('radio_go');
+      this.bank.queue(['stinger_ct_win', 'stinger_t_win', 'stinger_mvp']); // on-demand music: render during the round
+    });
     on('round_start', () => {
       for (const h of this.loops.values()) h.stop(0.3);
       this.loops.clear(); this.bomb = null; this._stopWarning(); this.timers.length = 0;
@@ -758,13 +773,13 @@ export class Audio {
     on('round_end', (p) => {
       this._stopWarning();
       const w = String(p.winner || '').toUpperCase();
-      if (w === 'CT') this.play('stinger_ct_win', { jitter: 0 });
-      else if (w === 'T') this.play('stinger_t_win', { jitter: 0 });
+      if (w === 'CT') this.play('stinger_ct_win', { jitter: 0, deferMs: 4000 });
+      else if (w === 'T') this.play('stinger_t_win', { jitter: 0, deferMs: 4000 });
     });
     on('round_mvp mvp', (p) => {
       if (!this._isLocal(p.ent)) return;
       for (const v of this.voices) if (v.state === 1 && /stinger_(ct|t)_win/.test(v.name)) v.release(0.6);
-      this.play('stinger_mvp', { jitter: 0, delay: 0.3 });
+      this.play('stinger_mvp', { jitter: 0, delay: 0.3, deferMs: 4000 });
     });
   }
 
@@ -911,6 +926,12 @@ export class Audio {
     }
     if (this.track.size > World.entities.length + 16) this.track.clear();
   }
+  _surfaceBelow(pt) {
+    const col = World.collision;
+    if (!col?.rayTrace) return 'concrete';
+    try { toVec(pt, _v); _v.y += 4; _v2.copy(_v); _v2.y -= 24; const tr = col.rayTrace(_v, _v2, MASK_VISIBLE); return tr.fraction < 1 ? tr.surface || 'concrete' : 'concrete'; }
+    catch { return 'concrete'; }
+  }
   _groundSurface(e) {
     if (e.groundSurface) return e.groundSurface;
     const col = World.collision;
@@ -921,6 +942,7 @@ export class Audio {
 
   _updateFlash() {
     if (!this.pendingFlash.length) return;
+    if (this.seen.flashedEvent) { this.pendingFlash.length = 0; return; } // FX reports blindness itself
     for (let i = this.pendingFlash.length - 1; i >= 0; i--) {
       const f = this.pendingFlash[i];
       if (--f.frames > 0) continue;
@@ -995,7 +1017,7 @@ export class Audio {
         if (now >= t.t) { this.timers.splice(i, 1); try { t.fn(); } catch (err) { console.error('[audio] timer', err); } }
       }
     }
-    if (this.deferred.length && performance.now() - this.deferred[0].t > 400) this.deferred.length = 0;
+    if (this.deferred.length) { const now2 = performance.now(); for (let i = this.deferred.length - 1; i >= 0; i--) if (now2 - this.deferred[i].t > this.deferred[i].max + 100) this.deferred.splice(i, 1); }
     this._updateBomb();
     this._updateFlash();
     this._trackEntities(dt);

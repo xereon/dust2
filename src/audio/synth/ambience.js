@@ -8,7 +8,7 @@ const unit = (x) => { const p = peak(x); return p > 1e-9 ? scale(x, 1 / p) : x; 
 
 /** Stereo wind loop (~24 s) with gusts. */
 export function windBed(s) {
-  const sr = s.sr, L = 24, X = 3, n = s.n(L + X);
+  const sr = s.sr, L = 18, X = 2.5, n = s.n(L + X);
   // shared gust envelope with a little L/R skew so gusts move across the stereo field
   const gust = wander(n, sr, 0.18, s.r), gust2 = wander(n, sr, 0.5, s.r);
   const outs = [];

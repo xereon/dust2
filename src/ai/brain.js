@@ -508,8 +508,18 @@ export class Bot {
     if (this.stuckTime < 1) return;
     this.stuckTime = 0;
     // blocked by a teammate (players are solid): that's traffic, not bad nav — sidestep
-    if (this.mgr.friendAhead(this, 56)) {
-      this.unstickUntil = now + 0.4; this.unstickSide = this.id % 2 ? 1 : -1;
+    const blocker = this.mgr.playerAhead(this, 72);
+    if (blocker && blocker.team !== this.team) {
+      // bumped into an enemy we hadn't noticed (behind / beside us): you feel that in CS too
+      const m = this.memOf(blocker);
+      if (!m.visible) m.firstSeen = now;
+      m.visible = true; m.lastSeen = now; m.lastCheck = now; m.part = 1;
+      m.pos.copy(blocker.origin); if (blocker.velocity) m.vel.copy(blocker.velocity);
+      this.hurtBy(blocker, now);
+      return;
+    }
+    if (blocker) {
+      this.unstickUntil = now + 0.45; this.unstickSide = (this.trafficN = (this.trafficN || 0) + 1) % 2 ? 1 : -1;
       this.mgr.stats.blocked = (this.mgr.stats.blocked || 0) + 1;
       return;
     }

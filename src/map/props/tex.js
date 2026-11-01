@@ -254,7 +254,7 @@ function metalTex(kind, col, wear0 = 0.3, albedoOnly = false) {
       // vertical run streaks, sun fading and dust
       const wear = big;
       const fine = F.fine[i];
-      const th = 0.86 - wear0 * 0.3 - (wear - 0.5) * 0.5;
+      const th = 0.86 - wear0 * 0.3 - (wear - 0.5) * 0.5 * Math.min(1, wear0 * 3);
       const chip = sm(th, th + 0.02, fine + (pit - 0.5) * 0.08);
       const edge = sm(th - 0.035, th, fine) - chip; // primer ring round chips
       const fade = 0.9 + 0.12 * (big - 0.5) + (streak - 0.5) * 0.1;
@@ -492,7 +492,7 @@ export function material(key) {
     case 'canvas': m = std(tex(key, () => clothTex('canvas', PAINTS[arg] || PAINTS.teal)), { side: THREE.DoubleSide }); break;
     case 'awning': m = std(tex(key, () => clothTex('stripe', PAINTS[arg] || PAINTS.teal, PAINTS.cream)), { side: THREE.DoubleSide }); break;
     case 'burlap': m = std(tex('burlap', () => clothTex('burlap', [0.72, 0.64, 0.5]))); break;
-    case 'stone': m = std(tex(key, () => stoneTex(arg === 'white' ? [0.86, 0.83, 0.77] : arg === 'clay' ? [0.80, 0.58, 0.43] : [0.82, 0.68, 0.50], arg === 'clay' ? 0.25 : 1))); break;
+    case 'stone': m = std(tex(key, () => stoneTex(arg === 'white' ? [0.86, 0.83, 0.77] : arg === 'clay' ? [0.80, 0.58, 0.43] : [0.82, 0.68, 0.50], arg === 'clay' ? 0.25 : arg === 'white' ? 0.4 : 1))); break;
     case 'rubber': m = std(tex('rubber', rubberTex)); break;
     case 'rope': m = std(tex('rope', ropeTex)); break;
     case 'glass': m = std(tex('glass', glassTex), { roughness: 1 }); m.envMapIntensity = 1.5; break;

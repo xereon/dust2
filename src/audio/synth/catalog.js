@@ -38,8 +38,8 @@ for (const k of Object.keys(GUN_DEFS)) {
   const common = COMMON_GUNS.has(k) && !k.endsWith('_unsil');
   const unsil = k.endsWith('_unsil') || EXTRA_GUNS.has(k);
   const base = k;
-  def(`weapon_${base}_fire`, (s) => gunshot(s, P, 'close'), { vars: common ? 4 : 3, tier: unsil ? 3 : common ? 1 : 2 });
-  def(`weapon_${base}_fire_far`, (s) => gunshot(s, P, 'far'), { vars: 2, sr: 24000, tier: unsil ? 3 : common ? 1 : 2 });
+  def(`weapon_${base}_fire`, (s) => gunshot(s, P, 'close'), { vars: 3, tier: unsil ? 3 : common ? 1 : 2 });
+  def(`weapon_${base}_fire_far`, (s) => gunshot(s, P, 'far'), { vars: 2, sr: 16000, tier: unsil ? 3 : common ? 1 : 2 });
   def(`weapon_${base}_fire_2d`, (s) => gunshot(s, P, 'stereo'), { vars: 4, tier: 3 });
 }
 def('weapon_taser_fire', (s) => taserZap(s), { vars: 2, tier: 2 });
@@ -70,10 +70,10 @@ def('nade_pin', (s) => H.pinPull(s), { vars: 2, tier: 2 });
 def('nade_throw', (s) => H.throwWhoosh(s), { vars: 2, tier: 2 });
 for (const cls of ['hard', 'metal', 'wood', 'soft']) def(`nade_bounce_${cls}`, (s) => X.nadeBounce(s, cls), { vars: 3, tier: 2 });
 def('he_explode', (s) => X.explosion(s, 1, false), { vars: 3, tier: 2 });
-def('he_explode_far', (s) => X.explosion(s, 1, true), { vars: 2, sr: 24000, tier: 2 });
+def('he_explode_far', (s) => X.explosion(s, 1, true), { vars: 2, sr: 16000, tier: 2 });
 def('flash_pop', (s) => X.flashPop(s, false), { vars: 2, tier: 2 });
 def('flash_pop_far', (s) => X.flashPop(s, true), { vars: 2, sr: 24000, tier: 2 });
-def('tinnitus', (s) => X.tinnitus(s), { tier: 2 });
+def('tinnitus', (s) => X.tinnitus(s), { tier: 2, sr: 24000 });
 def('smoke_pop', (s) => X.smokePop(s), { tier: 2 });
 def('smoke_loop', (s) => X.smokeLoop(s), { tier: 2, loop: true, sr: 32000 });
 def('molotov_break', (s) => X.molotovBreak(s), { vars: 2, tier: 2 });
@@ -99,11 +99,11 @@ def('bomb_key', (s, v) => X.bombKey(s, v), { vars: 7, tier: 2 });
 def('bomb_plant', (s) => X.bombPlant(s), { vars: 2, tier: 2 });
 def('bomb_arm', (s) => X.bombArm(s), { tier: 2 });
 def('bomb_beep', (s) => X.bombBeep(s), { tier: 2 });
-def('bomb_final', (s) => X.bombFinal(s), { tier: 2 });
+def('bomb_final', (s) => X.bombFinal(s), { tier: 3 });
 def('bomb_defusing', (s) => X.bombDefusing(s), { vars: 2, tier: 2 });
 def('bomb_defused', (s) => X.bombDefused(s), { tier: 2 });
-def('bomb_explode', (s) => X.explosion(s, 1.7, false), { vars: 2, tier: 2 });
-def('bomb_explode_far', (s) => X.explosion(s, 1.7, true), { sr: 24000, tier: 2 });
+def('bomb_explode', (s) => X.explosion(s, 1.7, false), { vars: 2, tier: 3 });
+def('bomb_explode_far', (s) => X.explosion(s, 1.7, true), { sr: 16000, tier: 3 });
 
 // --- UI / music
 def('ui_click', (s) => M.uiClick(s, false), { vars: 2, tier: 1 });
@@ -112,13 +112,13 @@ def('ui_buy', (s) => M.uiBuy(s), { vars: 2, tier: 1 });
 def('ui_deny', (s) => M.uiDeny(s), { tier: 1 });
 def('radio_go', (s) => M.radioGo(s), { vars: 2, tier: 1 });
 def('radio_chirp', (s) => M.radioChirp(s), { vars: 3, tier: 2 });
-def('stinger_ct_win', (s) => M.stingerCT(s), { tier: 2 });
-def('stinger_t_win', (s) => M.stingerT(s), { tier: 2 });
-def('stinger_mvp', (s) => M.stingerMVP(s), { tier: 2 });
-def('stinger_bomb10', (s) => M.stingerBomb10(s), { tier: 2 });
+def('stinger_ct_win', (s) => M.stingerCT(s), { tier: 3 }); // on demand: requested when a round goes live
+def('stinger_t_win', (s) => M.stingerT(s), { tier: 3 });
+def('stinger_mvp', (s) => M.stingerMVP(s), { tier: 3 });
+def('stinger_bomb10', (s) => M.stingerBomb10(s), { tier: 3 });
 
 // --- ambience
-def('amb_wind', (s) => A.windBed(s), { tier: 1, loop: true, sr: 32000, norm: 0.89 });
+def('amb_wind', (s) => A.windBed(s), { tier: 1, loop: true, sr: 24000, norm: 0.89 });
 def('amb_bird', (s) => A.bird(s), { vars: 5, tier: 2, sr: 32000 });
 def('amb_rattle', (s) => A.farRattle(s), { vars: 4, tier: 2, sr: 32000 });
 def('amb_powerbox', (s) => A.powerHum(s), { tier: 2, loop: true, sr: 24000 });
@@ -139,7 +139,7 @@ export function renderSound(name, srOverride = 0) {
     const s = new S(sr, hashStr(name) + v * 7919);
     let chs = d.gen(s, v);
     if (!d.raw) {
-      if (!d.loop) chs = trim(chs, sr, -72);
+      if (!d.loop) chs = trim(chs, sr, -62); // below this a normalised one-shot is inaudible in the mix
       normalize(chs, d.norm);
     }
     vars.push(chs);

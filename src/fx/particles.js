@@ -71,7 +71,7 @@ export class ParticlePool {
       uniforms: this.uniforms,
       vertexShader: PARTICLE_VERT,
       fragmentShader: PARTICLE_FRAG,
-      transparent: true, depthWrite: false, depthTest: true, fog: true, side: THREE.DoubleSide,
+      transparent: true, depthWrite: false, side: THREE.DoubleSide, depthTest: true, fog: true, side: THREE.DoubleSide,
       blending: THREE.CustomBlending,
       blendEquation: THREE.AddEquation,
       blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,

@@ -91,7 +91,7 @@ export class Tracers {
     this.uniforms = { uTime: shared.uTime, uViewport: { value: new THREE.Vector2(1920, 1080) }, ...THREE.UniformsLib.fog };
     this.material = new THREE.ShaderMaterial({
       name: 'fx-tracers', uniforms: this.uniforms, vertexShader: VERT, fragmentShader: FRAG,
-      transparent: true, depthWrite: false, fog: true, side: THREE.DoubleSide,
+      transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: true, side: THREE.DoubleSide,
       blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor,
       blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
     });
