@@ -205,7 +205,7 @@ function template(team) {
 
   // --- wrist + forearm (bound to `arm`, pointing +Z) ---
   const toBack = M([0, 0, 0], [0, 180, 0]);
-  const fore = G.lathe([[0.001, -0.5], [0.85, -0.4], [1.0, 0.0], [1.08, 1.5], [1.2, 3.0]], 20, { crease: 80 });
+  const fore = G.lathe([[0.001, 0.4], [0.8, 0.5], [0.95, 0.9], [1.05, 1.8], [1.15, 3.0]], 20, { crease: 80 });
   fore.scale(1, 0.78, 1);
   const cuffLen = team === 'T' ? 1.9 : 2.4;
   sb.add(st.skin, fore, arm, world[arm], { m: toBack });   // wrist gap only; sleeve covers the rest
@@ -230,7 +230,7 @@ function template(team) {
     else for (const a of [0.6, 2.2]) sb.add('brass', G.cyl(0.09, 0.09, 0.08, 10, { axis: 'y' }), arm, world[arm], { m: M([Math.cos(a) * 1.53, Math.sin(a) * 1.3, 2.0]) });
   }
   // glove cuff around the wrist, with a strap on top
-  const cuff = G.lathe([[0.98, -0.3], [1.08, -0.15], [1.12, 0.3], [1.14, cuffLen - 0.2], [1.06, cuffLen]], 20, { crease: 70 });
+  const cuff = G.lathe([[0.82, -0.75], [0.98, -0.5], [1.1, -0.1], [1.13, 0.3], [1.14, cuffLen - 0.2], [1.06, cuffLen]], 20, { crease: 70 });
   cuff.scale(1, 0.78, 1);
   sb.add(st.cuff, cuff, arm, world[arm], { m: toBack });
   sb.add(st.palm, G.deform(G.box(1.3, 0.1, 0.8, { r: 0.06 }), (v) => { v.y -= 0.3 * v.x * v.x; }, 70), arm, world[arm], { m: M([0.1, 0.9, cuffLen * 0.45]) });
