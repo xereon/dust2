@@ -38,6 +38,7 @@ export const PAINT = {
   ochre: 0xd9b26e, teal: 0x86aca4, white: 0xfbf6ec, warm: 0xf6e3c4, cream: 0xf3e6cc,
   sand: 0xe9cf9f, pink: 0xf0d6c8, grey: 0xd8d4cc, dark: 0xb8ab94, blue: 0x8fb0c2,
   green: 0x93ad95, red: 0xb5584a, rust: 0xa5703f, cool: 0xe6e6e2,
+  decal: 0xfffffd, // floor overlays (paint marks, stone patches): own instance, offset, no shadow casting
 };
 // Fallback world units per texture repeat (TextureLib.info(key).world wins when present).
 const TEX_WORLD = {
@@ -47,6 +48,8 @@ const TEX_WORLD = {
   metal_door: 128, metal_grate: 64, metal_beam: 64, metal_barrel: 64, tile_floor: 128,
   tile_wall: 128, cloth_awning: 128, cloth_tarp: 128, rope: 32, sandbag: 64, arch_stone: 128,
   roof_tile: 128, window_frame: 64, glass: 128, poster: 128, crate_label: 64,
+  plaster_white: 256, plaster_band_ochre: 128, plaster_band_teal: 128, cobblestone: 256, paving_setts: 128,
+  asphalt: 256, curb_redwhite: 64, flagstone: 192, adobe: 192, wood_shutter: 64,
 };
 const SURF_OF = {
   sand_floor: 'sand', sand_blend: 'sand', gravel: 'gravel', concrete_wall: 'concrete',
@@ -56,12 +59,17 @@ const SURF_OF = {
   metal_beam: 'metal', metal_barrel: 'metal', tile_floor: 'tile', tile_wall: 'tile',
   cloth_awning: 'cloth', cloth_tarp: 'cloth', sandbag: 'sand', arch_stone: 'rock', roof_tile: 'tile',
   window_frame: 'wood', glass: 'glass', poster: 'plaster', crate_label: 'crate',
+  plaster_white: 'plaster', plaster_band_ochre: 'plaster', plaster_band_teal: 'plaster', cobblestone: 'rock',
+  paving_setts: 'rock', asphalt: 'concrete', curb_redwhite: 'concrete', flagstone: 'rock', adobe: 'plaster',
+  wood_shutter: 'wood',
 };
 const FALLBACK_COL = {
   sand_floor: 0xcbb285, sand_blend: 0xc4a97a, gravel: 0xa99a82, concrete_floor: 0xa89c88, plaster_wall: 0xe2d6bf,
   plaster_trim: 0xd8c9ad, stone_block: 0xc2ad86, stone_wall: 0xc9a979, wood_planks: 0x8a6440, wood_crate: 0x9b7447,
   wood_door: 0x7a5534, metal_door: 0x5b6f78, tile_floor: 0xbfae92, arch_stone: 0xcab790, cloth_tarp: 0x5f8f8a,
   metal_barrel: 0x3f5a6a, glass: 0x88a0a8,
+  plaster_white: 0xe0d9cb, plaster_band_ochre: 0xcfa24e, plaster_band_teal: 0x629c8c, cobblestone: 0xb3a792,
+  paving_setts: 0xb8ae9c, asphalt: 0x7d7670, curb_redwhite: 0xb8a8a0, flagstone: 0xcdb48f, adobe: 0xcc9860,
 };
 export const surfOf = (mat) => SURF_OF[String(mat).split('#')[0]] || 'default';
 
@@ -129,6 +137,7 @@ export class Kit {
       if (variant && PAINT[variant] != null) m.color.multiply(new THREE.Color(PAINT[variant]));
     }
     m.vertexColors = true;
+    if (variant === 'decal') { m.polygonOffset = true; m.polygonOffsetFactor = -2; m.polygonOffsetUnits = -2; }
     m.needsUpdate = true;
     return m;
   }
@@ -387,7 +396,7 @@ export class Kit {
         const pick = this._edgeKey(R, e);
         e.top = pick(R.o.tops) ?? R.top;
         e.noWall = pick(R.o.walls) === false;
-        e.wallMat = pick(R.o.wallMats) ?? R.o.wallMat ?? 'plaster_wall';
+        e.wallMat = pick(R.o.wallMats) ?? R.o.wallMat ?? 'plaster_white';
         e.paint = pick(R.o.paints) ?? R.o.paint ?? null;
         e.riserMat = pick(R.o.riserMats) ?? R.o.riserMat ?? null;
       }
@@ -600,7 +609,10 @@ export class Kit {
       const P = this._ptOn(e, (cuts[i] + cuts[i + 1]) / 2);
       const k = Math.floor(noise(P.x / 173, P.y / 173, 11) * 6.999);
       tops.push(e.top + steps[Math.max(0, Math.min(5, k))]);
+      const keep = e.wallMat;
+      if (keep === 'plaster_white' && noise(P.x / 211, P.y / 211, 13) > 0.62) e.wallMat = 'plaster_wall';
       this._wall(R, e, cuts[i], cuts[i + 1], tops[i]);
+      e.wallMat = keep;
     }
     // shallow pilaster where one building meets the next
     const mat = e.wallMat;
@@ -1094,7 +1106,7 @@ export class Kit {
       g.computeBoundingBox(); g.computeBoundingSphere();
       const m = new THREE.Mesh(g, this.material(spec));
       m.name = `map_${spec}`;
-      m.castShadow = true; m.receiveShadow = true;
+      m.castShadow = !spec.endsWith('#decal'); m.receiveShadow = true;
       m.matrixAutoUpdate = false; m.updateMatrix();
       m.userData.static = true;
       root.add(m); meshes.push(m);

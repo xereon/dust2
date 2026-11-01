@@ -358,7 +358,7 @@ export class SmokeSystem {
       uCamWorld: { value: new THREE.Matrix4() },
       uSunDirV: { value: new THREE.Vector3() },
       uSunCol: shared.uSunCol, uSkyCol: shared.uSkyCol, uGroundCol: shared.uGroundCol,
-      uAlbedo: { value: new THREE.Vector3(0.7, 0.7, 0.69) },
+      uAlbedo: { value: new THREE.Vector3(0.76, 0.76, 0.75) },
       uDepth: shared.uDepth, uHasDepth: shared.uHasDepth, uDepthRes: shared.uDepthRes, uNearFar: shared.uNearFar,
       uNearFade: { value: new THREE.Vector2(10, 70) },
       ...THREE.UniformsLib.fog,

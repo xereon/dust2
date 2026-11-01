@@ -52,11 +52,11 @@ vec3 rpSkyRadiance(vec3 d, float disc) {
   float yh = max(y, 0.0);
   float mu = dot(d, rpSunDir);
   // Rayleigh-ish gradient: deep blue overhead, paler toward the horizon
-  float g = pow(1.0 - yh, 2.6);
+  float g = pow(1.0 - yh, 4.5);
   vec3 col = mix(rpSkyZenith, rpSkyHorizon, g);
   // warm dust haze band hugging the horizon
-  float haze = exp(-yh * 7.0);
-  col = mix(col, rpSkyHaze, haze * 0.8);
+  float haze = exp(-yh * 14.0);
+  col = mix(col, rpSkyHaze, haze * 0.75);
   // Mie forward scatter: broad aureole + tight glow near the sun, stronger through haze
   col += rpSunGlow * (0.18 * rpPhaseHG(mu, 0.55) + 0.06 * rpPhaseHG(mu, 0.93)) * (0.55 + 0.45 * haze);
   // below the horizon: distant terrain / dust
@@ -149,8 +149,8 @@ export function setSkyParams({ sunDir, sunColor, E, sky = 1 }) {
   const k = E * sky;
   // Colours chosen to read as CS2 Dust II noon: pale-to-medium blue overhead, milky cream
   // horizon, warm dust at the very bottom.
-  u.rpSkyZenith.value.setRGB(0.050, 0.108, 0.235).multiplyScalar(k);
-  u.rpSkyHorizon.value.setRGB(0.150, 0.180, 0.215).multiplyScalar(k);
+  u.rpSkyZenith.value.setRGB(0.040, 0.100, 0.245).multiplyScalar(k);
+  u.rpSkyHorizon.value.setRGB(0.120, 0.160, 0.215).multiplyScalar(k);
   u.rpSkyHaze.value.setRGB(0.205, 0.195, 0.175).multiplyScalar(k);
   u.rpSkyGround.value.setRGB(0.120, 0.105, 0.085).multiplyScalar(k);
   u.rpSunGlow.value.copy(sunColor).multiplyScalar(k * (0.9 + 0.6 * (1 - elev)));

@@ -503,3 +503,9 @@ crouchjump/drop) and `.n` (node index). `nearest(pos)` → node **index** (not a
   Bots plant/defuse via `World.match.use(ent, held)` (held = use/attack down this tick).
 * At halftime rules calls `World.bots?.onTeamSwap?.()` if present; until BotManager implements it,
   rules rebuilds bot character models itself.
+
+### 14a. FX extras (shipped)
+`fireAt(pos)` (debug: fire a shot at a point), `reset()`, `reseed()`. Emits `flashed { ent, amount, duration }`
+(audio drives tinnitus from it). `shell_land { pos, key, speed }` fires once per bounce. FX objects are
+`userData.fx = true` on layer 5; the renderer composites them after AO/atmosphere and may expose
+`fxDepthTexture` (safe-to-sample scene depth) for soft particles.

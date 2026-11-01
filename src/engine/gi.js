@@ -147,7 +147,7 @@ uniform sampler2DShadow uSun;
 uniform mat4 uSunMat;
 uniform float uSunBias;
 uniform vec3 uSunE, uAmbGuess;
-uniform float uBounce, uPrevOn, uPrevBias;
+uniform float uBounce, uPrevOn, uPrevBias, uSkySat;
 uniform sampler3D uP0, uP1, uP2;
 uniform vec3 uPrevMin, uPrevInv;
 uniform highp usampler3D uValid;
@@ -224,6 +224,8 @@ void main() {
       L = alb * E * (uBounce / 3.14159265);
     } else {
       L = rpSkyRadiance(d, 0.0);
+      // ambient sky light reads grey-blue in Dust II, not saturated blue: desaturate for GI only
+      L = mix(vec3(dot(L, vec3(0.2126, 0.7152, 0.0722))), L, uSkySat);
     }
     A += L; BX += L * d.x; BY += L * d.y; BZ += L * d.z;
   }
@@ -341,7 +343,7 @@ export class GIVolume {
       uBounce: { value: opts.bounce ?? 1 }, uPrevOn: { value: 0 }, uPrevBias: { value: P.sh * 0.5 },
       uP0: { value: null }, uP1: { value: null }, uP2: { value: null },
       uPrevMin: { value: gmin }, uPrevInv: { value: new THREE.Vector3(1 / gext.x, 1 / gext.y, 1 / gext.z) },
-      uValid: { value: validTex },
+      uValid: { value: validTex }, uSkySat: { value: opts.skySat ?? 0.55 },
     };
     u.uVDims.value = new THREE.Vector3(vx, vy, vz);
     const mat = new THREE.RawShaderMaterial({

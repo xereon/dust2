@@ -4,7 +4,7 @@ import { zx, zy, zc } from './util.js';
 
 export function build(K) {
   const tun = { mat: 'concrete_floor', wallMat: 'plaster_wall', ceilMat: 'wood_planks', paint: { h: 36, mat: 'plaster_wall#dark' } };
-  const stoneWall = { wallMat: 'stone_wall', paint: null };
+  const stoneWall = { wallMat: 'adobe', paint: null };
 
   // ---- upper tunnels ------------------------------------------------------------------------
   K.region('utun_mouth', zc([[-1736, 716], [-1588, 716], [-1588, 744], [-1736, 744]], 30),
@@ -18,7 +18,7 @@ export function build(K) {
   K.region('utun_exit', zc([[-2057, 1425], [-1906, 1425], [-1906, 1765], [-2057, 1765]], 32),
     { ...tun, ceil: 170, beams: { dir: 'x', step: 96 } });
   K.region('utun_exit_mouth', zc([[-2057, 1765], [-1906, 1765], [-1906, 1789], [-2057, 1789]], 32),
-    { ...tun, arch: { spring: 118, crown: 170 }, ceilTop: 330, wallMat: 'stone_wall' });
+    { ...tun, arch: { spring: 118, crown: 170 }, ceilTop: 330, wallMat: 'adobe' });
   // support posts in the hall
   K.box([-1798, 1042, 32], [-1782, 1058, 182], 'wood_planks', { color: 0.8 });
   K.box([-1798, 1292, 32], [-1782, 1308, 182], 'wood_planks', { color: 0.8 });
@@ -33,34 +33,34 @@ export function build(K) {
     [-1334, 2719], [-1334, 2787], [-1352, 2803], [-1512, 2895], [-1715, 2895], [-1715, 2442], [-1860, 2442],
     [-1980, 2442], [-2185, 2442], [-2185, 2320], [-2211, 2320], [-2211, 2068], [-2186, 2068],
   ], 4), {
-    mat: 'sand_floor', ...stoneWall, top: 330, tops: { 25: 64, 26: 64, 28: 64 }, cornice: { mat: 'stone_block', h: 10, out: 5 }, merlons: true,
+    mat: 'sand_blend', ...stoneWall, top: 330, tops: { 25: 64, 26: 64, 28: 64 }, cornice: { mat: 'stone_block', h: 10, out: 5 }, merlons: { mat: 'adobe' },
   });
   // close the skyline above the north end of the low plat/site divider
-  K.slab([-1736, 2896], [-1714, 2896], 60, 330, 12, 'stone_wall', { side: 'left', color: 0.95 });
+  K.slab([-1736, 2896], [-1714, 2896], 60, 330, 12, 'adobe', { side: 'left', color: 0.95 });
   K.stairs('b_platst', [[-1980, 2442], [-1860, 2442], [-1860, 2500], [-1980, 2500]], 4, 32, 4,
     { mat: 'stone_block', tops: { e: 64, w: 64 } });
   K.region('b_plat', zc([
     [-2140, 2460], [-1980, 2460], [-1980, 2500], [-1860, 2500], [-1860, 2460], [-1735, 2460], [-1735, 2895],
     [-1874, 2895], [-1874, 3172], [-2140, 3172],
-  ], 32), { mat: 'sand_blend', ...stoneWall, top: 360, tops: { 0: 64, 4: 64, 5: 64 }, cornice: { mat: 'stone_block', h: 10, out: 5 }, merlons: true });
+  ], 32), { mat: 'sand_blend', ...stoneWall, top: 360, tops: { 0: 64, 4: 64, 5: 64 }, cornice: { mat: 'stone_block', h: 10, out: 5 }, merlons: { mat: 'adobe' } });
 
   // B window: raised ledge inside the site, the opening through the wall, the CT-side platform
   K.region('bwin_step', zc([[-1455, 2600], [-1400, 2600], [-1400, 2640], [-1455, 2640]], 108), { mat: 'stone_block', ...stoneWall });
   K.region('bwin_in', zc([[-1400, 2600], [-1334, 2600], [-1334, 2719], [-1400, 2719]], 124), { mat: 'stone_block', ...stoneWall, top: 330 });
   K.region('bwin_hole', zc([[-1334, 2626], [-1304, 2626], [-1304, 2719], [-1334, 2719]], 124),
-    { mat: 'stone_block', ...stoneWall, ceil: 220, ceilMat: 'wood_planks', headerMat: 'stone_wall' });
+    { mat: 'stone_block', ...stoneWall, ceil: 220, ceilMat: 'wood_planks', headerMat: 'adobe' });
   K.region('bwin_out', zc([[-1304, 2586], [-1250, 2586], [-1250, 2732], [-1304, 2732]], 118),
-    { mat: 'stone_block', top: 340, paint: { h: 40, mat: 'plaster_wall#teal' } });
+    { mat: 'stone_block', top: 340, paint: { h: 52, mat: 'plaster_band_teal' } });
   // L-shaped climb from the hall: north up r1, then west up r2 onto the window platform
   K.region('bwin_r2', zx([[-1250, 2586], [-1180, 2586], [-1180, 2732], [-1250, 2732]], -1250, 114, -1180, 80),
-    { mat: 'concrete_floor', top: 340, paint: { h: 40, mat: 'plaster_wall#teal' } });
+    { mat: 'concrete_floor', top: 340, paint: { h: 52, mat: 'plaster_band_teal' } });
   K.region('bwin_r1', [[-1180, 2586, 42], [-1052, 2586, 11], [-1052, 2726, 47.4], [-1067, 2732, 52.6], [-1180, 2732, 80]],
-    { mat: 'concrete_floor', top: 340, paint: { h: 40, mat: 'plaster_wall#teal' } });
+    { mat: 'concrete_floor', top: 340, paint: { h: 52, mat: 'plaster_band_teal' } });
   K.box([-1485, 2628, 4], [-1460, 2665, 60], 'wood_crate');
 
   // B doors: thick frame with a timber lintel
   K.region('bdoors', zc([[-1334, 2112], [-1304, 2112], [-1304, 2306], [-1334, 2306]], 3),
-    { mat: 'stone_block', ...stoneWall, ceil: 146, ceilMat: 'wood_planks', headerMat: 'stone_wall' });
+    { mat: 'stone_block', ...stoneWall, ceil: 146, ceilMat: 'wood_planks', headerMat: 'adobe' });
 
   // ---- hall from B doors to CT mid: warped slope, low near CT, rising west to the doors and
   // north-west toward the window ramp. Built as a grid of cells sampling one height field.
@@ -71,7 +71,7 @@ export function build(K) {
     return Sx(x) + (Nx(x) - Sx(x)) * t;
   };
   const hz = (pts) => pts.map(([x, y]) => [x, y, Math.round(H(x, y) * 10) / 10]);
-  const hall = { mat: 'concrete_floor', paint: { h: 44, mat: 'plaster_wall#ochre' }, cornice: {} };
+  const hall = { mat: 'cobblestone', paint: { h: 56, mat: 'plaster_band_ochre' }, cornice: {} };
   const XS = [-1304, -1150, -1052, -900, -742, -600, -316], YS = [2072, 2300, 2400, 2500, 2586];
   for (let i = 0; i < XS.length - 1; i++) for (let j = 0; j < YS.length - 1; j++) {
     const x0 = XS[i], x1 = XS[i + 1], y0 = YS[j], y1 = YS[j + 1];

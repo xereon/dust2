@@ -104,6 +104,10 @@ export function buildGradeLUT(p, size = 32) {
     L = Math.min(1, Math.max(0, 0.2126 * R + 0.7152 * G + 0.0722 * B));
     const ws = (1 - L) * (1 - L), wh = L * L;
     R += sh[0] * ws + hi[0] * wh; G += sh[1] * ws + hi[1] * wh; B += sh[2] * ws + hi[2] * wh;
+    // highlight stretch: ACES' shoulder leaves sunlit plaster ~0.86; CS2 sits ~0.92-0.95
+    const hl = p.highlights || 0;
+    const sm = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+    R += hl * R * sm(0.45, 0.9, R); G += hl * G * sm(0.45, 0.9, G); B += hl * B * sm(0.45, 0.9, B);
     // lift / gain
     R = p.lift + R * (p.gain - p.lift); G = p.lift + G * (p.gain - p.lift); B = p.lift + B * (p.gain - p.lift);
     data[i++] = toH(Math.min(1, Math.max(0, R)));

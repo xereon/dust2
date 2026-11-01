@@ -2,9 +2,11 @@
 // the suicide alley below the T-spawn ledge and the strip up to top mid.
 import { rect, zx, zc } from './util.js';
 
+const KERB = { h: 8, out: 12, mat: 'curb_redwhite' };
+
 export function build(K) {
-  const ochre = { h: 44, mat: 'plaster_wall#ochre' };
-  const teal = { h: 40, mat: 'plaster_wall#teal' };
+  const ochre = { h: 56, mat: 'plaster_band_ochre' };
+  const teal = { h: 52, mat: 'plaster_band_teal' };
 
   // ---- T spawn plateau (z 128) -----------------------------------------------------------
   K.region('tspawn', [
@@ -12,7 +14,7 @@ export function build(K) {
     [-520, -620], [-950, -620], [-950, -142], [-1161, -142], [-1161, -239], [-1333, -239],
     [-1396, -174], [-1396, -144], [-1769, -144], [-1769, -650], [-2088, -650], [-2088, -485], [-2237, -627],
   ], {
-    z: 128, mat: 'concrete_floor', base: { h: 6, out: 10, mat: 'concrete_floor', alt: { len: 56, mats: ['plaster_wall#red', 'plaster_wall#white'] } }, top: 420, tops: { 6: 372, 7: 360, 8: 350, 9: 340, 10: 340, 11: 352, 12: 352, 13: 160, 14: 160, 15: 160 },
+    z: 128, mat: 'asphalt', base: KERB, top: 420, tops: { 6: 372, 7: 360, 8: 350, 9: 340, 10: 340, 11: 352, 12: 352, 13: 160, 14: 160, 15: 160 },
     paint: ochre, cornice: {},
   });
   // T ramp: wide steps down to outside tunnels, hemmed by the L wall on the east
@@ -21,12 +23,12 @@ export function build(K) {
 
   // ---- the road: slopes east from the plateau down to outside long ---------------------------
   K.region('road_slope', zx([[-520, -1067], [-337, -1067], [-337, -1180], [30, -1180], [30, -620], [-520, -620]], -520, 124, 30, 0),
-    { base: { h: 6, out: 10, mat: 'concrete_floor', alt: { len: 56, mats: ['plaster_wall#red', 'plaster_wall#white'] } }, mat: 'concrete_floor', top: 380, tops: { 1: 330, 2: 300, 3: 300 }, paint: teal, cornice: {} });
+    { base: KERB, mat: 'asphalt', top: 380, tops: { 1: 330, 2: 300, 3: 300 }, paint: teal, cornice: {} });
   K.region('road_flat', zc([[30, -1180], [194, -1180], [194, -1015], [463, -1015], [463, -620], [388, -620], [30, -620]], 0),
-    { base: { h: 6, out: 10, mat: 'concrete_floor', alt: { len: 56, mats: ['plaster_wall#red', 'plaster_wall#white'] } }, mat: 'concrete_floor', top: 300, paint: teal, cornice: {} });
+    { base: KERB, mat: 'asphalt', top: 300, paint: teal, cornice: {} });
   // the road carries on east past a fenced gate (out of bounds, seen from T spawn)
   K.region('road_beyond', zc([[463, -960], [1060, -960], [1060, -700], [463, -700]], 0),
-    { base: { h: 6, out: 10, mat: 'concrete_floor', alt: { len: 56, mats: ['plaster_wall#red', 'plaster_wall#white'] } }, mat: 'concrete_floor', top: 280, paint: teal, cornice: {}, nav: false });
+    { base: KERB, mat: 'asphalt', top: 280, paint: teal, cornice: {}, nav: false });
   K.clip([458, -962, -20], [476, -698, 420]);
   for (const y of [-960, -830, -700]) K.box([460, y - 3, 0], [466, y + 3, 124], 'metal_beam', { col: false, color: 0.7 });
   K.slab([463, -957], [463, -833], 0, 120, 2, 'metal_grate', { col: false });
@@ -42,9 +44,9 @@ export function build(K) {
   }
   // ---- suicide alley and T-mid strip (z 0) -------------------------------------------------
   K.region('tsp_alley', zc([[-520, -620], [388, -620], [388, -400], [82, -400], [25, -458], [-60, -458], [-60, -428], [-520, -428]], 0),
-    { mat: 'concrete_floor', top: 300, tops: { 3: 260, 4: 260, 5: 260 }, paint: ochre, cornice: {} });
+    { mat: 'sand_blend', top: 300, tops: { 3: 260, 4: 260, 5: 260 }, paint: ochre, cornice: {} });
   K.region('tmid_strip', zc([[-520, -428], [-305, -428], [-361, -367], [-361, -176], [-378, -172], [-378, 190], [-520, 190]], 0),
-    { mat: 'concrete_floor', top: 320, tops: { 1: 260, 2: 260, 3: 260, 4: 260, 5: 280 }, paint: ochre, cornice: {} });
+    { mat: 'cobblestone', top: 320, tops: { 1: 260, 2: 260, 3: 260, 4: 260, 5: 280 }, paint: ochre, cornice: {} });
 
   // ---- outside tunnels ---------------------------------------------------------------------
   K.region('otun_low', zc([

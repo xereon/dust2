@@ -34,9 +34,10 @@ const CV = {
   fog_density: [1.0, 0, 10, 'height fog density (multiplier)'],
   sun_intensity: [1.0, 0, 4, 'sun intensity (x map value)'],
   sky_intensity: [1.0, 0, 4, 'sky light intensity (x) — rebakes GI'],
-  bounce_intensity: [1.0, 0, 3, 'bounce light (x) — rebakes GI'],
+  bounce_intensity: [1.2, 0, 3, 'bounce light (x) — rebakes GI'],
   saturation: [1.05, 0, 2, 'grade saturation'],
   contrast: [1.0, 0.3, 2, 'grade S-curve (1 = neutral)'],
+  highlights: [0.08, 0, 0.5, 'grade highlight stretch'],
   grain: [0.15, 0, 3, 'film grain amount'],
   vignette: [0.22, 0, 1, 'vignette strength'],
   shadow_bias: [1.0, 0, 5, 'shadow bias (x)'],
@@ -359,7 +360,7 @@ export class RenderPipeline {
         map: this.map, bounds: this.bounds,
         sunMat: st.matrix, sunDepth: st.map.depthTexture, sunBias: 6 / (cam.far - cam.near),
         sunE: this.sunColor.clone().multiplyScalar(E), bounce: 0.6 * (World.cvar.bounce_intensity ?? 1),
-        openSkyGuess: guess,
+        openSkyGuess: guess, skySat: 0.55,
       });
       lightUniforms.rpGIOn.value = (World.cvar.r_gi ?? 1) > 0 ? 1 : 0;
     } catch (e) {
@@ -401,7 +402,7 @@ export class RenderPipeline {
       if (this.map) { this.env.update(); this._giDirty = true; }
     } else if (name === 'bounce_intensity') this._giDirty = true;
     else if (name === 'r_gi') lightUniforms.rpGIOn.value = World.cvar.r_gi > 0 && this.gi.ready ? 1 : 0;
-    else if (name === 'saturation' || name === 'contrast') this._buildLUT();
+    else if (name === 'saturation' || name === 'contrast' || name === 'highlights') this._buildLUT();
     else if (name === 'shadow_bias') this.shadows.setBias(World.cvar.shadow_bias);
     else if (name === 'fov') { this._camera.fov = vfov(World.cvar.fov); this._camera.updateProjectionMatrix(); }
     this._applyCvars(false);
@@ -425,7 +426,7 @@ export class RenderPipeline {
     this.aoOn = c.r_ao > 0 && c.ao_intensity > 0;
     const A = this.atmo.material.uniforms;
     A.uAOOn.value = this.aoOn ? 1 : 0;
-    A.uFog.value.x = 1.15e-4 * c.fog_density;
+    A.uFog.value.x = 0.8e-4 * c.fog_density;
     A.uFogTint.value.copy(this.fogTint);
     A.uDebug.value = c.r_debugview === 4 ? 1 : 0;
     lightUniforms.rpDebug.value = c.r_debugview < 4 ? c.r_debugview : 0;
@@ -443,8 +444,8 @@ export class RenderPipeline {
     const c = World.cvar;
     const lut = buildGradeLUT({
       contrast: c.contrast, saturation: c.saturation,
-      shadowTint: [-0.022, 0.0, 0.026], highlightTint: [0.016, 0.008, -0.018],
-      lift: 0.004, gain: 0.995,
+      shadowTint: [-0.022, 0.0, 0.026], highlightTint: [0.028, 0.012, -0.028],
+      lift: 0.004, gain: 1.0, highlights: c.highlights,
     });
     this.tonemap.setLUT(lut, 32);
   }

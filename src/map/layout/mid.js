@@ -4,35 +4,38 @@
 import { zx, zy, zc } from './util.js';
 
 export function build(K) {
-  const ochre = { h: 48, mat: 'plaster_wall#ochre' };
-  const teal = { h: 40, mat: 'plaster_wall#teal' };
+  const ochre = { h: 56, mat: 'plaster_band_ochre' };
+  const teal = { h: 52, mat: 'plaster_band_teal' };
 
   // ---- top mid courtyard ---------------------------------------------------------------------
   K.region('tmid_court', zc([
     [-693, 190], [-520, 190], [-378, 190], [-378, 227], [-318, 287], [52, 287], [113, 287], [469, 287],
     [469, 300], [479, 312], [479, 494], [-68, 494], [-124, 558], [-648, 558], [-648, 527], [-752, 527],
     [-754, 510], [-706, 257], [-701, 222],
-  ], 0), { mat: 'concrete_floor', top: 340, tops: { 3: 260, 4: 260, 5: 260, 11: 360, 12: 360 }, paint: ochre, cornice: {} });
+  ], 0), { mat: 'cobblestone', top: 340, tops: { 3: 260, 4: 260, 5: 260, 11: 360, 12: 360 }, paint: ochre, cornice: {} });
   K.region('mid_top', zc([[-648, 558], [-124, 558], [-124, 737], [-250, 737], [-275, 737], [-521, 737], [-648, 737]], 0),
-    { mat: 'concrete_floor', top: 330, tops: { 3: 32 }, paint: ochre, cornice: {} });
+    { mat: 'cobblestone', top: 330, tops: { 3: 32 }, paint: ochre, cornice: {} });
 
   // ---- mid lane (east side is the low wall to catwalk, top z 32) ------------------------------
   K.region('mid_a', zc([[-521, 737], [-275, 737], [-275, 760], [-521, 760]], 0),
     { mat: 'sand_floor', top: 330, tops: { e: 32 }, paint: ochre, cornice: {} });
-  K.region('mid_b', zy([[-521, 760], [-275, 760], [-275, 1260], [-518, 1260], [-518, 1136], [-554, 1136], [-554, 872], [-521, 872]], 760, 0, 1260, -125),
+  K.region('mid_b', zy([[-521, 760], [-275, 760], [-275, 790], [-330, 790], [-330, 1260], [-518, 1260], [-518, 1136], [-554, 1136], [-554, 872], [-521, 872]], 760, 0, 1260, -125),
     { mat: 'sand_floor', top: 320, tops: { 1: 32 }, paint: ochre, cornice: {} });
-  K.region('mid_c', zc([[-518, 1260], [-275, 1260], [-275, 1546], [-316, 1546], [-518, 1546]], -125),
-    { mat: 'sand_floor', top: 230, tops: { 1: 32, 2: 240 }, paint: teal, cornice: {} });
+  K.region('mid_c', zc([[-518, 1260], [-330, 1260], [-330, 1300], [-275, 1300], [-275, 1546], [-316, 1546], [-518, 1546]], -125),
+    { mat: 'sand_floor', top: 230, tops: { 3: 32, 4: 240 }, paint: teal, cornice: {} });
+  // worn stone steps climbing the east side of the lane, at the foot of the catwalk wall
+  K.stairs('mid_st', [[-330, 1300], [-275, 1300], [-275, 790], [-330, 790]], -125, 0, 9,
+    { mat: 'stone_block', tops: { e: 32 } });
   K.region('mid_d', zc([[-518, 1546], [-316, 1546], [-316, 1646], [-518, 1646]], -128),
     { mat: 'sand_floor', top: 230, paint: teal, cornice: {} });
   K.region('ctmid', zc([[-602, 1646], [-518, 1646], [-316, 1646], [-316, 1718], [-254, 1718], [-254, 1806], [-316, 1806], [-316, 2072], [-602, 2072]], -128),
-    { mat: 'concrete_floor', top: 210, paint: teal, cornice: {} });
+    { mat: 'paving_setts', top: 210, paint: teal, cornice: {} });
 
   // ---- catwalk + short ------------------------------------------------------------------------
   K.region('cat', zc([
     [-250, 737], [-124, 737], [-124, 1265], [-62, 1328], [287, 1328], [287, 1342], [513, 1342], [513, 1760],
     [395, 1760], [395, 1655], [239, 1655], [239, 1550], [74, 1550], [74, 1610], [-145, 1610], [-145, 1546], [-250, 1546],
-  ], 0), { mat: 'concrete_floor', top: 300, tops: { 16: 32, 1: 330, 2: 300, 3: 300, 4: 300 }, paint: ochre, cornice: {} });
+  ], 0), { mat: 'paving_setts', top: 300, tops: { 16: 32, 1: 330, 2: 300, 3: 300, 4: 300 }, paint: ochre, cornice: {} });
   K.stairs('short_st', [[239, 1655], [395, 1655], [395, 1800], [239, 1800]], 0, 96, 12,
     { mat: 'stone_block', top: 360 });
 

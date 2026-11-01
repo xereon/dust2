@@ -8,11 +8,74 @@ export function crate(K, pos, size = 64, yaw = 0, variant = 0) {
   K.prop('crate', [[sx, sz, sy], variant], pos, yaw, () => K.obox(pos, [sx, sy, sz], yaw, 'wood_crate'));
 }
 function tarpCrate(K, pos, size = 64, yaw = 0, color = 'teal', variant = 0) {
-  K.emitter('amb_tarp', [pos[0], pos[1], pos[2] + size], 700);
+  const [sx, h, sy] = Array.isArray(size) ? size : [size, size, size];
+  K.emitter('amb_tarp', [pos[0], pos[1], pos[2] + h], 700);
   K.prop('tarpCrate', [size, color, variant], pos, yaw, () => {
-    K.obox(pos, [size, size, size], yaw, 'wood_crate');
-    K.obox([pos[0], pos[1], pos[2] + size], [size + 4, size + 4, 3], yaw, 'cloth_tarp', { col: false });
+    K.obox(pos, [sx, sy, h], yaw, 'wood_crate');
+    K.obox([pos[0], pos[1], pos[2] + h], [sx + 4, sy + 4, 3], yaw, 'cloth_tarp', { col: false });
   });
+}
+
+/** Sprayed bombsite marker (orange circle and cross) lying on a flat floor at z. */
+export function bombMark(K, [cx, cy], z, r = 44, rot = 20) {
+  const mat = 'plaster_white#decal', col = [1.0, 0.36, 0.08], w = 5, N = 40, zz = z + 0.15;
+  const a0 = rot * Math.PI / 180;
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * 2 * Math.PI, b = ((i + 1) / N) * 2 * Math.PI;
+    const ri = r - w + 1.2 * Math.sin(i * 1.7), ro = r + 1.4 * Math.sin(i * 2.3 + 1);
+    K.poly(mat, [[cx + ri * Math.cos(a), cy + ri * Math.sin(a), zz], [cx + ri * Math.cos(b), cy + ri * Math.sin(b), zz],
+      [cx + ro * Math.cos(b), cy + ro * Math.sin(b), zz], [cx + ro * Math.cos(a), cy + ro * Math.sin(a), zz]], { col, normal: [0, 0, 1] });
+  }
+  for (const k of [0, 1]) {
+    const a = a0 + Math.PI / 4 + k * Math.PI / 2, ux = Math.cos(a), uy = Math.sin(a), L = r * 0.92, t = w * 0.6;
+    K.poly(mat, [[cx - ux * L - uy * t, cy - uy * L + ux * t, zz + 0.05], [cx - ux * L + uy * t, cy - uy * L - ux * t, zz + 0.05],
+      [cx + ux * L + uy * t, cy + uy * L - ux * t, zz + 0.05], [cx + ux * L - uy * t, cy + uy * L + ux * t, zz + 0.05]], { col, normal: [0, 0, 1] });
+  }
+}
+
+/** Irregular patch of a floor material laid over a flat floor at z (star-shaped, fan from the centre). */
+export function floorPatch(K, mat, [cx, cy], z, r, seed = 1, n = 18) {
+  const P = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * 2 * Math.PI;
+    const k = 0.72 + 0.18 * Math.sin(a * 3 + seed) + 0.1 * Math.sin(a * 7 + seed * 2.3);
+    P.push([cx + r * k * Math.cos(a), cy + r * k * Math.sin(a) * 0.85, z + 0.1]);
+  }
+  const C = [cx, cy, z + 0.1];
+  for (let i = 0; i < n; i++) K.poly(mat + '#decal', [C, P[i], P[(i + 1) % n]], { col: 0.96, normal: [0, 0, 1] });
+}
+
+/** Corrugated metal sheet nailed to timber posts, from a to b (Source [x,y]) on floor z, height h. */
+function corrugatedFence(K, a, b, z, h = 92, { posts = true, brace = true } = {}) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, nx = uy, ny = -ux;
+  // galvanised sheet, both faces; ribbed metal texture turned so the corrugations run vertically
+  const uv = (q) => [q[2] / 64, ((q[0] - a[0]) * ux + (q[1] - a[1]) * uy) / 64];
+  const P = (s, o, zz) => [a[0] + ux * s + nx * o, a[1] + uy * s + ny * o, zz];
+  const zt = z + h;
+  K.poly('metal_door', [P(0, 0.8, z + 2), P(L, 0.8, z + 2), P(L, 0.8, zt), P(0, 0.8, zt)], { uv, col: 0.95, normal: [nx, ny, 0] });
+  K.poly('metal_door', [P(L, -0.8, z + 2), P(0, -0.8, z + 2), P(0, -0.8, zt), P(L, -0.8, zt)], { uv, col: 0.85, normal: [-nx, -ny, 0] });
+  K.colPrism([P(0, 2, 0), P(L, 2, 0), P(L, -2, 0), P(0, -2, 0)].map((q) => [q[0], q[1]]), z, zt, 'metal');
+  if (posts) {
+    const np = Math.max(2, Math.round(L / 52) + 1);
+    for (let i = 0; i < np; i++) {
+      const s = (i / (np - 1)) * (L - 8) + 4;
+      const c = [a[0] + ux * s - nx * 5, a[1] + uy * s - ny * 5];
+      K.obox([c[0], c[1], z], [6, 6, h + 6], Math.atan2(uy, ux) * 180 / Math.PI, 'wood_planks', { col: false, color: 0.75 });
+    }
+    // horizontal rails
+    for (const zr of [z + 14, z + h - 14]) K.slab([a[0] - nx * 5, a[1] - ny * 5], [b[0] - nx * 5, b[1] - ny * 5], zr, zr + 6, 3, 'wood_planks', { col: false, color: 0.7 });
+  }
+  if (brace) {
+    // diagonal timber brace across the sheet face (thin box rotated in the wall plane, approximated as a stepped run)
+    const n = 6;
+    for (let i = 0; i < n; i++) {
+      const t0 = i / n, t1 = (i + 1) / n;
+      const s0 = L * 0.15 + t0 * L * 0.7, s1 = L * 0.15 + t1 * L * 0.7;
+      const zz0 = z + 8 + t0 * (h - 20), zz1 = z + 8 + t1 * (h - 20);
+      const q0 = [a[0] + ux * s0 - nx * 6, a[1] + uy * s0 - ny * 6], q1 = [a[0] + ux * s1 - nx * 6, a[1] + uy * s1 - ny * 6];
+      K.slab(q0, q1, Math.min(zz0, zz1), Math.max(zz0, zz1) + 7, 3, 'wood_planks', { col: false, color: 0.72 });
+    }
+  }
 }
 function barrel(K, pos, variant = 0, yaw = 0) {
   K.prop('barrel', [variant], pos, yaw, () => K.obox(pos, [22, 22, 35], yaw, 'metal_barrel'));
@@ -117,7 +180,7 @@ export function build(K) {
   crate(K, [459, 1395, 0], [72, 64, 64], 0, 1);
 
   // ---------------------------------------------------------------- mid
-  crate(K, [-312, 1428, -125], [80, 80, 97], 0, 0);                       // xbox
+  tarpCrate(K, [-312, 1428, -125], [80, 97, 80], 0, 'olive', 0);         // xbox, under its green canvas
   crate(K, [-826, 1356, -112], [64, 64, 64], 0, 1);
   crate(K, [-1174, 1497, -112], [64, 64, 36], 0, 2);
   crate(K, [-1097, 1497, -112], [64, 64, 36], 6, 3);
@@ -140,7 +203,14 @@ export function build(K) {
   crate(K, [-1820, 1833, 4], [64, 72, 64]);
   crate(K, [-1589, 1874, 4], [180, 70, 64], 29.4, 2);
   crate(K, [-1807, 2377, 4], [96, 96, 96], 0, 0);
-  crate(K, [-1631, 2546, 4], [64, 64, 64], 0, 1);
+  // plank-walled box on the west of the site (the "fence" cover), boards facing the site
+  crate(K, [-1631, 2546, 4], [64, 120, 104], 0, 1);
+  prop(K, 'plankFence', [120, 104], [-1598, 2546, 4], 90, null);
+  // stone-block pillar with corrugated sheets nailed to posts in front of the window ledge
+  prop(K, 'stoneBlocks', [64, 56, 7], [-1440, 2590, 4], 0, () => K.obox([-1440, 2590, 4], [64, 56, 100], 0, 'stone_block'));
+  prop(K, 'stoneBlocks', [44, 40, 3], [-1478, 2566, 4], 12, () => K.obox([-1478, 2566, 4], [44, 40, 42], 12, 'stone_block'));
+  corrugatedFence(K, [-1462, 2552], [-1364, 2552], 4, 92);
+  corrugatedFence(K, [-1366, 2552], [-1366, 2600], 4, 92, { brace: false });
   crate(K, [-1584, 2753, 4], 64, 63, 2);
   crate(K, [-1829, 2654, 32], [70, 36, 36], 45);
   crate(K, [-2058, 2856, 32], 60, 0, 3);
@@ -148,9 +218,18 @@ export function build(K) {
   barrel(K, [-1361, 2344, 4]); barrel(K, [-1358, 2379, 4], 1);
   // the big timber gate in B's north wall and the tarp-covered pallets
   prop(K, 'bigDoorMetal', [150, 170, 0, { paint: 'teal', arch: true }], [-1620, 2895, 4], 0);
-  prop(K, 'tarp', [64, 56, 48, 'bluegrey'], [-1480, 2560, 4], 20);
+  prop(K, 'tarp', [64, 56, 48, 'bluegrey'], [-1505, 2752, 4], 4);
+  prop(K, 'tarp', [60, 52, 44, 'bluegrey'], [-1420, 2430, 4], -12);
   prop(K, 'stoneBlocks', [48, 40, 5], [-1690, 2600, 4], 0);
   prop(K, 'stoneBlocks', [48, 40, 4], [-1690, 2650, 4], 90);
+  // bombsite markers
+  bombMark(K, [-1508, 2640], 4, 46, 14);
+  bombMark(K, [1118, 2462], 96, 44, -8);
+  // B floor: dusty dirt with worn flagstone patches
+  floorPatch(K, 'flagstone', [-1508, 2640], 4, 150, 1);
+  floorPatch(K, 'flagstone', [-1430, 2380], 4, 110, 2);
+  floorPatch(K, 'flagstone', [-1640, 2780], 4, 95, 3);
+  floorPatch(K, 'flagstone', [-1560, 2200], 4, 120, 4);
   barrel(K, [-1774, 2786, 32], 2);
   car(K, [-1950, 3080, 32], 90, 0);
   // palms on the terrace behind A and in the T-spawn yard

@@ -114,7 +114,8 @@ function buildFallback(kind, team) {
 /** Build a held item. Returns { obj, lGrip: Vector3|null, butt: number, key }. */
 export function makeHeldItem(kind, key, team) {
   resolveVM();
-  if ((kind === 'rifle' || kind === 'pistol') && VM && key && (!VMCFG || VMCFG[key])) {
+  if (kind === 'knife' && key === 'knife') key = team === 'T' ? 'knife_t' : 'knife_ct';
+  if (kind !== 'c4' && VM && key && (!VMCFG || VMCFG[key])) {
     try {
       const wm = VM.buildWorldModel(key);
       const ud = wm.userData || {};

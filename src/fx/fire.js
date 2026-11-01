@@ -167,7 +167,7 @@ export class FireVolume {
       while (this.acc[i] > rate) {
         this.acc[i] -= rate;
         S.reset();
-        const sz = (19 + R() * 13) * (0.6 + 0.4 * intensity);
+        const sz = (28 + R() * 18) * (0.6 + 0.4 * intensity);
         S.pos.set(this.cells[o] + (R() - 0.5) * 22, this.cells[o + 1] + sz * 0.62, this.cells[o + 2] + (R() - 0.5) * 22);
         S.vel.set((R() - 0.5) * 10, 18 + R() * 30, (R() - 0.5) * 10);
         S.gravity = -0.06; S.drag = 0.6;
