@@ -23,7 +23,7 @@ const W = +opt.w || 960, H = +opt.h || 540;
 fs.mkdirSync(OUT, { recursive: true });
 
 // same cross-process render semaphore as shot.mjs
-const LOCKDIR = '/tmp/dust2-shot-locks';
+const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('movement_live'));
 fs.mkdirSync(LOCKDIR, { recursive: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 let myLock = null;

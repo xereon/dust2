@@ -33,7 +33,7 @@ const shots = String(opt.shots || 'fp,tt').split(String(opt.shots || '').include
 const W = +opt.w || 1600, H = +opt.h || 900;
 
 // same cross-process render semaphore as tools/shot.mjs
-const SLOTS = +process.env.DUST2_SHOT_SLOTS || 2, LOCKDIR = '/tmp/dust2-shot-locks';
+const SLOTS = +process.env.DUST2_SHOT_SLOTS || 2, LOCKDIR = (await (await import('./slot.mjs')).legacyDir('vmlab'));
 fs.mkdirSync(LOCKDIR, { recursive: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 let myLock = null;

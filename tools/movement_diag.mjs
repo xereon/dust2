@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'; import { createRequire } from 'node:mo
 const require = createRequire(import.meta.url);
 let chromium; try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require('/opt/node22/lib/node_modules/playwright')); }
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const LOCKDIR = '/tmp/dust2-shot-locks'; fs.mkdirSync(LOCKDIR, { recursive: true });
+const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('movement_diag')); fs.mkdirSync(LOCKDIR, { recursive: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 let lock = null;
 while (!lock) {

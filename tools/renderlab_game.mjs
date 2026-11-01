@@ -46,7 +46,7 @@ if (opt['list-poses']) {
 // ---- cross-process semaphore: at most SLOTS concurrent headless browsers ------------------
 // SwiftShader is CPU-bound; many agents screenshotting at once would thrash the box.
 const SLOTS = +process.env.DUST2_SHOT_SLOTS || 2;
-const LOCKDIR = '/tmp/dust2-shot-locks';
+const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('renderlab_game'));
 fs.mkdirSync(LOCKDIR, { recursive: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 let myLock = null;

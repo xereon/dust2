@@ -22,7 +22,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 // same cross-process render semaphore as shot.mjs
-const SLOTS = +process.env.DUST2_SHOT_SLOTS || 2, LOCKDIR = '/tmp/dust2-shot-locks';
+const SLOTS = +process.env.DUST2_SHOT_SLOTS || 2, LOCKDIR = (await (await import('./slot.mjs')).legacyDir('proplab'));
 fs.mkdirSync(LOCKDIR, { recursive: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 let myLock = null;

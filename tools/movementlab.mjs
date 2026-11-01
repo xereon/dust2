@@ -10,7 +10,7 @@ const args = process.argv.slice(2); const opt = {};
 for (let i = 0; i < args.length; i++) if (args[i].startsWith('--')) opt[args[i].slice(2)] = args[i + 1]?.startsWith('--') ? true : args[++i] ?? true;
 const OUT = opt.outdir || '/tmp/movement/lab', W = +opt.w || 960, H = +opt.h || 540, POSE = opt.pose || 'long_doors';
 fs.mkdirSync(OUT, { recursive: true });
-const LOCKDIR = '/tmp/dust2-shot-locks'; fs.mkdirSync(LOCKDIR, { recursive: true });
+const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('movementlab')); fs.mkdirSync(LOCKDIR, { recursive: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 let lock = null;
 for (let w = 0; !lock; w++) {

@@ -29,7 +29,7 @@ for (let i = 1; i < args.length; i++) {
 
 // ---- render slot semaphore (shared with shot.mjs) -----------------------------------------
 const SLOTS = +process.env.DUST2_SHOT_SLOTS || 2;
-const LOCKDIR = '/tmp/dust2-shot-locks';
+const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('ailab'));
 fs.mkdirSync(LOCKDIR, { recursive: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 let myLock = null;

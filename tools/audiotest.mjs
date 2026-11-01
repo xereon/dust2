@@ -241,7 +241,7 @@ if (opt.game) {
   let chromium;
   try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require('/opt/node22/lib/node_modules/playwright')); }
   // share tools/shot.mjs's render-slot semaphore (SwiftShader is CPU bound)
-  const LOCKDIR = '/tmp/dust2-shot-locks', SLOTS = +process.env.DUST2_SHOT_SLOTS || 2;
+  const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('audiotest')), SLOTS = +process.env.DUST2_SHOT_SLOTS || 2;
   fs.mkdirSync(LOCKDIR, { recursive: true });
   const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
   let lock = null;

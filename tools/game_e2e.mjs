@@ -18,7 +18,7 @@ const outdir = opt.outdir || '/tmp/hud/e2e';
 fs.mkdirSync(outdir, { recursive: true });
 const W = +opt.w || 1280, H = +opt.h || 720;
 
-const LOCKDIR = '/tmp/dust2-shot-locks'; let lock = null;
+const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('game_e2e')); let lock = null;
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 fs.mkdirSync(LOCKDIR, { recursive: true });
 for (let w = 0; !lock; w++) {

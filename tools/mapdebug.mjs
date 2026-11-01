@@ -14,7 +14,7 @@ try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require(
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const a = process.argv.slice(2); const opt = { eval: [] };
 for (let i = 0; i < a.length; i++) if (a[i].startsWith('--')) { const k = a[i].slice(2), n = a[i + 1]; const v = n && !n.startsWith('--') ? (i++, n) : true; if (k === 'eval') opt.eval.push(v); else opt[k] = v; }
-const LOCKDIR = '/tmp/dust2-shot-locks'; fs.mkdirSync(LOCKDIR, { recursive: true });
+const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('mapdebug')); fs.mkdirSync(LOCKDIR, { recursive: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
 let lock = null;
 while (!lock) {
