@@ -26,7 +26,7 @@ import { FinalPass } from './post/final.js';
 import { makeRT } from './post/common.js';
 
 const CV = {
-  exposure: [0.9, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
+  exposure: [0.82, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
   bloom_strength: [0.05, 0, 1, 'bloom mix'],
   bloom_threshold: [1.6, 0, 20, 'bloom luminance threshold (exposed HDR)'],
   ao_intensity: [1.5, 0, 4, 'GTAO power (0 = off)'],
@@ -37,7 +37,7 @@ const CV = {
   bounce_intensity: [1.2, 0, 3, 'bounce light (x) — rebakes GI'],
   saturation: [0.86, 0, 2, 'grade saturation'],
   contrast: [1.18, 0.3, 2, 'grade S-curve (1 = neutral)'],
-  highlights: [0.08, 0, 0.5, 'grade highlight stretch'],
+  highlights: [0.12, 0, 0.5, 'grade highlight stretch'],
   grain: [0.15, 0, 3, 'film grain amount'],
   vignette: [0.22, 0, 1, 'vignette strength'],
   shadow_bias: [1.0, 0, 5, 'shadow bias (x)'],
@@ -434,7 +434,7 @@ export class RenderPipeline {
         map: this.map, bounds: this.bounds,
         sunMat: st.matrix, sunDepth: st.map.depthTexture, sunBias: 6 / (cam.far - cam.near),
         sunE: this.sunColor.clone().multiplyScalar(E), bounce: 0.6 * (World.cvar.bounce_intensity ?? 1),
-        openSkyGuess: guess, skySat: 0.55,
+        openSkyGuess: guess, skySat: 0.35,
       });
       lightUniforms.rpGIOn.value = (World.cvar.r_gi ?? 1) > 0 ? 1 : 0;
     } catch (e) {

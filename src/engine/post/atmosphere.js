@@ -57,7 +57,16 @@ vec3 multiBounce(float v, vec3 alb) {
 
 void main() {
   vec4 c = texture(tColor, vUv);
-  if (bad(c.rgb) || isnan(c.a)) c = vec4(0.0, 0.0, 0.0, 1.0);
+  if (bad(c.rgb) || isnan(c.a)) {
+    // NaN/Inf from a bad shading sample: patch from valid neighbours instead of a black hole
+    vec2 tx = 1.0 / vec2(textureSize(tColor, 0));
+    vec4 acc = vec4(0.0);
+    for (int j = -2; j <= 2; j++) for (int i = -2; i <= 2; i++) {
+      vec4 q = texture(tColor, vUv + vec2(i, j) * tx);
+      if (!bad(q.rgb) && !isnan(q.a)) acc += vec4(q.rgb, 1.0);
+    }
+    c = vec4(acc.w > 0.0 ? acc.rgb / acc.w : vec3(0.0), 1.0);
+  }
   c.rgb = min(c.rgb, vec3(6.0e4));
   float d = texture(tDepth, vUv).r;
   if (d >= 1.0) { gl_FragColor = vec4(c.rgb, 1.0); return; }

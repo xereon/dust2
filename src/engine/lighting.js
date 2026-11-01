@@ -23,7 +23,7 @@ export const lightUniforms = {
   rpSpecRef: { value: 1 },   // luminance of open-sky irradiance (specular occlusion reference)
   rpIndirect: { value: 1 },  // debug / global ambient multiplier
   rpIndoor: { value: 1.5 },
-  rpIndoorFloor: { value: 0.2 }, // min ambient in sealed spaces, as a fraction of open-sky irradiance  // extra ambient where the volume sees no sky (tunnels, under roofs)
+  rpIndoorFloor: { value: 0.55 }, // min ambient in sealed spaces, as a fraction of open-sky irradiance
   rpVMRot: { value: new THREE.Matrix3() },
   rpVMPos: { value: new THREE.Vector3() },
   rpVMSun: { value: 1 },
@@ -131,6 +131,17 @@ const LFM = BASE_LFM.replace('iblIrradiance += getIBLIrradiance( geometryNormal 
 `;
 
 const ALPHA_OUT = /* glsl */`
+// upstream NaN guard (degenerate tangent frames / normal maps): re-shade with the geometric
+// normal so a bad mesh reads as matte instead of a black hole or a bloom blob
+if (any(isnan(outgoingLight)) || any(isinf(outgoingLight))) {
+  vec3 rpAlb = (any(isnan(diffuseColor.rgb)) ? vec3(0.5) : diffuseColor.rgb);
+  vec3 rpE = rpGIEval(rpWP + rpGN * rpGIBias, rpGN);
+  #if NUM_DIR_LIGHTS > 0
+    rpE += directionalLights[0].color * max(dot(rpGN, rpSunDir), 0.0) * (isnan(rpSunVis) ? 1.0 : rpSunVis);
+  #endif
+  outgoingLight = rpAlb * RECIPROCAL_PI * rpE;
+  reflectedLight.indirectDiffuse = vec3(0.0); reflectedLight.indirectSpecular = vec3(0.0);
+}
 #include <opaque_fragment>
 #ifdef OPAQUE
   {
