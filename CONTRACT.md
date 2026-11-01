@@ -485,3 +485,11 @@ extra anims `zoom_out`, `bolt`, `silencer_on`, `silencer_off`, `plant`.
 `findPath(from, to)` → `Vector3[]` waypoints, each carrying `.t` (link type: walk/step/jump/
 crouchjump/drop) and `.n` (node index). `nearest(pos)` → node **index** (not an object).
 `areaOf(pos)` → callout name, `randomPointIn(zone)`, `visibleFrom(pos)`, `hidingSpots`.
+
+### 7a. Ownership decisions (lead)
+* **C4 has one owner: the rules module** (`World.match.bomb`). `src/weapons/c4.js` only runs the
+  plant/defuse input timing and steps aside whenever `World.match.bomb` exists.
+* FX positions for the first-person gun are in **viewScene space**: weapons pass
+  `viewmodel.muzzleView()` / eject-in-view plus `opts.viewmodel = true`; everyone else passes
+  world positions with `opts.viewmodel = false`.
+* Damage info may carry `tagging` / `taggingSmall` (slow-down when hit); `Player.takeDamage` reads them.

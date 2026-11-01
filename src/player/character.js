@@ -9,7 +9,7 @@ import { World } from '../core/world.js';
 import { defCvar } from '../core/cvars.js';
 import { buildSkeleton, BONE, HAND_R } from './models/skeleton.js';
 import { buildAgent } from './models/agents.js';
-import { layoutAtlas, bakeAtlasAsync, vertexPaint } from './models/paint.js';
+import { layoutAtlas, bakeAtlas, bakeAtlasAsync, vertexPaint } from './models/paint.js';
 import { Animator, HOLDS, holdKind } from './models/pose.js';
 import { makeHeldItem, vmAvailable } from './models/weapon.js';
 import { Ragdoll } from './models/ragdoll.js';
@@ -17,6 +17,7 @@ import { createHitboxSet, poseHitboxes, debugDrawHitboxes, rayVsHitboxes } from 
 export { rayVsHitboxes };
 
 defCvar('r_drawhitboxes', 0, 0, 1, 'draw character hitbox capsules');
+defCvar('r_character_async_bake', 0, 0, 1, 'bake agent textures time-sliced (shows vertex paint meanwhile)');
 defCvar('r_character_lod_dist', 1500, 200, 8000, 'distance where agents switch to the low LOD');
 
 const DEG = Math.PI / 180;
@@ -58,12 +59,20 @@ function teamAssets(team) {
   // hook the renderer's lighting patch now so the first visible frame doesn't recompile
   try { World.renderer?.setupMaterial?.(material); } catch (err) { /* renderer without hooks */ }
   a = { geo, material, tris: geo.map((g) => g.index.count / 3), ready: null, baked: false };
-  a.ready = bakeAtlasAsync(mb0, layout).then(({ maps }) => {
+  const applyMaps = ({ maps }) => {
     material.map = maps.map; material.normalMap = maps.normalMap;
     material.roughnessMap = maps.ormMap; material.metalnessMap = maps.ormMap; material.aoMap = maps.ormMap;
     for (const g of geo) { g.attributes.color.array.fill(1); g.attributes.color.needsUpdate = true; }
     a.baked = true;
-  }).catch((err) => console.error('[character] atlas bake failed', err));
+  };
+  // Default: bake synchronously (one-time ~0.5-1 s per team, at match start) so an agent is
+  // never seen untextured. r_character_async_bake 1 time-slices it behind the vertex paint.
+  if (!World.cvar.r_character_async_bake) {
+    try { applyMaps(bakeAtlas(mb0, 1024)); } catch (err) { console.error('[character] atlas bake failed', err); }
+    a.ready = Promise.resolve();
+  } else {
+    a.ready = bakeAtlasAsync(mb0, layout).then(applyMaps).catch((err) => console.error('[character] atlas bake failed', err));
+  }
   cache.set(key, a);
   return a;
 }

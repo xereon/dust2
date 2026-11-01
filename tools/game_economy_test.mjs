@@ -223,6 +223,23 @@ test('halftime swaps sides and resets money to $800', () => {
   for (const p of World.entities) assert.equal(p.money, 800);
   assert.equal(Ts[0].inventory.secondary, 'usp');
 });
+test('freeze time: ent.frozen set, cleared at freeze_end; round_mvp emitted', () => {
+  let fe = 0, mvp = 0;
+  World.on('freeze_end', () => fe++);
+  World.on('round_mvp', (e) => { if (e?.ent) mvp++; });
+  World.cvar.mp_freezetime = 0.5;
+  tickUntil(() => m.phase === 'roundend' || m.phase === 'freeze');
+  if (m.phase === 'live') { for (const p of World.entities) if (p.team === 'CT' && p.alive) kill(Ts[0], p); }
+  tickUntil(() => m.phase === 'freeze');
+  assert.ok(World.entities.every((p) => p.frozen === true), 'all frozen in freeze time');
+  tickUntil(() => m.phase === 'live');
+  assert.ok(World.entities.every((p) => !p.frozen), 'unfrozen after freeze');
+  assert.equal(fe, 1);
+  const win = Ts[0].team;
+  for (const p of World.entities) if (p.team !== win && p.alive) kill(Ts[0], p);
+  assert.equal(mvp, 1);
+  World.cvar.mp_freezetime = 0;
+});
 test('first to 13 ends the match', () => {
   let guard = 0;
   while (m.phase !== 'matchend' && guard++ < 40) {
