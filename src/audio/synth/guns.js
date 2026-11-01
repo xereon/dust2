@@ -92,10 +92,10 @@ export const GUN_DEFS = {
     body: 0.8, bodyDec: 0.04, bodyLP: [7500, 2100], bark: 0.5, barkF: 430, barkQ: 2.4, barkDec: 0.045,
     bark2: 0.5, bark2F: 1150, bark2Q: 2.6, thump: 0.95, thumpF: [165, 52], thumpTau: 0.022, thumpDec: 0.042,
     mech: 0.18, mechF: 2600, mechRing: 0.025, mechBody: 0.6, drive: 2.6, tail: 1.3, tailAmt: 0.32, tailT60: 1.0, farLP: 1600,
-    rattle: 0.4, ring: 0.22, ringF: 1350 }],
+    rattle: 0.55, ring: 0.28, ringF: 1350 }],
   m4a4: ['rifle', { crack: 1.15, crackHP: 2800, crackDec: 0.0009, sizzle: 1.0, sizzleHP: 2800, sizzleDec: 0.015, blast: 0.75, blastT: 0.0019, blastLP: 4800,
     body: 0.75, bodyDec: 0.021, bodyLP: [9500, 2800], bodyTau: 0.014, bark: 0.35, barkF: 820, barkQ: 1.8, barkDec: 0.03,
-    bark2: 0.42, bark2F: 2400, thump: 0.6, thumpF: [205, 68], thumpDec: 0.03, mech: 0.2, mechF: 3600, mechRing: 0.018, spring: 0.22, ring: 0.2, ringF: 2500,
+    bark2: 0.42, bark2F: 2400, thump: 0.6, thumpF: [205, 68], thumpDec: 0.03, mech: 0.2, mechF: 3600, mechRing: 0.018, spring: 0.3, ring: 0.26, ringF: 2500,
     drive: 2.3, tail: 1.1, farLP: 1900 }],
   m4a1s: ['rifle+supp', { thwipF: [2800, 1000], thwipTau: 0.007, thwipDec: 0.014, pew: 0.35, pewF: [2100, 800], thump: 0.4,
     thumpF: [150, 65], thumpDec: 0.022, mech: 0.85, mechF: 3000, mechDelay: 0.005, mech2: 0.6, mech2Delay: 0.042, mech2F: 2400, spring: 0.3 }],
@@ -213,7 +213,7 @@ export function gunshot(s, P0, mode = 'close') {
     const nw = new Float32Array(w + 8);
     for (let i = 0; i <= w; i++) nw[i] = 1 - 2 * i / w; // linear ramp + -> -
     svf(nw, sr, 'hp', 1500, 0.7);
-    mix(dry, unit(nw), P.nwave * s.rand(0.7, 1.1), at);
+    mix(dry, unit(nw), P.nwave * s.rand(0.9, 1.3), at);
   }
   // --- receiver / barrel ring: short inharmonic partials excited by the blast
   if (P.ring > 0) {
@@ -229,7 +229,7 @@ export function gunshot(s, P0, mode = 'close') {
   if (P.ground > 0) {
     const gd = Math.round(s.rand(0.0011, 0.0032) * sr * (far ? 2 : 1));
     const gc = svf(copy(dry), sr, 'lp', s.rand(5000, 9000), 0.7);
-    mix(dry, gc, P.ground * s.rand(0.35, 0.6) * (s.r() < 0.5 ? 1 : -0.8), gd);
+    mix(dry, gc, P.ground * s.rand(0.5, 0.8) * (s.r() < 0.5 ? 1 : -0.85), gd);
   }
 
   // compress + saturate the dry blast: dense, loud, "recorded through a preamp" character

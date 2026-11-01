@@ -465,3 +465,9 @@ Everything is synthesised with WebAudio (no sample files).
 * `ent.fov` — set by weapons when scoped; `active.zoomLevel` + `def.maxSpeedAlt` give scoped speed.
 * `BotManager.frame(dt, alpha)` must call `ent.frame(dt, alpha)` for every bot.
 * Ladders are brushes with `CONTENTS_PLAYERCLIP | CONTENTS_LADDER`.
+
+### 6a. Prop colliders (src/map/props.js)
+Prop factories return `{ object, colliders }` in local space (Y-up, base at y=0). A collider is
+`{min,max}` or `{prism:[{x,z}], y0, y1}` and may carry `surface` (a §4 key), `grate: true`
+(→ CONTENTS_GRATE, shoot-through) or `ladder: true` (→ CONTENTS_PLAYERCLIP|CONTENTS_LADDER).
+Wall-mounted props face local +z out of the wall. Materials named `*label*`/`*bulb*` never cast shadows.

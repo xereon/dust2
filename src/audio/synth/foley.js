@@ -1,5 +1,5 @@
 // Footsteps, body foley, bullet impacts and player-hit sounds.
-import { white, pink, svf, mix, modal, softclip, dcblock, fadeOut, envAD, TAU, tick, scatter, sweepSine, osc, scale, peak } from './dsp.js';
+import { white, pink, svf, biquad, mix, modal, softclip, dcblock, fadeOut, envAD, TAU, tick, scatter, sweepSine, osc, scale, peak } from './dsp.js';
 import { clack, scrape, cloth, rattle, whoosh, burst, tock, thud } from './mech.js';
 
 const fin = (o, s, hp = 30) => { dcblock(o, s.sr, hp); fadeOut(o, s.sr, 0.015); return [o]; };
@@ -83,15 +83,31 @@ function contact(o, s, t, surf, w) {
 
 export const FOOT_SURFACES = ['sand', 'gravel', 'concrete', 'plaster', 'wood', 'metal', 'metalgrate', 'tile', 'dirt'];
 
+const HARD = new Set(['concrete', 'plaster', 'tile', 'wood', 'metal', 'metalgrate']);
+const SCUFF = { concrete: [2400, 0.1], plaster: [2000, 0.11], tile: [3200, 0.08], wood: [1700, 0.08], metal: [2600, 0.06], metalgrate: [3000, 0.05],
+  sand: [3600, 0.14], gravel: [2800, 0.12], dirt: [1800, 0.12] };
+
 export function footstep(s, surf) {
   const ring = surf === 'metal' ? 0.4 : surf === 'metalgrate' ? 0.3 : 0.12;
   const o = new Float32Array(s.n(0.2 + ring));
   const toe = s.rand(0.045, 0.085);
-  contact(o, s, 0.002, surf, 1);
-  contact(o, s, toe, surf, s.rand(0.5, 0.72));
+  const heel = s.rand(0.85, 1);
+  // heel: the sole lands in 2-4 micro-impacts over a few ms, not one click
+  const hits = HARD.has(surf) ? 1 + Math.floor(s.r() * 3) : 1;
+  contact(o, s, 0.002, surf, heel);
+  for (let i = 1; i <= hits; i++) contact(o, s, 0.002 + i * s.rand(0.0018, 0.0045), surf, heel * s.rand(0.15, 0.35) / i);
+  // roll from heel to toe: a low-level friction bridge
+  const [sf, sa] = SCUFF[surf] || SCUFF.concrete;
+  scrape(o, s, 0.012, Math.max(0.02, toe - 0.012), { amp: sa * 0.45 * s.rand(0.5, 1.2), f0: sf * 0.8, f1: sf * 1.1, rough: 0.85, hp: 900 });
+  contact(o, s, toe, surf, s.rand(0.45, 0.75));
+  // toe push-off scuff on some steps
+  if (s.r() < 0.4) scrape(o, s, toe + s.rand(0.01, 0.03), s.rand(0.025, 0.05), { amp: sa * s.rand(0.6, 1.1), f0: sf * 1.1, f1: sf * 0.7, rough: 0.9, hp: 1000 });
   // kit + cloth (the "tactical" layer of CS footsteps)
   if (s.r() < 0.7) rattle(o, s, s.rand(0, 0.03), 0.06, { amp: 0.035, count: 3, f: 3600 });
   cloth(o, s, 0, 0.12, { amp: 0.035, f: 2600 });
+  // per-take colour: boot, stance and mic angle never repeat exactly
+  biquad(o, s.sr, 'peak', s.rand(700, 4000), 1.4, s.rand(-3.5, 3.5));
+  biquad(o, s.sr, 'highshelf', 5000, 0.7, s.rand(-2.5, 1.5));
   svf(o, s.sr, 'lp', 11000, 0.7);
   return fin(o, s, 40);
 }

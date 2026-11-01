@@ -26,7 +26,7 @@ import { FinalPass } from './post/final.js';
 import { makeRT } from './post/common.js';
 
 const CV = {
-  exposure: [1.0, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
+  exposure: [1.4, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
   bloom_strength: [0.05, 0, 1, 'bloom mix'],
   bloom_threshold: [1.6, 0, 20, 'bloom luminance threshold (exposed HDR)'],
   ao_intensity: [1.5, 0, 4, 'GTAO power (0 = off)'],
@@ -318,7 +318,7 @@ export class RenderPipeline {
 
   _applySun() {
     const E = this._sunE();
-    const sky = World.cvar.sky_intensity ?? 1;
+    const sky = 1.3 * (World.cvar.sky_intensity ?? 1);
     setSkyParams({ sunDir: this.sunDir, sunColor: this.sunColor, E, sky });
     this.shadows.setSun(this.sunDir, this.sunColor, E);
     const u = skyUniforms;
@@ -358,7 +358,7 @@ export class RenderPipeline {
       this.gi.bake({
         map: this.map, bounds: this.bounds,
         sunMat: st.matrix, sunDepth: st.map.depthTexture, sunBias: 6 / (cam.far - cam.near),
-        sunE: this.sunColor.clone().multiplyScalar(E), bounce: World.cvar.bounce_intensity ?? 1,
+        sunE: this.sunColor.clone().multiplyScalar(E), bounce: 0.6 * (World.cvar.bounce_intensity ?? 1),
         openSkyGuess: guess,
       });
       lightUniforms.rpGIOn.value = (World.cvar.r_gi ?? 1) > 0 ? 1 : 0;
@@ -443,7 +443,7 @@ export class RenderPipeline {
     const c = World.cvar;
     const lut = buildGradeLUT({
       contrast: c.contrast, saturation: c.saturation,
-      shadowTint: [-0.010, 0.002, 0.014], highlightTint: [0.018, 0.008, -0.016],
+      shadowTint: [-0.022, 0.0, 0.026], highlightTint: [0.016, 0.008, -0.018],
       lift: 0.004, gain: 0.995,
     });
     this.tonemap.setLUT(lut, 32);

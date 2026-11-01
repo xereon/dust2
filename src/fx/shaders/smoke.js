@@ -129,7 +129,8 @@ void main() {
   if (a < 0.003) discard;
   vec3 n = vec3(t.g * 2.0 - 1.0, t.b * 2.0 - 1.0, 0.0);
   n.z = sqrt(max(0.0, 1.0 - dot(n.xy, n.xy)));
-  n.xy = vec2(vRot.x * n.x - vRot.y * n.y, vRot.y * n.x + vRot.x * n.y);
+  n.xy = vec2(vRot.x * n.x - vRot.y * n.y, vRot.y * n.x + vRot.x * n.y) * 0.62;
+  n.z = sqrt(max(0.0, 1.0 - dot(n.xy, n.xy)));
   // sprite plane faces the eye: rebuild view-space normal around the view ray
   vec3 V = normalize(-vViewPos);
   vec3 up = abs(V.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);

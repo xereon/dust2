@@ -14,6 +14,8 @@ export const WEAPON_KEYS = ['knife', 'glock', 'usp', 'p250', 'deagle', 'tec9', '
   'mp7', 'ump45', 'p90', 'bizon', 'nova', 'xm1014', 'mag7', 'sawedoff', 'negev', 'm249', 'galil', 'famas', 'ak47', 'm4a4', 'm4a1s', 'ssg08',
   'aug', 'sg553', 'awp', 'g3sg1', 'scar20', 'taser'];
 const COMMON_GUNS = new Set(['ak47', 'm4a4', 'm4a1s', 'awp', 'glock', 'usp', 'deagle']);
+// rarely fired back-to-back: two takes + pitch jitter are enough
+const SLOW_FIRE = new Set(['p250', 'tec9', 'fiveseven', 'dualberettas', 'nova', 'xm1014', 'mag7', 'ssg08', 'g3sg1', 'scar20']);
 const EXTRA_GUNS = new Set(['cz75a', 'mp7', 'bizon', 'sawedoff']); // not in the contract list: render on demand only
 export const PARTS = {
   pistol: ['magout', 'magin', 'slide'], smg: ['magout', 'magin', 'boltback', 'boltfwd'], rifle: ['magout', 'magin', 'boltback', 'boltfwd'],
@@ -38,7 +40,7 @@ for (const k of Object.keys(GUN_DEFS)) {
   const common = COMMON_GUNS.has(k) && !k.endsWith('_unsil');
   const unsil = k.endsWith('_unsil') || EXTRA_GUNS.has(k);
   const base = k;
-  def(`weapon_${base}_fire`, (s) => gunshot(s, P, 'close'), { vars: 3, tier: unsil ? 3 : common ? 1 : 2 });
+  def(`weapon_${base}_fire`, (s) => gunshot(s, P, 'close'), { vars: SLOW_FIRE.has(k) ? 2 : 3, tier: unsil ? 3 : common ? 1 : 2 });
   def(`weapon_${base}_fire_far`, (s) => gunshot(s, P, 'far'), { vars: 2, sr: 16000, tier: unsil ? 3 : common ? 1 : 2 });
   def(`weapon_${base}_fire_2d`, (s) => gunshot(s, P, 'stereo'), { vars: 4, tier: 3 });
 }

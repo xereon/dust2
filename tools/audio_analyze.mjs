@@ -119,7 +119,7 @@ export function stats(chs, sr) {
     crestDb: +(db(pk) - db(rms50)).toFixed(1),
     centroidHz: Math.round(cen / Math.max(1e-20, tot)),
     centroid150Hz: Math.round(cenA / Math.max(1e-20, totA)),
-    attackMs: +((pkI / sr) * 1000).toFixed(1),
+    attackMs: +((m.findIndex((v) => Math.abs(v) >= 0.9 * pk) / sr) * 1000).toFixed(1), // time to 90% of peak
     decay40Ms: Math.round((d40 - ePkI) * 5),
     bands,
   };

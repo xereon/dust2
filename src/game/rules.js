@@ -227,6 +227,7 @@ export class MatchController {
       }
       if (sp) this.spawnPos.set(e, (this.spawnPos.get(e) || new THREE.Vector3()).copy(sp.pos));
       e.frozen = freeze > 0; // Player honours this: no movement, looking allowed
+      e.maxSpeedOverride = null;
     }
 
     this._rekitAll = false;
@@ -256,7 +257,7 @@ export class MatchController {
   }
 
   _goLive() {
-    for (const e of this.players()) e.frozen = false;
+    for (const e of this.players()) e.frozen = false; // CONTRACT §11a: cleared at freeze_end
     this.phase = 'live';
     this.timer = 0;
     this.roundTime = World.cvar.mp_roundtime;
@@ -496,13 +497,13 @@ export class MatchController {
         World.emit('bomb_plant_start', { ent: c, site });
       }
       b.plantProgress += dt;
-      c.frozen = true;
+      c.maxSpeedOverride = 0;
       c.origin.x = b.plantPos.x; c.origin.z = b.plantPos.z;
       if (c.velocity) { c.velocity.x = 0; c.velocity.z = 0; }
       if (b.plantProgress >= FORMAT.PLANT) this._plant(c, site);
     } else if (b.plantProgress > 0) {
       b.plantProgress = 0;
-      c.frozen = false;
+      c.maxSpeedOverride = null;
       World.emit('bomb_abortplant', { ent: c });
       World.emit('bomb_plant_abort', { ent: c });
     }
@@ -519,7 +520,7 @@ export class MatchController {
     b.beepAt = World.time;
     b.finalBeep = false;
     b.plantProgress = 0;
-    c.frozen = false;
+    c.maxSpeedOverride = null;
     if (c.inventory?.c4) { try { World.weapons?.remove?.(c, 'c4'); } catch {} if (c.inventory.c4 === 'c4') c.inventory.c4 = null; }
     c.money = clampMoney((c.money || 0) + ECON.PLANT_PLAYER);
     const s = this.stat(c); s.plants++; s.score += 2;
@@ -568,12 +569,12 @@ export class MatchController {
     if (b.defuser) {
       const d = b.defuser;
       if (d.alive === false || !this._holdingUse(d) || d.origin.distanceTo(b.pos) > DEFUSE_RANGE + 12) {
-        b.defuser = null; b.defuseProgress = 0; d.frozen = false;
+        b.defuser = null; b.defuseProgress = 0; d.maxSpeedOverride = null;
         World.emit('bomb_abortdefuse', { ent: d });
         World.emit('bomb_defuse_abort', { ent: d });
       } else {
         b.defuseProgress += dt;
-        d.frozen = true;
+        d.maxSpeedOverride = 0;
         d.origin.x = b.defusePos.x; d.origin.z = b.defusePos.z;
         if (d.velocity) { d.velocity.x = 0; d.velocity.z = 0; }
         if (b.defuseProgress >= b.defuseTime) {
@@ -601,7 +602,7 @@ export class MatchController {
     b.state = 'defused';
     d.money = clampMoney((d.money || 0) + ECON.DEFUSE_PLAYER);
     const s = this.stat(d); s.defuses++; s.score += 2;
-    b.defuser = null; d.frozen = false;
+    b.defuser = null; d.maxSpeedOverride = null;
     World.emit('bomb_defused', { site: b.site, ent: d, pos: b.pos.clone() });
     if (this.phase === 'planted') this._endRound('CT', 'bomb_defused', d);
   }
@@ -621,7 +622,7 @@ export class MatchController {
   _explode() {
     const b = this.bomb;
     b.state = 'exploded';
-    if (b.defuser) b.defuser.frozen = false;
+    if (b.defuser) b.defuser.maxSpeedOverride = null;
     b.defuser = null;
     this.bombModel.hide();
     // Settle the round before the blast kills anyone, so the deaths can't read as an
@@ -745,7 +746,7 @@ export class MatchController {
       World.emit('bomb_dropped', { ent: v, pos: b.pos.clone() });
     }
     if (b.defuser === v) { b.defuser = null; b.defuseProgress = 0; }
-    v.frozen = false;
+    v.frozen = false; v.maxSpeedOverride = null;
     this._checkElimination();
   }
 

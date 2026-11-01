@@ -207,7 +207,7 @@ export class SmokeVolume {
     const reveal = this.revealT(d) - 0.22;
     // provisional fade (refined in finish() once maxD is known)
     const fade = this.t0 + SMOKE.HOLD + hash1(c) * 0.7;
-    const size = 46 + r() * 16;
+    const size = 52 + r() * 18;
     this.pslots[p] = this.sys.writeParticle(this.index * SMOKE.PER + p, _a, reveal, _b, fade,
       size, r() * 6.283, (r() - 0.5) * 0.08, r(), 0.8, 0.85, 0.82 + r() * 0.18, this.groundY);
     this.radius = Math.max(this.radius, _a.distanceTo(this.pos) + size);
@@ -358,7 +358,7 @@ export class SmokeSystem {
       uCamWorld: { value: new THREE.Matrix4() },
       uSunDirV: { value: new THREE.Vector3() },
       uSunCol: shared.uSunCol, uSkyCol: shared.uSkyCol, uGroundCol: shared.uGroundCol,
-      uAlbedo: { value: new THREE.Vector3(0.6, 0.6, 0.59) },
+      uAlbedo: { value: new THREE.Vector3(0.7, 0.7, 0.69) },
       uDepth: shared.uDepth, uHasDepth: shared.uHasDepth, uDepthRes: shared.uDepthRes, uNearFar: shared.uNearFar,
       uNearFade: { value: new THREE.Vector2(10, 70) },
       ...THREE.UniformsLib.fog,

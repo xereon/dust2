@@ -8,7 +8,7 @@
 // faces, lintels over low-ceilinged passages, arches, trims and wall-end caps are generated
 // from that, so the walkable space defines the map exactly like the radar does.
 import * as THREE from 'three';
-import { CollisionWorld, CONTENTS_SOLID, CONTENTS_PLAYERCLIP, CONTENTS_GRATE } from '../player/collision.js';
+import { CollisionWorld, CONTENTS_SOLID, CONTENTS_PLAYERCLIP, CONTENTS_GRATE, CONTENTS_LADDER } from '../player/collision.js';
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -1059,7 +1059,8 @@ export class Kit {
     const a = yaw * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
     // local Three (x, y up, z) -> Source local (x, -z, y) then rotate by yaw about z
     const L2S = (x, z) => { const sx = x, sy = -z; return [pos[0] + sx * ca - sy * sa, pos[1] + sx * sa + sy * ca]; };
-    const flags = c.flags ?? (c.grate ? CONTENTS_GRATE : c.ladder ? 16 : c.noShot ? CONTENTS_PLAYERCLIP : CONTENTS_SOLID);
+    let flags = c.flags ?? (c.grate ? CONTENTS_GRATE : c.ladder ? (CONTENTS_PLAYERCLIP | CONTENTS_LADDER) : c.noShot ? CONTENTS_PLAYERCLIP : CONTENTS_SOLID);
+    if (flags & CONTENTS_LADDER) flags |= CONTENTS_PLAYERCLIP; // CONTRACT §11a: ladders are playerclip|ladder
     const s = c.surface || surf;
     if (c.min && c.max) {
       const mn = c.min, mx = c.max;
