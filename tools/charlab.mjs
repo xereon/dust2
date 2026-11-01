@@ -23,23 +23,9 @@ for (let i = 0; i < args.length; i++) {
   opt[a.slice(2)] = next === undefined || next.startsWith('--') ? true : (i++, next);
 }
 
-// share the render-slot semaphore with tools/shot.mjs
-const SLOTS = +process.env.DUST2_SHOT_SLOTS || 2;
-const LOCKDIR = (await (await import('./slot.mjs')).legacyDir('charlab'));
-fs.mkdirSync(LOCKDIR, { recursive: true });
-const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
-let myLock = null;
-for (let waited = 0; !myLock; waited++) {
-  for (let i = 0; i < SLOTS && !myLock; i++) {
-    const f = path.join(LOCKDIR, `slot${i}.lock`);
-    try { fs.writeFileSync(f, String(process.pid), { flag: 'wx' }); myLock = f; }
-    catch { const pid = +fs.readFileSync(f, 'utf8').trim(); if (!pid || !alive(pid)) { try { fs.unlinkSync(f); } catch {} } }
-  }
-  if (!myLock) { if (waited === 0) console.error('[charlab] waiting for a free render slot…'); await new Promise((r) => setTimeout(r, 1000)); }
-}
-const releaseLock = () => { try { if (myLock && fs.readFileSync(myLock, 'utf8').trim() === String(process.pid)) fs.unlinkSync(myLock); } catch {} };
-process.on('exit', releaseLock);
-for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { releaseLock(); process.exit(130); });
+// shared FIFO render-slot queue (tools/slot.mjs)
+const { acquireSlot } = await import('./slot.mjs');
+const releaseSlot = await acquireSlot('charlab');
 
 const W = +opt.w || 1600, H = +opt.h || 900;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json' };
@@ -76,6 +62,6 @@ try {
     await page.close();
   }
 } catch (e) { errors.push(String(e.stack || e)); }
-finally { await browser.close(); server.close(); }
+finally { await browser.close(); server.close(); releaseSlot(); }
 if (errors.length) { console.error(`\n${errors.length} ERROR(S):\n` + [...new Set(errors)].slice(0, 20).map((e) => '  ✗ ' + e).join('\n')); process.exit(2); }
 process.exit(0);
