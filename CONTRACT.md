@@ -203,7 +203,10 @@ export const TextureLib = {
   material(key, opts = {}) -> THREE.MeshStandardMaterial   // cached; opts {repeat, tint, aniso}
   maps(key) -> { map, normalMap, roughnessMap, metalnessMap, aoMap, displacementMap? }
   keys() -> string[]
-  info(key) -> { tile /* world units per repeat */, surface, hero }
+  info(key) -> { world /* world units per tile */, tile, surface, hero }
+  // material(key, { world, tint, antiTile, repeat, aniso })
+  // roughnessMap, metalnessMap and aoMap share ONE packed ORM texture:
+  //   R = AO, G = roughness, B = metalness, A = height (used by anti-tiling)
   preload(keys) -> Promise                                  // bake a set up front
   decal(type) -> Texture (with .normalMap)                  // bullet_*, blood, scorch
   detailNormal() -> Texture

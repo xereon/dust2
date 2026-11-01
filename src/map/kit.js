@@ -404,6 +404,12 @@ export class Kit {
         e.noWall = pick(R.o.walls) === false;
         e.wallMat = pick(R.o.wallMats) ?? R.o.wallMat ?? 'plaster_white';
         e.paint = pick(R.o.paints) ?? R.o.paint ?? null;
+        // painted base bands only on about one outdoor wall in four (Dust II leaves most bare)
+        if (e.paint && R.o.ceil == null && !R.o.keepPaint && /band/.test(e.paint.mat)) {
+          const mx = (e.a.x + e.b.x) / 2, my = (e.a.y + e.b.y) / 2;
+          const hsh = Math.abs(Math.sin(mx * 12.9898 + my * 78.233) * 43758.5453) % 1;
+          if (hsh > 0.27) e.paint = null;
+        }
         e.riserMat = pick(R.o.riserMats) ?? R.o.riserMat ?? null;
       }
     }
