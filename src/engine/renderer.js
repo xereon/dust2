@@ -26,7 +26,7 @@ import { FinalPass } from './post/final.js';
 import { makeRT } from './post/common.js';
 
 const CV = {
-  exposure: [1.4, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
+  exposure: [1.25, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
   bloom_strength: [0.05, 0, 1, 'bloom mix'],
   bloom_threshold: [1.6, 0, 20, 'bloom luminance threshold (exposed HDR)'],
   ao_intensity: [1.5, 0, 4, 'GTAO power (0 = off)'],
@@ -500,7 +500,7 @@ export class RenderPipeline {
     const c = World.cvar;
     const lut = buildGradeLUT({
       contrast: c.contrast, saturation: c.saturation,
-      shadowTint: [-0.022, 0.0, 0.026], highlightTint: [0.028, 0.012, -0.028],
+      shadowTint: [-0.010, 0.0, 0.012], highlightTint: [0.028, 0.012, -0.028],
       lift: 0.004, gain: 1.0, highlights: c.highlights,
     });
     this.tonemap.setLUT(lut, 32);

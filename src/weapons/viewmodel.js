@@ -36,8 +36,8 @@ const SCALARS = ['magVis', 'bolt', 'slide', 'lhMag', 'lhBolt', 'lhFree', 'lhSil'
 const VECS = ['gp', 'gr', 'mp', 'mr', 'lhFreeP', 'rp', 'rr', 'silP', 'rhFreeP'];
 const STEPPED = ['magVis', 'vis', 'silVis', 'nade', 'shell'];   // visibility-like: never crossfaded
 // hand elbow offsets in camera space (in): forearm direction from the wrist
-const ELBOW_R = new THREE.Vector3(6, -6, 8);
-const ELBOW_L = new THREE.Vector3(-4.5, -7, 6.5);
+const ELBOW_R = new THREE.Vector3(3.5, -8.5, 5);
+const ELBOW_L = new THREE.Vector3(-3.5, -8.5, 4.5);
 
 // critically-ish damped spring on a scalar array
 class Spring {

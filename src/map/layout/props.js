@@ -45,6 +45,19 @@ export function floorPatch(K, mat, [cx, cy], z, r, seed = 1, n = 18) {
   for (let i = 0; i < n; i++) K.poly(mat + '#decal', [C, P[i], P[(i + 1) % n]], { col: 0.96, normal: [0, 0, 1] });
 }
 
+/** Pillar of rough dressed stone blocks, courses of two or three blocks with ragged joints. */
+function stonePillar(K, [cx, cy], z, [w, d], courses = 4, ch = 27) {
+  for (let c = 0; c < courses; c++) {
+    const n = c % 2 ? 2 : 3, z0 = z + c * ch, z1 = z0 + ch - 0.6;
+    for (let i = 0; i < n; i++) {
+      const x0 = cx - w / 2 + (w * i) / n, x1 = cx - w / 2 + (w * (i + 1)) / n;
+      const j = ((c * 7 + i * 3) % 5) - 2;
+      K.box([x0 + 0.4 + j * 0.4, cy - d / 2 - (j % 2), z0], [x1 - 0.4 + j * 0.3, cy + d / 2 + (j % 3) * 0.5, z1 - (i % 2) * 2], 'stone_block',
+        { color: 0.86 + 0.04 * j, uvScale: 96 });
+    }
+  }
+}
+
 /** Corrugated metal sheet nailed to timber posts, from a to b (Source [x,y]) on floor z, height h. */
 function corrugatedFence(K, a, b, z, h = 92, { posts = true, brace = true } = {}) {
   const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, nx = uy, ny = -ux;
@@ -207,26 +220,24 @@ export function build(K) {
   crate(K, [-1631, 2546, 4], [64, 120, 104], 0, 1);
   prop(K, 'plankFence', [120, 104], [-1598, 2546, 4], 90, null);
   // stone-block pillar with corrugated sheets nailed to posts in front of the window ledge
-  prop(K, 'stoneBlocks', [64, 56, 7], [-1440, 2590, 4], 0, () => K.obox([-1440, 2590, 4], [64, 56, 100], 0, 'stone_block'));
-  prop(K, 'stoneBlocks', [44, 40, 3], [-1478, 2566, 4], 12, () => K.obox([-1478, 2566, 4], [44, 40, 42], 12, 'stone_block'));
-  corrugatedFence(K, [-1462, 2552], [-1364, 2552], 4, 92);
-  corrugatedFence(K, [-1366, 2552], [-1366, 2600], 4, 92, { brace: false });
-  crate(K, [-1584, 2753, 4], 64, 63, 2);
+  stonePillar(K, [-1440, 2582], 4, [64, 40], 4);
+  corrugatedFence(K, [-1450, 2556], [-1396, 2556], 4, 62, { brace: false });
+  corrugatedFence(K, [-1404, 2588], [-1336, 2588], 4, 104);
   crate(K, [-1829, 2654, 32], [70, 36, 36], 45);
   crate(K, [-2058, 2856, 32], 60, 0, 3);
   crate(K, [-2060, 2482, 32], [34, 70, 36]);
   barrel(K, [-1361, 2344, 4]); barrel(K, [-1358, 2379, 4], 1);
   // the big timber gate in B's north wall and the tarp-covered pallets
   prop(K, 'bigDoorMetal', [150, 170, 0, { paint: 'teal', arch: true }], [-1620, 2895, 4], 0);
-  prop(K, 'tarp', [64, 56, 48, 'bluegrey'], [-1505, 2752, 4], 4);
+  prop(K, 'tarp', [84, 64, 56, 'bluegrey'], [-1590, 2776, 4], 2);
   prop(K, 'tarp', [60, 52, 44, 'bluegrey'], [-1420, 2430, 4], -12);
   prop(K, 'stoneBlocks', [48, 40, 5], [-1690, 2600, 4], 0);
   prop(K, 'stoneBlocks', [48, 40, 4], [-1690, 2650, 4], 90);
   // bombsite markers
-  bombMark(K, [-1508, 2640], 4, 46, 14);
+  bombMark(K, [-1545, 2645], 4, 54, 14);
   bombMark(K, [1118, 2462], 96, 44, -8);
   // B floor: dusty dirt with worn flagstone patches
-  floorPatch(K, 'flagstone', [-1508, 2640], 4, 150, 1);
+  floorPatch(K, 'flagstone', [-1545, 2650], 4, 140, 1);
   floorPatch(K, 'flagstone', [-1430, 2380], 4, 110, 2);
   floorPatch(K, 'flagstone', [-1640, 2780], 4, 95, 3);
   floorPatch(K, 'flagstone', [-1560, 2200], 4, 120, 4);

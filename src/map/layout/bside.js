@@ -4,7 +4,7 @@ import { zx, zy, zc } from './util.js';
 
 export function build(K) {
   const tun = { mat: 'concrete_floor', wallMat: 'plaster_wall', ceilMat: 'wood_planks', paint: { h: 36, mat: 'plaster_wall#dark' } };
-  const stoneWall = { wallMat: 'adobe', paint: null };
+  const stoneWall = { wallMat: 'adobe', paint: null, tint: [0.9, 0.9, 0.97] };
 
   // ---- upper tunnels ------------------------------------------------------------------------
   K.region('utun_mouth', zc([[-1736, 716], [-1588, 716], [-1588, 744], [-1736, 744]], 30),

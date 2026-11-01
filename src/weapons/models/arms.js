@@ -12,12 +12,12 @@ import { getMaterial } from './materials.js';
 const DEG = Math.PI / 180;
 // finger: knuckle position, segment lengths, radii (base, mid, tip), splay (deg about Y)
 const FINGERS = [
-  { k: [-1.1, 0.02, -3.5], L: [1.6, 0.96, 0.78], R: [0.37, 0.34, 0.31, 0.28], splay: 5 },
-  { k: [-0.37, 0.06, -3.68], L: [1.76, 1.08, 0.82], R: [0.38, 0.35, 0.32, 0.29], splay: 1 },
-  { k: [0.37, 0.0, -3.56], L: [1.66, 1.02, 0.8], R: [0.36, 0.33, 0.3, 0.27], splay: -3 },
-  { k: [1.04, -0.12, -3.2], L: [1.28, 0.78, 0.7], R: [0.31, 0.28, 0.26, 0.24], splay: -8 },
+  { k: [-1.02, 0.02, -3.45], L: [1.6, 0.96, 0.78], R: [0.33, 0.3, 0.27, 0.24], splay: 5 },
+  { k: [-0.34, 0.06, -3.62], L: [1.76, 1.08, 0.82], R: [0.34, 0.31, 0.28, 0.25], splay: 1 },
+  { k: [0.34, 0.0, -3.5], L: [1.66, 1.02, 0.8], R: [0.32, 0.29, 0.26, 0.23], splay: -3 },
+  { k: [0.96, -0.12, -3.16], L: [1.28, 0.78, 0.7], R: [0.28, 0.25, 0.23, 0.21], splay: -8 },
 ];
-const THUMB = { base: [-0.95, -0.36, -0.8], L: [1.55, 1.22, 1.0], R: [0.5, 0.42, 0.39, 0.34] };
+const THUMB = { base: [-0.9, -0.32, -0.8], L: [1.5, 1.18, 0.98], R: [0.44, 0.37, 0.34, 0.3] };
 // Thumb metacarpal rest frame: the bone points along `dir` (forward, thumb-side, palmar) and
 // flexes (rotation about its local X) toward `curl` — across the palm, i.e. opposition.
 const THUMB_DIR = [-0.62, -0.42, -0.66], THUMB_CURL = [0.85, -0.45, -0.3];
@@ -34,7 +34,7 @@ const THUMB_REST = thumbRest();
 
 const STYLE = {
   CT: { glove: 'glove_ct', palm: 'leather_ct', armor: 'armor_ct', sleeve: 'sleeve_ct', bareTips: 0, skin: 'skin', cuff: 'glove_ct' },
-  T: { glove: 'glove_t2', palm: 'glove_t', armor: null, knuckleStrip: 'glove_t', sleeve: 'sleeve_t', bareTips: 2, skin: 'skin', cuff: 'glove_t' },
+  T: { glove: 'glove_t2', palm: 'glove_t', armor: null, knuckleStrip: 'glove_t', sleeve: 'sleeve_t', bareTips: 1, skin: 'skin', cuff: 'glove_t2' },
 };
 
 // Tapered capsule along -Z from 0 (radius r0) to L (radius r1), flattened dorsally.
@@ -129,41 +129,37 @@ function template(team) {
   // --- palm (top-view outline, extruded in Y with a fat bevel => pillowy) ---
   // outline in (x, u) with u = distance toward the fingers
   const palmPts = [
-    [-1.05, -0.3, 0.5], [1.0, -0.3, 0.6], [1.42, 2.6, 0.7], [1.3, 3.3, 0.4], [0.7, 3.72, 0.4],
-    [-0.3, 3.85, 0.4], [-1.25, 3.62, 0.45], [-1.52, 2.8, 0.5], [-1.45, 1.2, 0.6],
+    [-0.95, -0.3, 0.45], [0.92, -0.3, 0.5], [1.3, 2.6, 0.6], [1.2, 3.25, 0.35], [0.65, 3.62, 0.35],
+    [-0.3, 3.75, 0.35], [-1.15, 3.55, 0.4], [-1.4, 2.8, 0.45], [-1.33, 1.2, 0.5],
   ];
-  const palmGeo = G.deform(G.top(palmPts, 1.18, { bevel: 0.42, bseg: 4, cseg: 4 }), (v) => {
+  const palmGeo = G.deform(G.top(palmPts, 1.0, { bevel: 0.32, bseg: 4, cseg: 4 }), (v) => {
     // dorsal arch across the knuckles and thinning toward the fingers
     v.y += -0.12 * (v.x * v.x) / 2;
     const u = -v.z;
     if (v.y < 0) v.y *= 1 - 0.18 * Math.max(0, (u - 2.2) / 1.6);
     if (v.y > 0) v.y *= 0.92;
   }, 70);
-  sb.add(st.palm, palmGeo, root, world[root], { m: M([0, -0.06, 0]) });
-  // back of the hand: glove shell (slightly larger, top half) for CT fabric / T leather
-  if (st.palm !== st.glove) {
-    const back = G.deform(G.top(palmPts.map((p) => [p[0] * 1.02, p[1], p[2]]), 0.7, { bevel: 0.3, bseg: 3, cseg: 4 }), (v) => { v.y += -0.12 * (v.x * v.x) / 2; }, 70);
-    sb.add(st.glove, back, root, world[root], { m: M([0, 0.26, 0]) });
-  }
+  sb.add(st.glove, palmGeo, root, world[root], { m: M([0, -0.04, 0]) });
+  // leather palm patch (palmar side), conforming to the palm surface
+  const pp = G.deform(G.top(palmPts.map((p) => [p[0] * 0.9, p[1] * 0.92 + 0.15, 0.3]), 0.12, { bevel: 0.05, bseg: 2, cseg: 3 }), (v) => { v.y -= 0.05 * v.x * v.x; }, 70);
+  sb.add(st.palm, pp, root, world[root], { m: M([0, -0.5, 0]) });
   // hypothenar pad on the pinky edge of the palm
-  sb.add(st.palm, G.sphere(0.62, 14, 10), root, world[root], { m: M([0.95, -0.28, -1.5], [0, 0, 0], [0.75, 0.85, 1.9]) });
+  sb.add(st.palm, G.sphere(0.48, 14, 10), root, world[root], { m: M([0.86, -0.24, -1.55], [0, 0, 0], [0.75, 0.8, 1.9]) });
   // knuckles
   FINGERS.forEach((f) => {
     // subtle knuckle bumps (mostly buried in the back of the hand)
-    sb.add(st.glove, G.sphere(f.R[0] * 0.78, 12, 8), root, world[root], { m: M([f.k[0], f.k[1] + 0.02, f.k[2] + 0.1], [0, 0, 0], [1.0, 0.7, 1.0]) });
+    sb.add(st.glove, G.sphere(f.R[0] * 0.72, 12, 8), root, world[root], { m: M([f.k[0], f.k[1], f.k[2] + 0.1], [0, 0, 0], [1.0, 0.62, 1.0]) });
   });
   if (st.knuckleStrip) {
     // T: stitched leather reinforcement strip across the knuckles + thumb-side palm patch
-    const strip = G.deform(G.box(2.75, 0.09, 0.62, { r: 0.04 }), (v) => { v.y -= 0.14 * v.x * v.x; v.z += 0.11 * v.x; }, 60);
-    sb.add(st.knuckleStrip, strip, root, world[root], { m: M([-0.02, 0.5, -3.2], [4, 0, -1]) });
-    sb.add(st.knuckleStrip, G.deform(G.box(1.4, 0.08, 1.6, { r: 0.05 }), (v) => { v.y += 0.12 * v.x * v.x; }, 60), root, world[root], { m: M([-0.55, -0.66, -1.6]) });
+    const strip = G.deform(G.box(2.5, 0.06, 0.5, { r: 0.025 }), (v) => { v.y -= 0.14 * v.x * v.x; v.z += 0.11 * v.x; }, 60);
+    sb.add(st.knuckleStrip, strip, root, world[root], { m: M([-0.02, 0.44, -3.15], [4, 0, -1]) });
   }
   if (st.armor) {
     // hard knuckle guard across the MCP line + wrist-side vent plate
     const guard = G.deform(G.box(2.9, 0.15, 0.78, { r: 0.07 }), (v) => { v.y -= 0.15 * v.x * v.x; v.z += 0.12 * v.x; }, 60);
     sb.add(st.armor, guard, root, world[root], { m: M([-0.02, 0.56, -3.28], [4, 0, -1]) });
     // vented ridges on the guard
-    for (let i = -2; i <= 2; i++) sb.add(st.armor, G.box(0.08, 0.06, 0.5, { r: 0.025 }), root, world[root], { m: M([i * 0.5, 0.64 - 0.15 * (i * 0.5) ** 2, -3.3 + 0.06 * i], [4, 0, 0]) });
     sb.add(st.glove, G.deform(G.box(2.3, 0.14, 1.5, { r: 0.07 }), (v) => { v.y -= 0.12 * v.x * v.x; }, 60), root, world[root], { m: M([0.05, 0.52, -1.75], [2, 0, 0]) });
   }
 
@@ -172,7 +168,7 @@ function template(team) {
     for (let j = 0; j < 3; j++) {
       const bare = j >= 3 - st.bareTips;
       const mat = bare ? st.skin : st.glove;
-      const r0 = f.R[j] + (bare ? 0 : 0.04), r1 = f.R[j + 1] + (bare ? 0 : 0.04);
+      const r0 = f.R[j] + (bare ? 0 : 0.03), r1 = f.R[j + 1] + (bare ? 0 : 0.03);
       sb.add(mat, phalanx(r0, r1, f.L[j], 0.86, j === 2), fingerIdx[i][j], world[fingerIdx[i][j]]);
       if (bare && j === 2) {
         // nail
@@ -193,37 +189,30 @@ function template(team) {
       }
     }
     // palm-side finger crease pads (fabric seam at the joints)
-    sb.add(st.palm, G.sphere(f.R[1] * 0.92, 10, 6), fingerIdx[i][1], world[fingerIdx[i][1]], { m: M([0, -0.1, -0.02], [0, 0, 0], [1, 0.8, 1]) });
+    sb.add(st.palm, G.sphere(f.R[1] * 0.85, 10, 6), fingerIdx[i][1], world[fingerIdx[i][1]], { m: M([0, -0.1, -0.02], [0, 0, 0], [0.95, 0.7, 1]) });
   });
 
   // --- thumb ---
   const tb = [t0, t1, t2];
   for (let j = 0; j < 3; j++) {
     const bare = st.bareTips && j === 2;
-    const mat = bare ? st.skin : (j === 0 ? st.palm : st.glove);
-    sb.add(mat, phalanx(THUMB.R[j] + (bare ? 0 : 0.04), THUMB.R[j + 1] + (bare ? 0 : 0.04), THUMB.L[j], 0.9, j === 2), tb[j], world[tb[j]]);
+    const mat = bare ? st.skin : st.glove;
+    sb.add(mat, phalanx(THUMB.R[j] + (bare ? 0 : 0.03), THUMB.R[j + 1] + (bare ? 0 : 0.03), THUMB.L[j], 0.88, j === 2), tb[j], world[tb[j]]);
     if (bare) sb.add('nail', G.deform(G.box(THUMB.R[3] * 1.35, 0.05, THUMB.L[2] * 0.6, { r: 0.08 }), (v) => { v.y -= 0.35 * v.x * v.x; }, 70), tb[j], world[tb[j]], { m: M([0, THUMB.R[3] * 0.86, -THUMB.L[2] * 0.62]) });
   }
   // thenar muscle mass (bound to the thumb metacarpal so it bulges with it)
-  sb.add(st.palm, G.sphere(0.62, 14, 10), t0, world[t0], { m: M([0.25, -0.1, -0.55], [0, 0, 0], [1.05, 0.9, 1.5]) });
+  sb.add(st.glove, G.sphere(0.5, 14, 10), t0, world[t0], { m: M([0.22, -0.08, -0.5], [0, 0, 0], [1.0, 0.85, 1.5]) });
 
   // --- wrist + forearm (bound to `arm`, pointing +Z) ---
   const toBack = M([0, 0, 0], [0, 180, 0]);
-  const fore = G.lathe([[0.001, -0.6], [0.95, -0.5], [1.12, 0.0], [1.2, 2.0], [1.42, 5.0], [1.62, 8.0], [1.72, 11.5], [1.74, 14]], 20, { crease: 80 });
-  fore.scale(1, 0.8, 1);
-  const cuffLen = team === 'T' ? 1.3 : 2.4;
-  if (team === 'T') {
-    sb.add(st.skin, fore, arm, world[arm], { m: toBack });
-    // rolled sleeve
-    const roll = G.lathe([[1.5, 5.4], [1.95, 5.6], [2.12, 6.2], [2.05, 6.9], [1.85, 7.2]], 20, { crease: 80 });
-    roll.scale(1, 0.86, 1);
-    sb.add(st.sleeve, G.deform(roll, (v) => { const a = Math.atan2(v.y, v.x); v.x *= 1 + 0.05 * Math.sin(a * 5); }), arm, world[arm], { m: toBack });
-    const sl = G.lathe([[1.9, 7.0], [2.0, 9], [2.2, 14]], 18, { crease: 80 }); sl.scale(1, 0.86, 1);
-    sb.add(st.sleeve, sl, arm, world[arm], { m: toBack });
-  } else {
+  const fore = G.lathe([[0.001, -0.5], [0.85, -0.4], [1.0, 0.0], [1.08, 1.5], [1.2, 3.0]], 20, { crease: 80 });
+  fore.scale(1, 0.78, 1);
+  const cuffLen = team === 'T' ? 1.9 : 2.4;
+  sb.add(st.skin, fore, arm, world[arm], { m: toBack });   // wrist gap only; sleeve covers the rest
+  {
     // sleeve: bunched compression folds near the cuff, looser further up the arm
-    const prof = [[1.42, 1.55], [1.66, 1.8]];
-    for (let i = 0; i <= 24; i++) { const u = 2.0 + i * 0.5; prof.push([1.72 + 0.045 * (u - 2) - 0.0012 * (u - 2) * (u - 2), u]); }
+    const prof = [[1.22, 1.55], [1.48, 1.8]];
+    for (let i = 0; i <= 20; i++) { const u = 2.0 + i * 0.5; prof.push([1.55 + 0.05 * (u - 2) - 0.0012 * (u - 2) * (u - 2), u]); }
     const sl = G.lathe(prof, 28, { crease: 80 });
     sl.scale(1, 0.84, 1);
     sb.add(st.sleeve, G.deform(sl, (v) => {
@@ -234,17 +223,18 @@ function template(team) {
       v.x *= 1 + fold; v.y *= 1 + fold;
     }, 80), arm, world[arm], { m: toBack });
     // cuff band + velcro tab
-    const cb = G.lathe([[1.5, 1.45], [1.66, 1.5], [1.7, 1.65], [1.7, 2.25], [1.64, 2.4]], 28, { crease: 70 });
+    const cb = G.lathe([[1.3, 1.45], [1.48, 1.5], [1.53, 1.65], [1.53, 2.25], [1.47, 2.4]], 28, { crease: 70 });
     cb.scale(1, 0.85, 1);
     sb.add(st.sleeve, cb, arm, world[arm], { m: toBack, c: 0xcfcfcf });
-    sb.add(st.sleeve, G.deform(G.box(0.8, 0.12, 0.75, { r: 0.06 }), (v) => { v.y -= 0.25 * v.x * v.x; }, 70), arm, world[arm], { m: M([-0.55, 1.42, 1.9], [0, 0, 25]), c: 0xb8b8b8 });
+    if (team === 'CT') sb.add(st.sleeve, G.deform(G.box(0.8, 0.12, 0.75, { r: 0.06 }), (v) => { v.y -= 0.25 * v.x * v.x; }, 70), arm, world[arm], { m: M([-0.5, 1.26, 1.9], [0, 0, 25]), c: 0xb8b8b8 });
+    else for (const a of [0.6, 2.2]) sb.add('brass', G.cyl(0.09, 0.09, 0.08, 10, { axis: 'y' }), arm, world[arm], { m: M([Math.cos(a) * 1.53, Math.sin(a) * 1.3, 2.0]) });
   }
   // glove cuff around the wrist, with a strap on top
-  const cuff = G.lathe([[1.08, -0.4], [1.24, -0.2], [1.3, 0.4], [1.32, cuffLen - 0.2], [1.2, cuffLen]], 20, { crease: 70 });
-  cuff.scale(1, 0.82, 1);
+  const cuff = G.lathe([[0.98, -0.3], [1.08, -0.15], [1.12, 0.3], [1.14, cuffLen - 0.2], [1.06, cuffLen]], 20, { crease: 70 });
+  cuff.scale(1, 0.78, 1);
   sb.add(st.cuff, cuff, arm, world[arm], { m: toBack });
-  sb.add(st.palm, G.deform(G.box(1.5, 0.14, 1.0, { r: 0.08 }), (v) => { v.y -= 0.22 * v.x * v.x; }, 70), arm, world[arm], { m: M([0.15, 1.08, cuffLen * 0.45]) });
-  if (st.armor) sb.add(st.armor, G.box(0.3, 0.1, 0.3, { r: 0.04 }), arm, world[arm], { m: M([0.15, 1.2, cuffLen * 0.45]) });
+  sb.add(st.palm, G.deform(G.box(1.3, 0.1, 0.8, { r: 0.06 }), (v) => { v.y -= 0.3 * v.x * v.x; }, 70), arm, world[arm], { m: M([0.1, 0.9, cuffLen * 0.45]) });
+  if (st.armor) sb.add(st.armor, G.box(0.26, 0.08, 0.26, { r: 0.03 }), arm, world[arm], { m: M([0.1, 0.98, cuffLen * 0.45]) });
 
   const t = { ...sb.build(), bones };
   cache.set(team, t);
