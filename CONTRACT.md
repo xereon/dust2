@@ -239,6 +239,9 @@ export async function buildDust2() -> MapData
 //   fog: { color: Color, density: number },
 //   walkable: Float32Array,                // triangle soup of walkable surfaces for nav
 //   callouts: { [name]: Zone },            // 'long', 'catwalk', 'mid', 'tunnels', ...
+//   soundEmitters: [{ name, type, pos, radius }],  // looping ambience points for audio
+//   regions: [...],                        // per-area build data (kit.js), read-only
+//   stats: { meshes, triangles, brushes, props },
 // }
 // Zone = { min: Vector3, max: Vector3, name: string }
 ```

@@ -1158,6 +1158,9 @@ function spanAt(pts, v, axis) {
   return [xs[0], xs[xs.length - 1]];
 }
 
+/** Decals (stencil labels) and lamp bulbs never cast shadows. */
+const NO_SHADOW = /label|bulb/i;
+
 /** Bake a prop hierarchy into one mesh per material (static props never move). */
 export function mergeStatic(group) {
   const out = new THREE.Group();
@@ -1178,9 +1181,10 @@ export function mergeStatic(group) {
   for (const b of bins.values()) {
     let g = null;
     try { g = b.list.length === 1 ? b.list[0] : mergeList(b.list); } catch { g = null; }
-    if (!g) { for (const x of b.list) { const m = new THREE.Mesh(x, b.mat); m.castShadow = true; m.receiveShadow = true; out.add(m); } continue; }
+    const cast = !NO_SHADOW.test(b.mat?.name || '');
+    if (!g) { for (const x of b.list) { const m = new THREE.Mesh(x, b.mat); m.castShadow = cast; m.receiveShadow = true; out.add(m); } continue; }
     const m = new THREE.Mesh(g, b.mat);
-    m.castShadow = true; m.receiveShadow = true;
+    m.castShadow = cast; m.receiveShadow = true;
     m.matrixAutoUpdate = false; m.updateMatrix();
     out.add(m);
   }

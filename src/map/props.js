@@ -224,7 +224,7 @@ export function addColliders(collision, colliders, matrix = null, surface = 'def
   const ids = [];
   for (const c of list) {
     const s = c.surface || surface;
-    const f = flags ?? (c.ladder ? 16 : c.grate ? 4 : 1);
+    const f = flags ?? (c.ladder ? 18 : c.grate ? 4 : 1);
     if (c.min) ids.push(collision.addBox(new THREE.Vector3(...c.min), new THREE.Vector3(...c.max), s, f));
     else ids.push(collision.addBrush(prismPlanes(c), s, f));
   }
