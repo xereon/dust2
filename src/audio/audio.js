@@ -185,7 +185,7 @@ export class Audio {
     this.lastHit = new Map();
     this.impactTimes = [0, 0, 0, 0, 0];
     this.pendingFlash = [];
-    this.statsCount = { played: 0, dropped: 0, stolen: 0 };
+    this.statsCount = { played: 0, dropped: 0, stolen: 0, outOfRange: 0, notReady: 0, suspended: 0 };
     this._opts = opts;
     this.deferred = [];
     const harness = World.harness && !World.params?.has?.('audio');
@@ -346,10 +346,11 @@ export class Audio {
   _start(name, pos, opts = {}) {
     if (!this.enabled || !this.ctx) return null;
     // before the first user gesture the context is suspended: drop, don't queue a burst for later
-    if (!this.offline && this.ctx.state !== 'running') return null;
+    if (!this.offline && this.ctx.state !== 'running') { this.statsCount.suspended++; return null; }
     const p = profile(name);
     const spatial = pos != null && p.spatial && !opts.force2D;
     if (!this.bank.need(name)) {
+      this.statsCount.notReady++;
       if (!opts.loop && !opts.noDefer && this.bank.pending.has(name) && this.deferred.length < 24) {
         this.deferred.push({ name, pos: pos != null ? toVec(pos, new THREE.Vector3()) : null, opts: { ...opts, noDefer: true }, t: performance.now(), max: opts.deferMs ?? 250 });
       }
@@ -362,7 +363,7 @@ export class Audio {
       toVec(pos, _v);
       d = _v.distanceTo(this.listenerPos);
       dg = distanceGain(p, d, scale);
-      if (dg <= 0.0005) { this.statsCount.dropped++; return null; }
+      if (dg <= 0.0005) { this.statsCount.outOfRange++; return null; }
     }
     const base = p.gain * (opts.volume ?? 1);
     const prio = (opts.prio ?? p.prio) * (0.4 + 0.6 * Math.min(1, base * dg * 3));
@@ -604,6 +605,7 @@ export class Audio {
     const on = (names, fn) => { for (const n of names.split(' ')) World.on(n, (p) => { if (this.enabled) fn(p || {}, n); }); };
 
     on('pointerlock', () => this.unlock());
+    on('spawn', (p) => { if (p.ent) this._trk(p.ent).spawnT = performance.now(); });
     on('fire', (p) => {
       const w = p.weapon;
       const sil = p.silenced ?? w?.silenced ?? w?.silencer ?? w?.silencerOn ?? p.ent?.active?.silenced;
@@ -656,7 +658,7 @@ export class Audio {
     on('weapon_mode', (p) => this._entSound('wpn_zoom', p.ent, { volume: 0.7 }));
     on('weapon_drop', (p) => { const pt = p.pos || p.point; if (pt) this.playAt('weapon_land', pt, { delay: 0.35 }); });
     on('bomb_dropped', (p) => { const pt = p.pos || p.point; if (pt) this.playAt('weapon_land', pt, { delay: 0.3, volume: 0.8, pitch: 0.9 }); });
-    on('weapon_pickup bomb_pickup', (p) => this._entSound('item_pickup', p.ent, {}));
+    on('weapon_pickup bomb_pickup', (p) => { if (!this._justSpawned(p.ent)) this._entSound('item_pickup', p.ent, {}); }); // not for the spawn loadout
     on('radio', (p) => {
       const me = World.local;
       if (!p.ent || !me || p.ent === me || (p.ent.team && me.team && p.ent.team !== me.team)) return;
@@ -825,6 +827,7 @@ export class Audio {
     const t = performance.now();
     const tr = this._trk(ent);
     if (tr.deployT && t - tr.deployT < 150) return;
+    if (!this._isLocal(ent) && this._justSpawned(ent)) return; // a spawn wave of bots drawing knives is noise
     tr.deployT = t;
     this._entSound(`deploy_${fam}`, ent, { volume: this._isLocal(ent) ? 1 : 0.8 });
   }
@@ -887,6 +890,7 @@ export class Audio {
   }
   _stopWarning() { if (this.warning?.alive) this.warning.stop(0.4); this.warning = null; }
 
+  _justSpawned(ent) { const t = ent && this.track.get(ent)?.spawnT; return !!t && performance.now() - t < 1500; }
   _trk(ent) {
     let t = this.track.get(ent);
     if (!t) { t = { active: null, activeObj: undefined, onGround: true, air: 0, vyMin: 0, ducking: false, stepT: 0, deployT: 0 }; this.track.set(ent, t); }

@@ -49,15 +49,15 @@ def('weapon_taser_fire_2d', (s) => taserZap(s), { vars: 1, tier: 3 });
 
 // --- handling
 for (const fam of ['pistol', 'smg', 'rifle', 'ak', 'sniper', 'shotgun', 'lmg', 'knife', 'grenade', 'c4']) {
-  def(`deploy_${fam}`, (s) => H.deploy(s, fam), { vars: 2, tier: fam === 'knife' || fam === 'pistol' ? 1 : 2 });
+  def(`deploy_${fam}`, (s) => H.deploy(s, fam), { vars: 2, tier: 1 });
 }
-for (const [fam, parts] of Object.entries(PARTS)) for (const p of parts) def(`wpn_${p}_${fam}`, (s) => H.part(s, fam, p), { vars: 2, tier: 2 });
+for (const [fam, parts] of Object.entries(PARTS)) for (const p of parts) def(`wpn_${p}_${fam}`, (s) => H.part(s, fam, p), { vars: 2, tier: 1 });
 def('wpn_dryfire', (s) => H.dryfire(s), { vars: 2, tier: 1 });
 def('wpn_zoom', (s) => H.zoom(s), { vars: 2, tier: 1 });
 def('wpn_silencer_on', (s) => H.silencer(s, true), { tier: 2 });
 def('wpn_silencer_off', (s) => H.silencer(s, false), { tier: 2 });
-def('weapon_land', (s) => H.weaponLand(s, true), { vars: 3, tier: 2 });
-def('item_pickup', (s) => H.itemPickup(s), { vars: 2, tier: 2 });
+def('weapon_land', (s) => H.weaponLand(s, true), { vars: 3, tier: 1 });
+def('item_pickup', (s) => H.itemPickup(s), { vars: 2, tier: 1 });
 def('knife_slash', (s) => H.knifeSlash(s, false), { vars: 3, tier: 1 });
 def('knife_stab', (s) => H.knifeSlash(s, true), { vars: 2, tier: 1 });
 def('knife_hit_wall', (s) => H.knifeHitWall(s), { vars: 3, tier: 1 });
@@ -113,7 +113,7 @@ def('ui_hover', (s) => M.uiClick(s, true), { vars: 2, tier: 1 });
 def('ui_buy', (s) => M.uiBuy(s), { vars: 2, tier: 1 });
 def('ui_deny', (s) => M.uiDeny(s), { tier: 1 });
 def('radio_go', (s) => M.radioGo(s), { vars: 2, tier: 1 });
-def('radio_chirp', (s) => M.radioChirp(s), { vars: 3, tier: 2 });
+def('radio_chirp', (s) => M.radioChirp(s), { vars: 3, tier: 1 });
 def('stinger_ct_win', (s) => M.stingerCT(s), { tier: 3 }); // on demand: requested when a round goes live
 def('stinger_t_win', (s) => M.stingerT(s), { tier: 3 });
 def('stinger_mvp', (s) => M.stingerMVP(s), { tier: 3 });

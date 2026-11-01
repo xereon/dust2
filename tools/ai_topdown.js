@@ -79,7 +79,8 @@ export function install(o = {}) {
     for (const e of W.entities) {
       if (!e.alive || !e.team || e.spectator) continue;
       const m = new THREE.Mesh(disc, mats[e.team] || mats.T);
-      m.position.set(e.origin.x, e.origin.y + 20, e.origin.z); m.renderOrder = 20;
+      const o = e.renderOrigin || e.origin;
+      m.position.set(o.x, o.y + 20, o.z); m.renderOrder = 20;
       botMarks.add(m);
     }
     const parent = root.parent;

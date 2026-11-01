@@ -6,6 +6,19 @@ import { rng } from '../../core/mathx.js';
 const SHUTTER = ['green', 'blue', 'green', 'brown', 'teal', 'red'];
 const DOORPAINT = [null, 'teal', 'blue', null, 'green', 'red'];
 
+/** True when any Source-space [x,y] point at height z lies inside a solid brush (props placed so far). */
+function blocked(K, pts, z) {
+  const B = K.col?.brushes; if (!B) return false;
+  for (const [x, y] of pts) {
+    const tx = x, ty = z, tz = -y; // Source -> Three
+    for (const b of B) {
+      if (!(b.contents & 1) || tx < b.min.x || tx > b.max.x || ty < b.min.y || ty > b.max.y || tz < b.min.z || tz > b.max.z) continue;
+      if (b.planes.every((pl) => pl.n.x * tx + pl.n.y * ty + pl.n.z * tz <= pl.dist)) return true;
+    }
+  }
+  return false;
+}
+
 export function decorate(K, walls) {
   const R = rng(0xd257);
   const wires = [];
@@ -34,7 +47,7 @@ export function decorate(K, walls) {
       const d = 90 + r() * (L - 180);
       const wd = r() < 0.5 ? 64 : 80, hd = 104;
       const z = floorAt(d);
-      if (Math.abs(w.zfB - w.zfA) / L < 0.08) {
+      if (Math.abs(w.zfB - w.zfA) / L < 0.08 && !blocked(K, [at(d, 30), at(d, 56), at(d - wd / 2, 40), at(d + wd / 2, 40)], z + 40)) {
         const [px, py] = at(d);
         K.prop('doubleDoor', [wd, hd, 0, { depth: 12, paint: DOORPAINT[seed % DOORPAINT.length], seed: seed % 7 }], [px, py, z], yaw);
         // worn stone doorstep
