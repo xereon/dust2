@@ -85,7 +85,8 @@ class Bucket {
     if (!Number.isFinite(x)) x = 0; if (!Number.isFinite(y)) y = 0; if (!Number.isFinite(z)) z = 0;
     if (!Number.isFinite(u)) u = 0; if (!Number.isFinite(v)) v = 0;
     this.pos.push(x, z, -y); this.nrm.push(nx, nz, -ny); this.uv.push(u, v);
-    if (typeof c === 'number') this.col.push(c, c, c); else this.col.push(c[0], c[1], c[2]);
+    if (typeof c === 'number') { if (!Number.isFinite(c)) c = 1; this.col.push(c, c, c); }
+    else { const f = (v) => (Number.isFinite(v) ? v : 1); this.col.push(f(c[0]), f(c[1]), f(c[2])); }
     return this.n++;
   }
 }
@@ -99,6 +100,7 @@ function newell(P) {
   const l = Math.hypot(nx, ny, nz) || 1;
   return [nx / l, ny / l, nz / l];
 }
+const scaleCol = (c, k) => (typeof c === 'number' ? c * k : c.map((v) => v * k));
 const faceUp = (P) => (area2(P.map((p) => ({ x: p[0], y: p[1] }))) < 0 ? P.slice().reverse() : P);
 const area2 = (P) => { let a = 0; for (let i = 0; i < P.length; i++) { const p = P[i], q = P[(i + 1) % P.length]; a += p.x * q.y - q.x * p.y; } return a / 2; };
 
@@ -577,7 +579,7 @@ export class Kit {
     // inward normal
     const n = [-e.nx, -e.ny, 0];
     this.quad(mat, [A.x, A.y, A.z], [B.x, B.y, B.z], [B.x, B.y, tb], [A.x, A.y, ta],
-      [u0, A.z / S], [u1, B.z / S], [u1, tb / S], [u0, ta / S], cA(A.z), cB(B.z), cB(tb) * 1.03, cA(ta) * 1.03, n);
+      [u0, A.z / S], [u1, B.z / S], [u1, tb / S], [u0, ta / S], cA(A.z), cB(B.z), scaleCol(cB(tb), 1.03), scaleCol(cA(ta), 1.03), n);
   }
 
   _header(R, e, u0, u1, z0, z1) {
