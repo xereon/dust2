@@ -47,7 +47,8 @@ export function buildKnife(b, variant = 'ct') {
 }
 function knifeCfg(y) {
   return {
-    hands: { R: { p: [0.72, y + 0.25, 2.35], across: [0, 0, 1], palm: [-1, -0.22, 0], pose: 'fist' } },
+    // wrist low on the near side, back of the hand toward the camera, fingers curling over the top
+    hands: { R: { p: [-0.5, y - 0.38, 2.35], across: [0, 0, 1], palm: [0.8, 0.6, 0], pose: 'fist' } },
     family: 'knife',
   };
 }

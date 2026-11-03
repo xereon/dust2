@@ -76,9 +76,11 @@ function fit(key, side, anchor, hs, team) {
     curl((j) => P.f[i][j], (j, v) => { P.f[i][j] = v; }, segs, R[i].map((r) => r * hs), [0.75, 1, 0.6], MAX, gripHand ? [35, 45, 20] : [Math.min(P.f[i][0], 5), 0, 0]);
   }
   const TL = [1.5, 1.18, 0.98];
+  if (key.startsWith('knife')) { P.t = [[38, -8, 0], 28, 24]; apply(); } else {
   const tsegs = [0, 1, 2].map((j) => () => [pos(`t${j}`), j < 2 ? pos(`t${j + 1}`) : tip('t2', TL[2]), arm.byName[`t${j}`]]);
   curl((j) => (j === 0 ? P.t[0][0] : P.t[j]), (j, v) => { if (j === 0) P.t[0][0] = v; else P.t[j] = v; }, tsegs, [0.45, 0.4, 0.36].map((r) => r * hs),
     [0.5, 1, 0.8], [45, 70, 70], [Math.min(P.t[0][0], side === 'R' ? 10 : 0), 0, 0], 1);
+  }
   const r1 = (v) => Math.round(v);
   return { f: P.f.map((f) => f.map(r1)), t: [P.t[0].map(r1), r1(P.t[1]), r1(P.t[2])] };
 }
