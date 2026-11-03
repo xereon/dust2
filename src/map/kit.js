@@ -79,6 +79,11 @@ class Bucket {
   constructor(spec) { this.spec = spec; this.pos = []; this.nrm = []; this.uv = []; this.col = []; this.idx = []; this.n = 0; }
   // Source-space vertex in, Three-space out.
   v(x, y, z, nx, ny, nz, u, v, c) {
+    // never emit a zero/NaN normal or a NaN position/uv (degenerate faces poison HDR + bloom)
+    const nl = Math.hypot(nx, ny, nz);
+    if (!(nl > 1e-6) || !Number.isFinite(nl)) { nx = 0; ny = 0; nz = 1; } else if (Math.abs(nl - 1) > 1e-3) { nx /= nl; ny /= nl; nz /= nl; }
+    if (!Number.isFinite(x)) x = 0; if (!Number.isFinite(y)) y = 0; if (!Number.isFinite(z)) z = 0;
+    if (!Number.isFinite(u)) u = 0; if (!Number.isFinite(v)) v = 0;
     this.pos.push(x, z, -y); this.nrm.push(nx, nz, -ny); this.uv.push(u, v);
     if (typeof c === 'number') this.col.push(c, c, c); else this.col.push(c[0], c[1], c[2]);
     return this.n++;

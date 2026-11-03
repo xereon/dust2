@@ -128,8 +128,8 @@ function corrugatedFence(K, a, b, z, h = 92, { posts = true, brace = true } = {}
   const uv = (q) => [q[2] / 64, ((q[0] - a[0]) * ux + (q[1] - a[1]) * uy) / 64];
   const P = (s, o, zz) => [a[0] + ux * s + nx * o, a[1] + uy * s + ny * o, zz];
   const zt = z + h;
-  K.poly('metal_door', [P(0, 0.8, z + 2), P(L, 0.8, z + 2), P(L, 0.8, zt), P(0, 0.8, zt)], { uv, col: 0.95, normal: [nx, ny, 0] });
-  K.poly('metal_door', [P(L, -0.8, z + 2), P(0, -0.8, z + 2), P(0, -0.8, zt), P(L, -0.8, zt)], { uv, col: 0.85, normal: [-nx, -ny, 0] });
+  K.poly('metal_door#grey', [P(0, 0.8, z + 2), P(L, 0.8, z + 2), P(L, 0.8, zt), P(0, 0.8, zt)], { uv, col: 0.95, normal: [nx, ny, 0] });
+  K.poly('metal_door#grey', [P(L, -0.8, z + 2), P(0, -0.8, z + 2), P(0, -0.8, zt), P(L, -0.8, zt)], { uv, col: 0.85, normal: [-nx, -ny, 0] });
   K.colPrism([P(0, 2, 0), P(L, 2, 0), P(L, -2, 0), P(0, -2, 0)].map((q) => [q[0], q[1]]), z, zt, 'metal');
   if (posts) {
     const np = Math.max(2, Math.round(L / 52) + 1);
