@@ -203,7 +203,7 @@ function patch(shader, u, flags) {
     .replace('texture2D( aoMap, vAoMapUv ).r', 'at_orm.r');
   aoChunk = '#if defined( USE_AOMAP ) && !defined( USE_ROUGHNESSMAP )\n at_orm = atTex(aoMap);\n#endif\n' + aoChunk;
   const nrmChunk = THREE.ShaderChunk.normal_fragment_maps
-    .replace('texture2D( normalMap, vNormalMapUv )', 'atTexN( normalMap )');
+    .replaceAll('texture2D( normalMap, vNormalMapUv )', 'atTexN( normalMap )');
   shader.fragmentShader = shader.fragmentShader
     .replace('#include <common>', defs + '#include <common>\n' + PARS + FRAG_FUNCS)
     .replace('#include <map_fragment>', FRAG_MAP)

@@ -13,9 +13,9 @@ const VARIANTS = [
   { panel: 'plain', planks: 'v', caps: true, bands: true, tint: [1.0, 0.85, 0.66], labels: [['care', 'c']] },
   // 4 — CS2 A-site / goose look: WHITE-painted panel crate (paint film over planks, a few
   //     chips to grey wood), 2×2 panels, dark steel bands + caps, black stencil numbers
-  { panel: 'cross', planks: 'h', caps: true, bands: true, mat: 'woodpaint:cratewhite:0.84', bandY: [0.17, 0.83], tint: [1.04, 1.04, 1.03], frameTint: [0.94, 0.94, 0.93], bandTint: [0.5, 0.52, 0.54], vary: 0.035, labels: [['num14', 'ul'], ['star', 'lr']] },
+  { panel: 'cross', planks: 'h', caps: true, bands: true, mat: 'woodpaint:cratewhite:0.84', bandY: [0.17, 0.83], plankW: 999, gap: 0.12, fwScale: 0.72, tint: [1.04, 1.04, 1.03], frameTint: [0.94, 0.94, 0.93], bandTint: [0.5, 0.52, 0.54], vary: 0.035, labels: [['num14', 'ul'], ['star', 'lr']] },
   // 5 — CS2 GREY-painted crate with a diagonal brace and bands (stacked small grey crates by the ramp)
-  { panel: 'diag', planks: 'h', caps: true, bands: true, mat: 'woodpaint:crategrey:0.84', bandY: [0.2, 0.8], tint: [1.0, 1.0, 1.0], frameTint: [0.88, 0.88, 0.88], bandTint: [0.46, 0.48, 0.5], vary: 0.035, labels: [['num14', 'ul']] },
+  { panel: 'diag', planks: 'h', caps: true, bands: true, mat: 'woodpaint:crategrey:0.84', bandY: [0.2, 0.8], plankW: 999, gap: 0.12, fwScale: 0.72, tint: [1.0, 1.0, 1.0], frameTint: [0.88, 0.88, 0.88], bandTint: [0.46, 0.48, 0.5], vary: 0.035, labels: [['num14', 'ul']] },
 ];
 export const CRATE_VARIANTS = VARIANTS.length;
 /** Named variants accepted wherever a crate variant is: crate(64, 'cs2'). */
@@ -31,7 +31,7 @@ export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
   const V = { ...VARIANTS[((variant % VARIANTS.length) + VARIANTS.length) % VARIANTS.length], ...opts };
   const r = pb.rand;
   const S = Math.min(sx, sy, sz);
-  const fw = clamp(S * 0.13, 3.2, 12);        // frame board width
+  const fw = clamp(S * 0.13, 3.2, 12) * (V.fwScale ?? 1); // frame board width
   const ft = clamp(S * 0.028, 0.9, 2.4);      // frame thickness (proud of planks)
   const pt = clamp(S * 0.022, 0.7, 1.8);      // plank thickness
   const gap = V.gap ?? clamp(S * 0.007, 0.22, 0.7);
@@ -59,7 +59,7 @@ export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
     const span0 = vertical ? -hw + lo : -hh + lo, span1 = vertical ? hw - lo : hh - lo;
     const len0 = vertical ? -hh + lo * (F.top ? 1 : 0) : -hw + lo, len1 = vertical ? hh - lo : hw - lo;
     const target = V.plankW ?? clamp(S * 0.16, 4.5, 11);
-    const n = Math.max(2, Math.round((span1 - span0) / target));
+    const n = Math.max(target > 100 ? 1 : 2, Math.round((span1 - span0) / target)); // plankW ≥ 100 → one plywood sheet
     const ws = []; let tot = 0;
     for (let i = 0; i < n; i++) { const w = r.f(0.8, 1.2); ws.push(w); tot += w; }
     const avail = span1 - span0 - gap * (n - 1);

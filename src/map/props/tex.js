@@ -180,7 +180,7 @@ export const PAINTS = {
   // CS2 A-site crate paints (cool sun-bleached white / weathered grey)
   cratewhite: [0.86, 0.86, 0.84], crategrey: [0.64, 0.65, 0.66],
   // car body: faded off-white enamel
-  carwhite: [0.86, 0.85, 0.81],
+  carwhite: [0.86, 0.85, 0.81], ochre: [0.80, 0.62, 0.30],
 };
 
 function woodAtlas(pal, paint = null, cover = 0.5, albedoOnly = false) {

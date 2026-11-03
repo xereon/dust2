@@ -48,7 +48,7 @@ export function tyreStack(n = 4) {
 }
 
 // ---- car ----------------------------------------------------------------------------------------------
-const CAR_PAINT = ['carwhite', 'sky', 'sand', 'red'];
+const CAR_PAINT = ['carwhite', 'sky', 'ochre', 'red'];
 /**
  * car(variant = 0): old boxy saloon, 160 × 64 × 55, front toward +x, centred, on the ground.
  * variant: 0 faded white, 1 pale blue, 2 sand, 3 red. Flat front-left tyre, rust, dust.
@@ -90,12 +90,12 @@ export function car(variant = 0) {
   for (const cx of [-wx, wx]) pb.add('rubber', cbox([cx - 13, 9.5, -W / 2 + 7.5], [cx + 13, 24, W / 2 - 7.5], 0.5), null, [0.25, 0.25, 0.25]);
   // ---- cabin with tumblehome
   const cs = new THREE.Shape();
-  const cab = [[28, 32.6], [4.5, 50.4], [-30.5, 50.6], [-44.5, 33.3]];
+  const cab = [[28, 32.6], [3.5, 53.2], [-31, 53.4], [-45, 33.3]];
   cs.moveTo(...cab[0]); for (let i = 1; i < cab.length; i++) cs.lineTo(...cab[i]); cs.lineTo(...cab[0]);
   const cbv = 1.6, Wc = W - 5, cdep = Wc - 2 * cbv;
   let cabin = new THREE.ExtrudeGeometry(cs, { depth: cdep, bevelEnabled: true, bevelThickness: cbv, bevelSize: 1.4, bevelSegments: 3, curveSegments: 4 });
   cabin.translate(0, 0, -cdep / 2);
-  const tumble = (g) => { const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i); p.setZ(i, p.getZ(i) * lerp(1, 0.88, smooth(33, 51, y))); } g.computeVertexNormals(); return g; };
+  const tumble = (g) => { const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i); p.setZ(i, p.getZ(i) * lerp(1, 0.88, smooth(33, 54, y))); } g.computeVertexNormals(); return g; };
   cabin = boxUV(tumble(cabin), 1 / 64);
   paint(cabin, (x, y, z, nx, ny) => (ny > 0.9 ? [0.9, 0.88, 0.84] : [1, 1, 1]));
   pb.add(P, cabin);
@@ -109,8 +109,8 @@ export function car(variant = 0) {
   const lerp2 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
   for (const zs of [-1, 1]) {
     const fwd = (pts) => (zs < 0 ? pts.map(([x, y]) => [-x, y]) : pts);
-    const front = [[24.2, 35], [-7.2, 35], [-7.2, 48.3], [5.2, 48.3]];
-    const rear = [[-10.4, 35], [-40.5, 35], [-30.2, 48.3], [-10.4, 48.3]];
+    const front = [[24.2, 35], [-7.2, 35], [-7.2, 51.1], [4.4, 51.1]];
+    const rear = [[-10.4, 35], [-40.9, 35], [-30.6, 51.1], [-10.4, 51.1]];
     for (const w of [front, rear]) pb.add('glass', glassPoly(fwd(w), zs), null, [1, 1, 1]);
   }
   // windscreen/rear screen as quads on the raked faces (offset along face normal)
@@ -152,9 +152,9 @@ export function car(variant = 0) {
     pb.add('rubber', cbox([-wx + AR + 1.2, 8.6, zs * (W / 2) - 0.9], [wx - AR - 1.2, 11.2, zs * (W / 2) + 0.4], 0.4), null, [0.32, 0.3, 0.28]);
     // drip rail along the roof edge
     const dz = zs * (Wc / 2 * 0.88 + 0.4);
-    pb.add(CH, sweep(new THREE.CatmullRomCurve3([new THREE.Vector3(5, 50.6, dz), new THREE.Vector3(-12, 51.2, dz), new THREE.Vector3(-30.2, 50.8, dz)]), 8, 4, 0.32), null, chrome);
+    pb.add(CH, sweep(new THREE.CatmullRomCurve3([new THREE.Vector3(4, 53.3, dz), new THREE.Vector3(-12, 53.9, dz), new THREE.Vector3(-30.6, 53.5, dz)]), 8, 4, 0.32), null, chrome);
     // chrome surrounds traced round both side windows (follow the tumblehome)
-    for (const w of [[[24.2, 35], [-7.2, 35], [-7.2, 48.3], [5.2, 48.3]], [[-10.4, 35], [-40.5, 35], [-30.2, 48.3], [-10.4, 48.3]]]) {
+    for (const w of [[[24.2, 35], [-7.2, 35], [-7.2, 51.1], [4.4, 51.1]], [[-10.4, 35], [-40.9, 35], [-30.6, 51.1], [-10.4, 51.1]]]) {
       const zz = zs * (cdep / 2 + cbv + 0.15);
       const loop = w.concat([w[0]]).map(([x, y]) => new THREE.Vector3(zs < 0 ? x : x, y, zz));
       for (let i = 0; i < loop.length - 1; i++) {
@@ -260,6 +260,6 @@ export function car(variant = 0) {
     }
   }
   pb.box([-83, 0, -W / 2 - 1], [83, 33, W / 2 + 1], 'metal');
-  pb.box([-45, 33, -W / 2 + 3], [29, 51, W / 2 - 3], 'metal');
+  pb.box([-45, 33, -W / 2 + 3], [29, 54, W / 2 - 3], 'metal');
   return pb.finish();
 }

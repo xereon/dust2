@@ -25,7 +25,7 @@ export function build(K) {
     { mat: 'sand_floor', top: 230, tops: { 3: 16, 4: 240 }, paint: teal, cornice: {} });
   // catwalk stairs: worn stone steps climbing the east side of the lane from beside xbox, then a
   // narrow ledge along the foot of the low catwalk wall up to top mid
-  K.stairs('mid_st', [[-330, 1385], [-275, 1385], [-275, 1120], [-330, 1120]], -125, -7, 9,
+  K.stairs('mid_st', [[-330, 1385], [-275, 1385], [-275, 1120], [-330, 1120]], -125, -7, 8,
     { mat: 'stone_block', tops: { e: 16 } });
   K.region('mid_ledge', zc([[-330, 790], [-275, 790], [-275, 1120], [-330, 1120]], -7),
     { mat: 'stone_block', tops: { e: 16 }, riserMat: 'stone_block', base: false, decor: false });

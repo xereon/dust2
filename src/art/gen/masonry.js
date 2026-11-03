@@ -157,7 +157,7 @@ void surface(vec2 uv, inout Surf o) {
   float eN = e - mortarW + 0.0012 * ero;
   // chips bitten out of the arrises: noisy, clustered, a few u deep into the face
   float chipN = fbmU(uv, 36.0, 3, 0.5, 16.0) + 0.3 * hr.z;
-  float chip = (1.0 - smoothstep(0.0, 0.006 + 0.008 * sat(chipN), eN)) * smoothstep(0.35, 0.45, chipN);
+  float chip = (1.0 - smoothstep(0.0, 0.003 + 0.005 * sat(chipN), eN)) * smoothstep(0.6, 0.7, chipN);
   float face = smoothstep(0.0, 0.0016, eN);                      // ~0.4u bevel
   float bump = fbmU(uv + c.rnd * 7.31, 8.0, 4, 0.5, 6.0);
   float fine = fbmU(uv, 110.0, 2, 0.5, 7.0);
@@ -176,7 +176,7 @@ void surface(vec2 uv, inout Surf o) {
   sc *= 0.86 + 0.24 * hash1(c.id, 19.0);
   float mot = fbmU(uv + c.rnd * 3.1, 14.0, 4, 0.55, 13.0);
   sc *= 0.96 + 0.05 * mot + 0.02 * fine;
-  sc = mix(sc, sc * 1.08 + 0.02, chip);                           // fresh breaks are paler
+  sc = mix(sc, sc * 1.05 + 0.01, chip);                           // fresh breaks are paler
   sc *= 1.0 - pits * 0.2;
   sc *= mix(vec3(1.0), vec3(0.86, 0.83, 0.78), L.x * 0.45);
   sc *= 1.0 - 0.08 * smoothstep(0.2, 0.7, L.w);                   // soft weathering drift

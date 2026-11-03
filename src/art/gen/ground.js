@@ -109,7 +109,7 @@ void surface(vec2 uv, inout Surf o) {
   float stain = smoothstep(0.3, 0.8, warpFbm(uv, 4.0, 0.3, 3, 12.0));
   sc *= mix(vec3(1.0), vec3(0.8, 0.79, 0.77), stain * 0.5);
   float drift = smoothstep(0.15, 0.7, warpFbm(uv, 3.0, 0.3, 3, 10.0) + 0.25 * fbmU(uv, 18.0, 2, 0.5, 11.0));
-  sc = mix(sc, ${C('#b9a888')}, drift * 0.55);
+  sc = mix(sc, ${C('#b9a888')}, drift * drift * 0.3);
   sc *= 1.0 - 0.22 * cr;
   sc = mix(sc, ${C('#8a8174')}, corner * 0.6);
   vec3 jc = mix(${C('#6f665a')}, ${C('#c3b496')}, drift * 0.8);   // dark grime joints unless sanded over

@@ -50,7 +50,7 @@ void brickUnder(vec2 uv, float rows, float cols, out float h, out vec3 col, out 
 void renderCoat(vec2 uv, out float h, out vec3 col, out float rough) {
   float g = fbmU(uv, 64.0, 3, 0.6, 81.0);
   float m = fbmU(uv, 10.0, 3, 0.5, 82.0);
-  h = 0.35 + 0.04 * g + 0.025 * m;
+  h = 0.47 + 0.03 * g + 0.02 * m;     // lime coat is thin: a shallow step, not an embossed rim
   col = mix(${C('#b8ac9a')}, ${C('#a99c89')}, sat(m * 0.6 + 0.5));
   col = mix(col, ${C('#c6b9a4')}, sat(g) * 0.4);
   col *= 0.92 + 0.12 * vnU(uv, 180.0, 83.0);
@@ -80,7 +80,7 @@ float limePlaster(vec2 uv, vec4 L, vec4 L2, vec3 pc0, vec3 pc1, float loss, floa
   // that read as leopard spots); thin plaster step so edges don't emboss
   float det = fbmU(uv, 24.0, 3, 0.5, s + 15.0);
   float n = L.x + 0.16 * det + 0.03 * gnU(uv, 96.0, s + 16.0);
-  float lostP = smoothstep(loss, loss + 0.05, n);
+  float lostP = smoothstep(loss, loss + 0.07, n);
   float lostR = smoothstep(loss + 0.25, loss + 0.3, n + 0.2 * L2.x);
   // grime gathers around breaks with a wide (20-40u) falloff taken from the smooth field
   float halo = smoothstep(loss - 0.45, loss + 0.02, L.x) * (1.0 - lostP);
