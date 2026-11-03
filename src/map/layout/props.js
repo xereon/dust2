@@ -124,12 +124,17 @@ function stonePillar(K, [cx, cy], z, [w, d], courses = 4, ch = 27) {
 /** Corrugated metal sheet nailed to timber posts, from a to b (Source [x,y]) on floor z, height h. */
 function corrugatedFence(K, a, b, z, h = 92, { posts = true, brace = true } = {}) {
   const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, nx = uy, ny = -ux;
-  // galvanised sheet, both faces; ribbed metal texture turned so the corrugations run vertically
-  const uv = (q) => [q[2] / 64, ((q[0] - a[0]) * ux + (q[1] - a[1]) * uy) / 64];
+  // galvanised corrugated sheet: real zig-zag ribs (both faces), weathered steel with brown-orange
+  // rust runs streaking down from the fixings (metal_beam's run pattern, brightened to zinc grey)
+  const uv = (q) => [((q[0] - a[0]) * ux + (q[1] - a[1]) * uy) / 64, q[2] / 64];
   const P = (s, o, zz) => [a[0] + ux * s + nx * o, a[1] + uy * s + ny * o, zz];
-  const zt = z + h;
-  K.poly('metal_door#grey', [P(0, 0.8, z + 2), P(L, 0.8, z + 2), P(L, 0.8, zt), P(0, 0.8, zt)], { uv, col: 0.95, normal: [nx, ny, 0] });
-  K.poly('metal_door#grey', [P(L, -0.8, z + 2), P(0, -0.8, z + 2), P(0, -0.8, zt), P(L, -0.8, zt)], { uv, col: 0.85, normal: [-nx, -ny, 0] });
+  const zt = z + h, pitch = 6, amp = 0.9, NR = Math.max(2, Math.round(L / (pitch / 2)));
+  for (let i = 0; i < NR; i++) {
+    const s0 = (i / NR) * L, s1 = ((i + 1) / NR) * L, o0 = i % 2 ? amp : -amp, o1 = -o0;
+    const c = 1.5 + 0.08 * ((i * 7) % 3);
+    K.poly('metal_beam', [P(s0, o0, z + 2), P(s1, o1, z + 2), P(s1, o1, zt), P(s0, o0, zt)], { uv, col: c, normal: [nx, ny, 0] });
+    K.poly('metal_beam', [P(s1, o1 - 0.4, z + 2), P(s0, o0 - 0.4, z + 2), P(s0, o0 - 0.4, zt), P(s1, o1 - 0.4, zt)], { uv, col: c * 0.9, normal: [-nx, -ny, 0] });
+  }
   K.colPrism([P(0, 2, 0), P(L, 2, 0), P(L, -2, 0), P(0, -2, 0)].map((q) => [q[0], q[1]]), z, zt, 'metal');
   if (posts) {
     const np = Math.max(2, Math.round(L / 52) + 1);
@@ -189,7 +194,7 @@ export function build(K) {
   // long doors: outer pair (west leaf swung in, east leaf swung out) and the inner pair
   // detailed plank doors (props doubleDoor: framed leaves with iron straps and ring pulls), both
   // pairs swung toward the north; the slab leaves remain only as the no-props fallback
-  prop(K, 'doubleDoor', [172, 132, [0.6, 0.85], { depth: 40, seed: 3 }], [636, 293, 0], 180, () => {
+  prop(K, 'doubleDoor', [172, 132, [1.0, 0.8], { depth: 40, seed: 3 }], [636, 293, 0], 180, () => {
     leaf(K, [553, 296], [621, 348], 0, 130); leaf(K, [719, 296], [646, 252], 0, 130);
   });
   prop(K, 'doubleDoor', [173, 132, [0.85, 0.7], { depth: 36, seed: 5 }], [636.5, 765, 0], 180, () => {
@@ -302,7 +307,10 @@ export function build(K) {
   crate(K, [-2060, 2482, 32], [34, 70, 36]);
   barrel(K, [-1361, 2344, 4]); barrel(K, [-1358, 2379, 4], 1);
   // the big timber gate in B's north wall and the tarp-covered pallets
-  prop(K, 'bigDoorMetal', [150, 160, 0, { paint: 'brown' }], [-1620, 2895, 4], 0);
+  // B's north wall: a plaque and a small barred window (no gate), a palm beyond
+  siteSign(K, [-1668, 2895], 52, [0, -1], 1.05);
+  window_(K, null, [-1580, 2894.4], 1, 0, 0, -1, 86, 34, 44, 0, null, () => 0.5, true);
+  palm(K, [-1585, 2965, 60], 360, 0);
   siteSign(K, [-1334, 2440], 40, [-1, 0], 1.6);
   siteSign(K, [-1805, 2895], 100, [0, -1], 1.1);
   // the tower rising behind B's north wall

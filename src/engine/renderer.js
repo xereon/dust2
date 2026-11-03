@@ -26,7 +26,7 @@ import { FinalPass } from './post/final.js';
 import { makeRT } from './post/common.js';
 
 const CV = {
-  exposure: [0.82, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
+  exposure: [0.77, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
   bloom_strength: [0.05, 0, 1, 'bloom mix'],
   bloom_threshold: [1.6, 0, 20, 'bloom luminance threshold (exposed HDR)'],
   ao_intensity: [1.5, 0, 4, 'GTAO power (0 = off)'],
@@ -35,7 +35,7 @@ const CV = {
   sun_intensity: [1.0, 0, 4, 'sun intensity (x map value)'],
   sky_intensity: [1.0, 0, 4, 'sky light intensity (x) — rebakes GI'],
   bounce_intensity: [1.2, 0, 3, 'bounce light (x) — rebakes GI'],
-  saturation: [0.64, 0, 2, 'grade saturation'],
+  saturation: [0.54, 0, 2, 'grade saturation'],
   contrast: [1.18, 0.3, 2, 'grade S-curve (1 = neutral)'],
   highlights: [0.12, 0, 0.5, 'grade highlight stretch'],
   grain: [0.15, 0, 3, 'film grain amount'],
@@ -419,7 +419,7 @@ export class RenderPipeline {
       else lamps.push({ p: c.p.clone(), n: c.n, lo: c.lo });
     }
     for (const L of lamps.slice(0, 8)) {
-      const light = new THREE.PointLight(0xffc98f, 7000, 360, 2);
+      const light = new THREE.PointLight(0xffc98f, 9000, 220, 2);
       light.position.set(L.p.x, L.lo - 6, L.p.z);
       light.castShadow = false;
       light.userData.rpSkip = true;

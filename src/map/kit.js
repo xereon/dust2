@@ -1105,6 +1105,21 @@ export class Kit {
       const n = newell(P);
       if (n[0] * nxv + n[1] * nyv < 0) P = P.reverse();
       this.poly(mat, P, { col: (p) => 0.85 + 0.1 * smooth(zl, zh, p[2]) });
+      // tall steps are building fronts: a narrow dark window every 64u, storey by storey
+      if (zh - zl >= 90) {
+        const mx = (xa + xb) / 2, my = (ya + yb) / 2;
+        const k = Math.floor((nxv !== 0 ? my : mx) / G);
+        if (((k % 4) + 4) % 4 === 1 && noise(mx / 97, my / 97, 4.4) > 0.3) {
+          const ox = nxv * 0.5, oy = nyv * 0.5, hw = 6;
+          const tx = nxv !== 0 ? 0 : 1, ty = nxv !== 0 ? 1 : 0;
+          for (let z = zl + 34; z + 40 < zh - 18; z += 105) {
+            let W = [[mx - tx * hw + ox, my - ty * hw + oy, z], [mx + tx * hw + ox, my + ty * hw + oy, z], [mx + tx * hw + ox, my + ty * hw + oy, z + 40], [mx - tx * hw + ox, my - ty * hw + oy, z + 40]];
+            const wn = newell(W);
+            if (wn[0] * nxv + wn[1] * nyv < 0) W = W.reverse();
+            this.poly('window_frame', W, { col: 0.12, normal: [nxv, nyv, 0] });
+          }
+        }
+      }
     };
     for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
       const c = j * nx + i;

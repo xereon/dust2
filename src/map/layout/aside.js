@@ -47,7 +47,7 @@ export function build(K) {
   // steps climbing beside the ramp along its south wall
   K.stairs('undera_st', [[540, 2096], [540, 2042], [900, 2042], [900, 2096]], -122, -17.4, 9, { mat: 'stone_block', top: 300 });
   // timber post-and-beam frame in the underpass
-  for (const [x, y] of [[290, 2050], [390, 2050], [478, 2050], [262, 2546], [390, 2546], [478, 2546], [262, 2100], [262, 2320]])
+  for (const [x, y] of [[280, 2050], [400, 2050], [482, 2048], [280, 2546], [400, 2546], [482, 2548], [482, 2398], [482, 2478], [262, 2180], [262, 2300], [262, 2420]])
     K.box([x - 5, y - 5, -122], [x + 5, y + 5, 36], 'wood_planks', { color: 0.72 });
   K.box([484, 2042, 22], [492, 2404, 36], 'wood_planks', { col: false, color: 0.7 });
   K.region('undera_e', zc([[960, 2006], [1228, 2006], [1228, 2314], [1024, 2314], [1024, 2404], [960, 2404]], 0),

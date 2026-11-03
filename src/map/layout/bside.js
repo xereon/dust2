@@ -25,7 +25,13 @@ export function build(K) {
     { ...tun, arch: { spring: 118, crown: 170 }, ceilTop: 330, wallMat: 'adobe' });
   K.region('utun_sky', zc([[-1673, 1030], [-1520, 1030], [-1520, 1170], [-1673, 1170]], 32), { ...tun, top: 316, decor: false });
   // a couple of old joists left across the roof hole, and a short parapet around it on the roof
-  for (const x of [-1640, -1560]) K.box([x - 4, 1026, 304], [x + 4, 1174, 312], 'wood_planks', { col: false, color: 0.7 });
+  for (const x of [-1650, -1612, -1536]) K.box([x - 4, 1026, 304], [x + 4, 1174, 312], 'wood_planks', { col: false, color: 0.7 });
+  for (const y of [1060, 1136]) K.box([-1677, y - 3, 312], [-1516, y + 3, 316], 'wood_planks', { col: false, color: 0.66 });
+  // one joist broken and hanging into the hall
+  for (let i = 0; i < 6; i++) {
+    const t0 = i / 6, t1 = (i + 1) / 6;
+    K.box([-1578, 1030 + t0 * 90, 304 - t1 * 70], [-1570, 1030 + t1 * 90, 312 - t0 * 70], 'wood_planks', { col: false, color: 0.62 });
+  }
   for (const [a, b] of [[[-1681, 1022], [-1512, 1022]], [[-1512, 1178], [-1681, 1178]]]) K.slab(a, b, 316, 336, 8, 'plaster_wall', { col: false, color: 0.85 });
   for (const [a, b] of [[[-1681, 1026], [-1681, 1174]], [[-1512, 1026], [-1512, 1174]]]) K.slab(a, b, 316, 336, 8, 'plaster_wall', { col: false, color: 0.85 });
   // shallow arched bays in the side walls

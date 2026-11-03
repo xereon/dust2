@@ -13,21 +13,21 @@ export function build(K) {
     [469, 300], [479, 312], [479, 494], [-68, 494], [-124, 558], [-648, 558], [-648, 527], [-752, 527],
     [-754, 510], [-706, 257], [-701, 222],
   ], 0), { mat: 'cobblestone', top: 340, tops: { 3: 260, 4: 260, 5: 260, 11: 360, 12: 360 }, paint: ochre, cornice: {} });
-  K.region('mid_top', zc([[-648, 558], [-124, 558], [-124, 737], [-250, 737], [-275, 737], [-521, 737], [-648, 737]], 0),
+  K.region('mid_top', zc([[-648, 558], [-124, 558], [-124, 737], [-250, 737], [-262, 737], [-521, 737], [-648, 737]], 0),
     { mat: 'cobblestone', top: 330, tops: { 3: 16 }, paint: ochre, cornice: {} });
 
   // ---- mid lane (east side is the low wall to catwalk, top z 32) ------------------------------
-  K.region('mid_a', zc([[-521, 737], [-275, 737], [-275, 760], [-521, 760]], 0),
+  K.region('mid_a', zc([[-521, 737], [-262, 737], [-262, 760], [-521, 760]], 0),
     { mat: 'sand_floor', top: 330, tops: { e: 16 }, paint: ochre, cornice: {} });
-  K.region('mid_b', zy([[-521, 760], [-275, 760], [-275, 790], [-330, 790], [-330, 1260], [-518, 1260], [-518, 1136], [-554, 1136], [-554, 872], [-521, 872]], 760, 0, 1260, -125),
+  K.region('mid_b', zy([[-521, 760], [-262, 760], [-262, 790], [-330, 790], [-330, 1260], [-518, 1260], [-518, 1136], [-554, 1136], [-554, 872], [-521, 872]], 760, 0, 1260, -125),
     { mat: 'sand_floor', top: 320, tops: { 1: 16 }, paint: ochre, cornice: {} });
-  K.region('mid_c', zc([[-518, 1260], [-330, 1260], [-330, 1385], [-275, 1385], [-275, 1546], [-316, 1546], [-518, 1546]], -125),
+  K.region('mid_c', zc([[-518, 1260], [-330, 1260], [-330, 1385], [-262, 1385], [-262, 1546], [-316, 1546], [-518, 1546]], -125),
     { mat: 'sand_floor', top: 230, tops: { 3: 16, 4: 240 }, paint: teal, cornice: {} });
   // catwalk stairs: worn stone steps climbing the east side of the lane from beside xbox, then a
   // narrow ledge along the foot of the low catwalk wall up to top mid
-  K.stairs('mid_st', [[-330, 1385], [-275, 1385], [-275, 1120], [-330, 1120]], -125, -7, 8,
+  K.stairs('mid_st', [[-330, 1385], [-262, 1385], [-262, 1000], [-330, 1000]], -125, -7, 16,
     { mat: 'stone_block', tops: { e: 16 } });
-  K.region('mid_ledge', zc([[-330, 790], [-275, 790], [-275, 1120], [-330, 1120]], -7),
+  K.region('mid_ledge', zc([[-330, 790], [-262, 790], [-262, 1000], [-330, 1000]], -7),
     { mat: 'stone_block', tops: { e: 16 }, riserMat: 'stone_block', base: false, decor: false });
   K.region('mid_d', zc([[-518, 1546], [-316, 1546], [-316, 1646], [-518, 1646]], -128),
     { mat: 'sand_floor', top: 230, paint: teal, cornice: {} });

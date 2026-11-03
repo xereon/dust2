@@ -4,22 +4,20 @@
 
 // [x, y, floor z] per pole; consecutive poles in a line are wired together
 const LINES = [
-  // T spawn plateau and the road down to outside long (south kerb)
-  [[-1300, -1048, 128], [-900, -1034, 128], [-560, -1034, 128], [-150, -1128, 48.6], [175, -1128, 8], [430, -963, 8]],
-  // outside long (west kerb) to the long-doors front
-  [[118, -360, 0], [130, -60, 0], [130, 250, 0]],
-  // long hall (north kerb) and up long A (west then east kerb)
-  [[505, 1205, 0], [930, 1212, 0], [1262, 1250, 4], [1262, 1500, 4], [1772, 1990, 6], [1610, 2420, 26]],
+  // T spawn plateau and the road down to outside long (south side, ~60u off the walls)
+  [[-1300, -1010, 128], [-750, -1002, 128], [-150, -1128, 48.6], [430, -963, 8]],
+  // outside long (west side) to the long-doors front
+  [[118, -300, 0], [130, 250, 0]],
+  // long hall and up long A
+  [[505, 1205, 0], [1050, 1212, 0], [1262, 1750, 4], [1772, 2250, 6]],
   // top mid and the mid lane (west side)
-  [[-680, 240, 0], [-630, 600, 0], [-536, 980, -55], [-505, 1200, -110]],
+  [[-630, 600, 0], [-505, 1150, -97.5]],
   // catwalk to short
-  [[-140, 820, 0], [-140, 1240, 0], [190, 1340, 0], [500, 1700, 0]],
+  [[190, 1340, 0], [500, 1740, 0]],
   // goose / A back plaza
-  [[1030, 3070, 120], [1350, 3075, 120], [1580, 2810, 120]],
+  [[1030, 3070, 120], [1580, 2810, 120]],
   // CT spawn
   [[-300, 1995, -126], [235, 2560, -126]],
-  // outside tunnels
-  [[-2050, 120, 6], [-2050, 520, 6]],
 ];
 
 export function build(K) {

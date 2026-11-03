@@ -22,8 +22,9 @@ export const lightUniforms = {
   rpAmbGround: { value: new THREE.Color(0.30, 0.24, 0.17) },
   rpSpecRef: { value: 1 },   // luminance of open-sky irradiance (specular occlusion reference)
   rpIndirect: { value: 1 },  // debug / global ambient multiplier
-  rpIndoor: { value: 2.6 },
-  rpIndoorFloor: { value: 0.9 }, // min ambient in sealed spaces, as a fraction of open-sky irradiance
+  rpIndoor: { value: 1.55 },
+  rpIndoorFloor: { value: 0.64 }, // min ambient in sealed spaces, as a fraction of open-sky irradiance
+  rpOpenFill: { value: 0.6 },     // ambient scale in the open: CS:GO shade is ~1:3.5 vs sun on plaster
   rpVMRot: { value: new THREE.Matrix3() },
   rpVMPos: { value: new THREE.Vector3() },
   rpVMSun: { value: 1 },
@@ -34,7 +35,7 @@ const COMMON_GLSL = /* glsl */`
 uniform vec3 rpSunDir;
 uniform highp sampler3D rpGI0, rpGI1, rpGI2, rpGI3;
 uniform vec3 rpGIMin, rpGIInvSize, rpAmbSky, rpAmbGround;
-uniform float rpGIBias, rpGIOn, rpSpecRef, rpIndirect, rpDebug, rpIndoor, rpIndoorFloor;
+uniform float rpGIBias, rpGIOn, rpSpecRef, rpIndirect, rpDebug, rpIndoor, rpIndoorFloor, rpOpenFill;
 // cosine-weighted sky visibility baked with the volume (1 open, 0 enclosed)
 float rpGISky(vec3 wp) {
   if (rpGIOn < 0.5) return 1.0;
@@ -76,7 +77,7 @@ ${vm ? 'rpSunVis = rpVMSun;' : `
   rpSunVis = rpSunShadow( rpWP, rpGN, vViewPosition.z, rpSunDir );
   // sealed interiors can't see the sun: kills 1px light leaks along ceiling/wall seams while
   // sun patches under skylights/openings (which do see sky) survive
-  rpSunVis *= smoothstep(0.004, 0.035, rpSkyVis);
+  rpSunVis *= smoothstep(0.002, 0.014, rpSkyVis);
 #endif`}
 `;
   const dir = /* glsl */`
@@ -105,7 +106,8 @@ ${vm ? 'rpSunVis = rpVMSun;' : `
     float rpEncl = 1.0 - rpSkyVis;
     // enclosed spaces in Dust II read warm (sand bounce through the openings), not grey
     // (covered areas + tunnels: ~+1..1.5 EV of the missing multi-bounce; open shade untouched)
-    irradiance *= rpIndirect * (1.0 + rpIndoor * smoothstep(0.3, 0.85, rpEncl) * vec3(1.04, 1.0, 0.9));
+    float rpCov = smoothstep(0.3, 0.85, rpEncl);
+    irradiance *= rpIndirect * mix(rpOpenFill, 1.0, rpCov) * (1.0 + rpIndoor * rpCov * vec3(1.04, 1.0, 0.9));
     // CS:GO's radiosity never lets a tunnel go black: floor the ambient in sealed spaces
     irradiance = max(irradiance, vec3(1.04, 1.0, 0.92) * (rpSpecRef * rpIndoorFloor * rpEncl * rpIndirect));
   }

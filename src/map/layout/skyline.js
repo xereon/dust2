@@ -41,6 +41,15 @@ export function build(K) {
       top2 = top + 90 + Math.round(r()) * 40;
       K.box([fx0, fy0, top], [fx0 + w * 0.6, fy0 + d * 0.6, top2], mat, { col: false, color: tone * 0.97 });
       K.box([fx0 - 3, fy0 - 3, top2], [fx0 + w * 0.6 + 3, fy0 + d * 0.6 + 3, top2 + 6], 'plaster_trim', { col: false, color: 0.93 });
+      const sw = w * 0.6, sd = d * 0.6, zw = top + 26;
+      for (const [ax, ay, ux, uy, nn, L] of [[fx0, fy0 - 0.6, 1, 0, [0, -1, 0], sw], [fx0, fy0 + sd + 0.6, 1, 0, [0, 1, 0], sw], [fx0 - 0.6, fy0, 0, 1, [-1, 0, 0], sd], [fx0 + sw + 0.6, fy0, 0, 1, [1, 0, 0], sd]]) {
+        const nw = Math.max(1, Math.floor(L / 60));
+        for (let k = 0; k < nw; k++) {
+          const m = (k + 0.5) * L / nw;
+          const Q = [[ax + ux * (m - 11), ay + uy * (m - 11), zw], [ax + ux * (m + 11), ay + uy * (m + 11), zw], [ax + ux * (m + 11), ay + uy * (m + 11), zw + 40], [ax + ux * (m - 11), ay + uy * (m - 11), zw + 40]];
+          K.poly('window_frame', orient(Q, nn), { col: 0.1, normal: nn });
+        }
+      }
     }
     // parapet railing (iron posts + rail) on some roofs, a solid rim on others
     if (r() < 0.3) {
@@ -58,8 +67,8 @@ export function build(K) {
       K.box([bx - 2, by + t, top], [bx + t, by + d - t, top + ph], mat, { col: false, color: tone });
       K.box([bx + w - t, by + t, top], [bx + w + 2, by + d - t, top + ph], mat, { col: false, color: tone });
     }
-    // windows (and a balcony slab) on the face turned toward the map
-    const fx = Math.abs(cx - (bx + w / 2)) / (x1 - x0) > Math.abs(cy - (by + d / 2)) / (y1 - y0);
+    // windows (and balcony slabs) on both faces turned toward the map
+    for (const fx of [true, false]) {
     const sgn = fx ? Math.sign(cx - (bx + w / 2)) : Math.sign(cy - (by + d / 2));
     const L = fx ? d : w;
     const nwin = Math.max(1, Math.floor(L / 70));
@@ -82,6 +91,7 @@ export function build(K) {
         if (fx) { const ex = sgn > 0 ? bx + w : bx - 22; K.box([ex, by + m - bw / 2, zz], [ex + 22, by + m + bw / 2, zz + 6], 'stone_block', { col: false, color: 0.9 }); const rx = sgn > 0 ? ex + 21 : ex; K.box([rx, by + m - bw / 2, zz + 6], [rx + 1.5, by + m + bw / 2, zz + 32], 'metal_grate', { col: false }); }
         else { const ey = sgn > 0 ? by + d : by - 22; K.box([bx + m - bw / 2, ey, zz], [bx + m + bw / 2, ey + 22, zz + 6], 'stone_block', { col: false, color: 0.9 }); const ry = sgn > 0 ? ey + 21 : ey; K.box([bx + m - bw / 2, ry, zz + 6], [bx + m + bw / 2, ry + 1.5, zz + 32], 'metal_grate', { col: false }); }
       }
+    }
     }
     // roof clutter
     const k = r();
@@ -117,42 +127,36 @@ export function build(K) {
     for (let s = 0; s < 3; s++) K.box([tx - 26, ty - 4, 760 - s * 30], [tx + 26, ty + 4, 776 - s * 30], 'plaster_white', { col: false, color: 0.9 });
   }
 
-  // ---- hills -----------------------------------------------------------------------------------
-  const RAD = [Math.hypot(x1 - x0, y1 - y0) / 2 + PAD1 - 200, 6000, 7000, 8000, 9000];
-  const N = 96;
+  // ---- hills: a low, far, hazy range to the west / north-west only (out of the T-spawn and
+  // long sightlines). Pale grey-blue vertex tint so they sit in the horizon haze.
+  const RAD = [8400, 9200, 9900, 10500];
+  const A0 = 150 * Math.PI / 180, A1 = 232 * Math.PI / 180, N = 40;
   const hz = (a, k) => {
-    // a: angle, k: ring index. North / north-west (toward +y, -x) rises highest.
-    const north = 0.5 + 0.5 * Math.cos(a - 1.9);
-    const n = 0.5 + 0.25 * Math.sin(a * 5 + 1.3) + 0.15 * Math.sin(a * 11 + 0.4) + 0.1 * Math.sin(a * 23 + 2.2);
-    const base = [-180, 600, 1500, 2100, 1700][k];
-    return k === 0 ? base : base * (0.55 + 0.9 * north) * (0.6 + 0.8 * n);
+    const t = (a - A0) / (A1 - A0), edge = Math.sin(Math.PI * Math.min(1, Math.max(0, t)));   // taper at the sector ends
+    const n = 0.55 + 0.25 * Math.sin(a * 7 + 1.3) + 0.12 * Math.sin(a * 17 + 0.4) + 0.08 * Math.sin(a * 31 + 2.2);
+    const base = [-220, 380, 900, 600][k];
+    return k === 0 ? base : -220 + (base + 220) * edge * (0.55 + 0.7 * n);
   };
   const P = (a, k) => [cx + RAD[k] * Math.cos(a), cy + RAD[k] * Math.sin(a), hz(a, k)];
-  const uv = (p) => [p[0] / 900, p[1] / 900];
+  const uv = (p) => [p[0] / 1400, p[1] / 1400];
+  const haze = (k) => { const f = 0.82 + 0.05 * k; return [f * 0.92, f * 0.95, f * 1.04]; };
   for (let i = 0; i < N; i++) {
-    const a0 = (i / N) * Math.PI * 2, a1 = ((i + 1) / N) * Math.PI * 2;
+    const a0 = A0 + (A1 - A0) * i / N, a1 = A0 + (A1 - A0) * (i + 1) / N;
     for (let k = 0; k < RAD.length - 1; k++) {
       const A = P(a0, k), B = P(a1, k), C = P(a1, k + 1), D = P(a0, k + 1);
-      const col = 0.78 + 0.08 * k;
-      K.poly('sand_blend', orient([A, B, C], [0, 0, 1]), { uv, col });
-      K.poly('sand_blend', orient([A, C, D], [0, 0, 1]), { uv, col });
+      K.poly('plaster_white', orient([A, B, C], [0, 0, 1]), { uv, col: haze(k) });
+      K.poly('plaster_white', orient([A, C, D], [0, 0, 1]), { uv, col: haze(k) });
     }
   }
-  // kasbah towers on the northern slopes beyond A (+y, a little west)
-  for (let t = 0; t < 7; t++) {
-    const a = 1.35 + t * 0.12 + (r() - 0.5) * 0.05, k = 1 + (t % 2);
-    const R0 = RAD[k] + 300 + r() * 500;
+  // a few kasbah towers on the slopes, just as hazy
+  for (let t = 0; t < 5; t++) {
+    const a = A0 + (A1 - A0) * (0.25 + t * 0.12), k = 1;
+    const R0 = RAD[k] + 200 + r() * 300;
     const px = cx + R0 * Math.cos(a), py = cy + R0 * Math.sin(a);
     const frac = (R0 - RAD[k]) / (RAD[k + 1] - RAD[k]);
     const gz = hz(a, k) * (1 - frac) + hz(a, k + 1) * frac;
-    const s = 90 + r() * 70, H = 180 + r() * 220;
-    K.box([px - s / 2, py - s / 2, gz - 60], [px + s / 2, py + s / 2, gz + H], 'adobe', { col: false, color: 0.85 });
-    for (let m = 0; m < 4; m++) {
-      const e = -s / 2 + (m + 0.5) * s / 4;
-      K.box([px + e - 8, py - s / 2, gz + H], [px + e + 8, py - s / 2 + 12, gz + H + 22], 'adobe', { col: false, color: 0.85 });
-      K.box([px + e - 8, py + s / 2 - 12, gz + H], [px + e + 8, py + s / 2, gz + H + 22], 'adobe', { col: false, color: 0.85 });
-    }
-    if (r() < 0.6) K.box([px + s / 2 - 10, py - s / 2 + 10, gz], [px + s / 2 + 60 + r() * 80, py + s / 2 - 10, gz + H * 0.55], 'adobe', { col: false, color: 0.8 });
+    const sz = 110 + r() * 60, H = 200 + r() * 160;
+    K.box([px - sz / 2, py - sz / 2, gz - 80], [px + sz / 2, py + sz / 2, gz + H], 'plaster_white', { col: false, color: 0.8 });
   }
   K.skylineStats = { blocks: nBlocks, dishes: nDish };
 }
