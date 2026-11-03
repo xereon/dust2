@@ -6,10 +6,12 @@ import { buildPallet } from './wood.js';
 
 // ---- palm ------------------------------------------------------------------------------------------
 /** Frond card: V-folded strip following an arching rachis (rises at `elev`, droops `droop` units by the tip). */
-function frond(pb, matKey, base, az, elev, len, width, droop, fold = 0.8, segs = 12, tint = [1, 1, 1], roll = 0) {
+function frond(pb, matKey, base, az, elev, len, width, droop, fold = 0.8, segs = 12, tint = [1, 1, 1], roll = 0, curl = 0) {
   const dirH = new THREE.Vector3(Math.cos(az), 0, Math.sin(az));
+  const side = new THREE.Vector3(-Math.sin(az), 0, Math.cos(az));
   const up = new THREE.Vector3(0, 1, 0);
-  const P = (s) => base.clone().addScaledVector(dirH, s * Math.cos(elev)).addScaledVector(up, s * Math.sin(elev) - droop * (s / len) ** 2);
+  // rachis rises at elev, droops by `droop` at the tip and curls sideways by `curl`
+  const P = (s) => base.clone().addScaledVector(dirH, s * Math.cos(elev)).addScaledVector(up, s * Math.sin(elev) - droop * (s / len) ** 2).addScaledVector(side, curl * (s / len) ** 2);
   const pos = [], uv = [], idx = [];
   const q = new THREE.Quaternion();
   for (let i = 0; i <= segs; i++) {
@@ -33,7 +35,7 @@ function frond(pb, matKey, base, az, elev, len, width, droop, fold = 0.8, segs =
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   g.setIndex(idx); g.computeVertexNormals();
   // lighten toward the tips, darker near the crown (self-shadowed)
-  paint(g, (x, y, z, nx, ny, nz, i) => { const t = uv[i * 2 + 1] ?? 0; const k = lerp(0.62, 1.05, smooth(0, 0.5, t)); return [tint[0] * k, tint[1] * k, tint[2] * k]; });
+  paint(g, (x, y, z, nx, ny, nz, i) => { const t = uv[i * 2 + 1] ?? 0; const k = lerp(0.78, 1.1, smooth(0, 0.5, t)); return [tint[0] * k, tint[1] * k, tint[2] * k]; });
   pb.add(matKey, g);
   return P;
 }
@@ -64,17 +66,19 @@ export function palm(h = 260, variant = 0) {
   pb.add('wood:door', boot, null, [0.55, 0.45, 0.34]);
   // dead fronds hanging down around the trunk
   const crown = top.clone().add(new THREE.Vector3(0, 4, 0));
-  for (let k = 0; k < 7; k++) frond(pb, 'frond:dead', crown.clone().add(new THREE.Vector3(0, -4, 0)), r.f(0, Math.PI * 2), r.f(-80, -62) * DEG, r.f(45, 65), r.f(16, 22), 2, 0.5, 8, [0.95, 0.9, 0.85], r.f(-0.5, 0.5));
+  for (let k = 0; k < 9; k++) frond(pb, 'frond:dead', crown.clone().add(new THREE.Vector3(0, -4, 0)), r.f(0, Math.PI * 2), r.f(-80, -62) * DEG, r.f(45, 65), r.f(16, 22), 2, 0.5, 8, [0.95, 0.9, 0.85], r.f(-0.5, 0.5));
   // live fronds (golden-angle spiral)
-  const nf = 14 + r.i(0, 2); // 14–16 big arching fronds
+  // a rounded fountain, not a flat star: steep young fronds on top, arching mid tier,
+  // lower fronds that leave the crown near-level and hang well below it
+  const nf = 20 + r.i(0, 4);
   for (let k = 0; k < nf; k++) {
-    const az = k * 2.39996 + r.f(-0.2, 0.2);
-    const tier = k / nf;
-    const elev = lerp(58, 8, tier) * DEG + r.f(-6, 6) * DEG;
-    const len = r.f(70, 96) * (0.8 + 0.2 * (1 - Math.abs(tier - 0.6) * 1.6));
-    const g = r.f(0.85, 1.05);
-    const droop = len * lerp(0.55, 1.15, tier) * r.f(0.85, 1.15);
-    frond(pb, 'frond', crown.clone().add(new THREE.Vector3(0, r.f(-2.5, 2.5), 0)), az, elev, len * 1.22, r.f(40, 50), droop * 1.22, 0.75, 14, [g, g, g * 0.95], r.f(-0.35, 0.35));
+    const az = k * 2.39996 + r.f(-0.25, 0.25);
+    const tier = k / (nf - 1);
+    const elev = lerp(72, 2, tier) * DEG + r.f(-7, 7) * DEG;
+    const len = r.f(78, 104) * lerp(0.72, 1.05, Math.min(1, tier * 1.6));
+    const g = r.f(0.9, 1.08) * lerp(1.06, 0.92, tier);
+    const droop = len * lerp(0.25, 0.85, tier) * r.f(0.85, 1.15);
+    frond(pb, 'frond', crown.clone().add(new THREE.Vector3(0, lerp(3, -3, tier) + r.f(-1.5, 1.5), 0)), az, elev, len * 1.15, r.f(42, 52), droop * 1.15, 0.9, 14, [g, g, g * 0.94], r.f(-0.4, 0.4), r.f(-14, 14));
   }
   // date clusters
   for (let k = 0; k < 4; k++) {

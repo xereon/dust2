@@ -177,6 +177,10 @@ export const PAINTS = {
   olive: [0.38, 0.40, 0.26], cream: [0.86, 0.82, 0.72], white: [0.86, 0.84, 0.79], grey: [0.58, 0.59, 0.58],
   sand: [0.74, 0.64, 0.47], orange: [0.72, 0.40, 0.18], yellow: [0.80, 0.66, 0.25], black: [0.12, 0.12, 0.12],
   bluegrey: [0.55, 0.64, 0.70], sky: [0.55, 0.70, 0.78], brown: [0.46, 0.32, 0.22],
+  // CS2 A-site crate paints (cool sun-bleached white / weathered grey)
+  cratewhite: [0.86, 0.86, 0.84], crategrey: [0.64, 0.65, 0.66],
+  // car body: faded off-white enamel
+  carwhite: [0.86, 0.85, 0.81],
 };
 
 function woodAtlas(pal, paint = null, cover = 0.5, albedoOnly = false) {
@@ -201,6 +205,9 @@ function woodAtlas(pal, paint = null, cover = 0.5, albedoOnly = false) {
       const pm = sm(th - 0.03, th + 0.03, paintField()[i] + (fib + 0.5) * 0.1 - late * 0.08);
       const fade = 0.8 + 0.2 * mo;
       r = mix(r, paint[0] * fade, pm); g = mix(g, paint[1] * fade, pm); b = mix(b, paint[2] * fade, pm);
+      // grain, cracks and pores still telegraph faintly through the paint film
+      const thr = 1 - pm * (late * 0.06 + cr * 0.18 + po * 0.04);
+      r *= thr; g *= thr; b *= thr;
       h += pm * 0.6; rough = mix(rough, 0.62, pm);
     }
     o.r = r; o.g = g; o.b = b; o.h = h; o.rough = rough;
@@ -233,7 +240,8 @@ function metalTex(kind, col, wear0 = 0.3, albedoOnly = false) {
     const big = F.big[i], pit = F.pit[i], streak = F.streak[i], speck = F.speck[i];
     let rust = sm(0.52, 0.66, big + streak * 0.18 - 0.05);
     let r, g, b, rough, metal = 0, h;
-    const rc = mix(0.42, 0.30, pit), rg = mix(0.24, 0.16, pit), rb = mix(0.12, 0.08, pit);
+    // rust: brown-orange (fresh) to umber (old), never red
+    const rc = mix(0.56, 0.36, pit), rg = mix(0.37, 0.25, pit), rb = mix(0.21, 0.15, pit);
     if (kind === 'iron') {
       const base = 0.46 + (big - 0.5) * 0.1 + (streak - 0.5) * 0.06;
       rust = sm(0.6, 0.74, big + streak * 0.2);
@@ -249,20 +257,27 @@ function metalTex(kind, col, wear0 = 0.3, albedoOnly = false) {
       const d = sm(0.4, 0.8, streak) * 0.12; r -= d; g -= d; b -= d;
       rough = 0.5 + big * 0.15 + rust * 0.3; metal = mix(0.2, 0.05, rust);
       h = spang * 0.1 + rust * 0.5 + pit * 0.2 * rust;
+    } else if (kind === 'car') {
+      // car enamel: smooth, sun-faded, dusty; no chips (rust is placed on the body by vertex colour)
+      const fade = 0.94 + 0.08 * (big - 0.5);
+      const dust = sm(0.35, 0.85, F.dust[i]) * 0.16 + sm(0.5, 0.8, streak) * 0.05;
+      r = mix(col[0] * fade, 0.74, dust); g = mix(col[1] * fade, 0.68, dust); b = mix(col[2] * fade, 0.57, dust);
+      rough = 0.42 + dust * 1.6 + speck * 0.04; metal = 0;
+      h = speck * 0.03 + dust * 0.05;
     } else {
       // painted steel: small chips (gated by a low-frequency wear mask) reveal rust,
       // vertical run streaks, sun fading and dust
       const wear = big;
       const fine = F.fine[i];
-      const th = 0.86 - wear0 * 0.3 - (wear - 0.5) * 0.5 * Math.min(1, wear0 * 3);
+      const th = 0.9 - wear0 * 0.3 - (wear - 0.5) * 0.45 * Math.min(1, wear0 * 3);
       const chip = sm(th, th + 0.02, fine + (pit - 0.5) * 0.08);
       const edge = sm(th - 0.035, th, fine) - chip; // primer ring round chips
       const fade = 0.9 + 0.12 * (big - 0.5) + (streak - 0.5) * 0.1;
       r = col[0] * fade; g = col[1] * fade; b = col[2] * fade;
       const dust = sm(0.45, 0.8, F.dust[i]) * 0.12;
       r = mix(r, 0.72, dust); g = mix(g, 0.66, dust); b = mix(b, 0.56, dust);
-      const run = sm(0.55, 0.75, streak) * sm(0.45, 0.7, wear) * 0.5 * wear0; // rust tears running down
-      r = mix(r, 0.5, run * 0.5); g = mix(g, 0.36, run * 0.5); b = mix(b, 0.24, run * 0.5);
+      const run = sm(0.5, 0.72, streak) * sm(0.38, 0.66, wear) * Math.min(0.85, wear0 * 3.5); // rust tears running down
+      r = mix(r, 0.6, run * 0.55); g = mix(g, 0.42, run * 0.55); b = mix(b, 0.26, run * 0.55);
       r = mix(r, 0.62, edge * 0.5); g = mix(g, 0.6, edge * 0.5); b = mix(b, 0.56, edge * 0.5);
       r = mix(r, rc, chip); g = mix(g, rg, chip); b = mix(b, rb, chip);
       rough = mix(0.55 + dust, 0.9, chip); metal = 0;
@@ -364,7 +379,7 @@ function frondTex(dead) {
     const t = au / (maxLen + 0.01);
     const dry = dead ? 1 : sm(0.75, 1.0, t) * 0.8 + sm(0.8, 1, v) * 0.5;
     const shade = 0.85 + (f - 0.5) * 0.3;
-    let r = mix(0.30, 0.62, dry) * shade, g = mix(0.44, 0.50, dry) * shade, b = mix(0.16, 0.30, dry) * shade;
+    let r = mix(0.36, 0.64, dry) * shade, g = mix(0.52, 0.53, dry) * shade, b = mix(0.20, 0.32, dry) * shade;
     if (rib) { r = mix(0.55, 0.62, dry); g = mix(0.55, 0.52, dry); b = mix(0.28, 0.34, dry); }
     o.r = r; o.g = g; o.b = b; o.rough = 0.75; o.h = rib ? 1 : (leaf ? 0.5 - Math.abs(f - 0.5) : 0);
   }, { nStrength: 2, alpha: true });
@@ -438,7 +453,8 @@ function labelAtlas() {
     const j = (y * W + xx) * 4; if (!d[j + 3]) continue;
     const ci = Math.floor(xx / 512) + Math.floor(y / 256) * 2;
     const e = fbm(xx / 40, y / 40, 4) + (vn(xx / 3, y / 3) - 0.5) * 0.35;
-    const k = ci >= 6 ? sm(0.2, 0.25, e) * 0.97 : sm(0.36, 0.52, e) * 0.9;
+    // big crate numbers stay bold (CS2 stencils read from across the site); the rest erode
+    const k = ci >= 6 ? sm(0.2, 0.25, e) * 0.97 : ci <= 1 ? sm(0.22, 0.34, e) * 0.97 : sm(0.36, 0.52, e) * 0.9;
     d[j + 3] *= k;
   }
   x.putImageData(img, 0, 0);
@@ -487,6 +503,11 @@ export function material(key) {
       const wear = +(key.split(':')[2] || 0.12);
       const nr = tex('paintNR:' + wear, () => metalTex('paint', PAINTS.grey, wear));
       m = std({ ...nr, map: tex(key, () => metalTex('paint', PAINTS[arg] || PAINTS.grey, wear, true)).map });
+      break;
+    }
+    case 'carpaint': {
+      const nr = tex('carNR', () => metalTex('car', PAINTS.carwhite));
+      m = std({ ...nr, map: tex(key, () => metalTex('car', PAINTS[arg] || PAINTS.carwhite, 0, true)).map });
       break;
     }
     case 'canvas': m = std(tex(key, () => clothTex('canvas', PAINTS[arg] || PAINTS.teal)), { side: THREE.DoubleSide }); break;

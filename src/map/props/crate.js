@@ -11,10 +11,11 @@ const VARIANTS = [
   { panel: 'diag', planks: 'h', caps: true, bands: false, tint: [0.98, 0.9, 0.78], labels: [['arrows', 'ul'], ['stamp', 'lr']] },
   { panel: 'x', planks: 'v', caps: false, bands: true, tint: [0.84, 0.84, 0.83], labels: [['num07', 'top']] },
   { panel: 'plain', planks: 'v', caps: true, bands: true, tint: [1.0, 0.85, 0.66], labels: [['care', 'c']] },
-  // 4 — CS2 A-site / goose look: sun-bleached grey-white boards, 2×2 panels, steel bands + caps
-  { panel: 'cross', planks: 'h', caps: true, bands: true, tint: [1.16, 1.15, 1.12], frameTint: [1.04, 1.03, 1.0], bandTint: [0.72, 0.74, 0.76], labels: [['num14', 'ul'], ['star', 'lr']] },
-  // 5 — CS2 grey crate with a diagonal brace and bands (stacked small grey crates by the ramp)
-  { panel: 'diag', planks: 'h', caps: true, bands: true, tint: [1.0, 1.0, 0.98], frameTint: [0.92, 0.92, 0.9], bandTint: [0.68, 0.7, 0.72], labels: [['num14', 'ul']] },
+  // 4 — CS2 A-site / goose look: WHITE-painted panel crate (paint film over planks, a few
+  //     chips to grey wood), 2×2 panels, dark steel bands + caps, black stencil numbers
+  { panel: 'cross', planks: 'h', caps: true, bands: true, mat: 'woodpaint:cratewhite:0.84', bandY: [0.17, 0.83], tint: [1.04, 1.04, 1.03], frameTint: [0.94, 0.94, 0.93], bandTint: [0.5, 0.52, 0.54], vary: 0.035, labels: [['num14', 'ul'], ['star', 'lr']] },
+  // 5 — CS2 GREY-painted crate with a diagonal brace and bands (stacked small grey crates by the ramp)
+  { panel: 'diag', planks: 'h', caps: true, bands: true, mat: 'woodpaint:crategrey:0.84', bandY: [0.2, 0.8], tint: [1.0, 1.0, 1.0], frameTint: [0.88, 0.88, 0.88], bandTint: [0.46, 0.48, 0.5], vary: 0.035, labels: [['num14', 'ul']] },
 ];
 export const CRATE_VARIANTS = VARIANTS.length;
 /** Named variants accepted wherever a crate variant is: crate(64, 'cs2'). */
@@ -68,11 +69,11 @@ export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
       const w = (ws[i] / tot) * avail;
       const a = c, b = c + w; c = b + gap;
       const pts = vertical ? rect(a, len0, b, len1) : rect(len0, a, len1, b);
-      board(pb, W, pts, pz, pt, M, { angle: vertical ? Math.PI / 2 : 0, tint, chamfer: Math.min(0.3, pt * 0.35), back: false, cap: false, vary: 0.09 });
+      board(pb, W, pts, pz, pt, M, { angle: vertical ? Math.PI / 2 : 0, tint, chamfer: Math.min(0.3, pt * 0.35), back: false, cap: false, vary: V.vary ?? 0.09 });
       planks.push({ a, b });
     }
     // ---- frame (proud layer) ----
-    const fz = -ft, bw = fw, fo = { tint: frameTint, chamfer: Math.min(0.55, ft * 0.35), vary: 0.05, back: false };
+    const fz = -ft, bw = fw, fo = { tint: frameTint, chamfer: Math.min(0.55, ft * 0.35), vary: Math.min(0.05, V.vary ?? 0.05), back: false };
     const x0 = -hw + ix, x1 = hw - ix, y0 = -hh + iy, y1 = hh - iy;
     board(pb, W, rect(x0, y0, x0 + bw, y1), fz, ft, M, { ...fo, angle: Math.PI / 2 });
     board(pb, W, rect(x1 - bw, y0, x1, y1), fz, ft, M, { ...fo, angle: Math.PI / 2 });
@@ -138,7 +139,7 @@ export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
     // ---- steel bands ----
     if (V.bands && !F.top) {
       const bt = 0.16, bh = clamp(S * 0.028, 1.2, 2.2);
-      for (const fy of [0.26, 0.74]) {
+      for (const fy of V.bandY || [0.26, 0.74]) {
         const yc = -hh + F.h * fy;
         const ext = F.k === '+z' || F.k === '-z' ? bt : 0;
         const g = slab(rect(-hw - ext, yc - bh / 2, hw + ext, yc + bh / 2), bt, 0.05, false);

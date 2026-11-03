@@ -51,8 +51,8 @@ void renderCoat(vec2 uv, out float h, out vec3 col, out float rough) {
   float g = fbmU(uv, 64.0, 3, 0.6, 81.0);
   float m = fbmU(uv, 10.0, 3, 0.5, 82.0);
   h = 0.35 + 0.04 * g + 0.025 * m;
-  col = mix(${C('#a8957c')}, ${C('#968470')}, sat(m * 0.6 + 0.5));
-  col = mix(col, ${C('#c0a585')}, sat(g) * 0.4);
+  col = mix(${C('#b8ac9a')}, ${C('#a99c89')}, sat(m * 0.6 + 0.5));
+  col = mix(col, ${C('#c6b9a4')}, sat(g) * 0.4);
   col *= 0.92 + 0.12 * vnU(uv, 180.0, 83.0);
   rough = 0.96;
 }
@@ -82,7 +82,8 @@ float limePlaster(vec2 uv, vec4 L, vec4 L2, vec3 pc0, vec3 pc1, float loss, floa
   float n = L.x + 0.16 * det + 0.03 * gnU(uv, 96.0, s + 16.0);
   float lostP = smoothstep(loss, loss + 0.05, n);
   float lostR = smoothstep(loss + 0.25, loss + 0.3, n + 0.2 * L2.x);
-  float halo = smoothstep(loss - 0.15, loss, n) * (1.0 - lostP);
+  // grime gathers around breaks with a wide (20-40u) falloff taken from the smooth field
+  float halo = smoothstep(loss - 0.45, loss + 0.02, L.x) * (1.0 - lostP);
 
   // under-layers only where something is missing (branch is coherent: big patches)
   float hR = 0.35, rR = 0.96, hB = 0.0, rB = 0.9; vec3 cR = vec3(0.4), cB = vec3(0.3);
@@ -95,7 +96,7 @@ float limePlaster(vec2 uv, vec4 L, vec4 L2, vec3 pc0, vec3 pc1, float loss, floa
   pc *= 0.975 + 0.028 * L2.y + 0.015 * grain;
   pc *= mix(vec3(1.0), vec3(0.83, 0.81, 0.77), L.z * stain);
   pc *= mix(vec3(1.0), vec3(0.87, 0.86, 0.83), L.w * stain * 0.8);
-  pc *= mix(vec3(1.0), vec3(0.92, 0.9, 0.86), halo * 0.6);   // grime collects around breaks
+  pc *= mix(vec3(1.0), vec3(0.9, 0.88, 0.84), halo * halo * 0.7);
 
   o.h = mix(hP, mix(hR, hB, lostR), lostP);
   o.col = mix(pc, mix(cR, cB, lostR), lostP);

@@ -1,10 +1,10 @@
 // B side: upper tunnels (corridor, hall, exit), B site with the back platform, the B doors,
 // B window and the hall from B doors down to CT mid.
-import { zx, zy, zc } from './util.js';
+import { zx, zy, zc, blindArch } from './util.js';
 
 export function build(K) {
   const tun = { mat: 'concrete_floor', wallMat: 'plaster_wall', ceilMat: 'wood_planks', paint: { h: 36, mat: 'plaster_wall#dark' } };
-  const stoneWall = { wallMat: 'adobe', paint: null, tint: [0.8, 0.82, 0.92], base: { h: 34, out: 4, mat: 'stone_wall' } };
+  const stoneWall = { wallMat: 'plaster_wall', paint: null, tint: [0.9, 0.84, 0.74], base: { h: 34, out: 4, mat: 'stone_wall' } };
 
   // ---- upper tunnels ------------------------------------------------------------------------
   K.region('utun_mouth', zc([[-1736, 716], [-1588, 716], [-1588, 744], [-1736, 744]], 30),
@@ -27,12 +27,9 @@ export function build(K) {
   // skylight timber grid (some joists missing) over the open bay
   for (const [i, x] of [-1850, -1810, -1770, -1730, -1710].entries()) if (i !== 2) K.box([x - 4, 1094, 334], [x + 4, 1256, 344], 'wood_planks', { col: false, color: 0.7 });
   for (let y = 1108; y < 1250; y += 18) if (Math.abs(y - 1180) > 20) K.box([-1866, y - 2, 344], [-1694, y + 2, 347], 'wood_planks', { col: false, color: 0.65 });
-  // shallow arched recesses in the side walls
-  for (const [x0, x1, y] of [[-2185, -2075, 1425], [-2010, -1930, 1022]]) {
-    const ys = y > 1200 ? y - 0.5 : y + 0.5, sg = y > 1200 ? -1 : 1;
-    const P = [[x0, ys, 32], [x1, ys, 32], [x1, ys, 150], [(x0 + x1) / 2, ys, 150 + (x1 - x0) * 0.35], [x0, ys, 150]];
-    K.poly('plaster_wall#dark', sg > 0 ? P.slice().reverse() : P, { col: 0.55, normal: [0, sg, 0] });
-  }
+  // shallow arched bays in the side walls
+  for (const [x0, x1, y, sg] of [[-2185, -2075, 1425, -1], [-2010, -1930, 1022, 1], [-1500, -1400, 1020, 1], [-1600, -1480, 1298, -1]])
+    blindArch(K, [x0, y], [x1, y], [0, sg], 32, 170, { mat: 'plaster_wall', col: 0.85, d: 14 });
   // support posts in the hall
   K.box([-1798, 1042, 32], [-1782, 1058, 300], 'wood_planks', { color: 0.8 });
   K.box([-1798, 1292, 32], [-1782, 1308, 300], 'wood_planks', { color: 0.8 });
@@ -85,7 +82,7 @@ export function build(K) {
     return Sx(x) + (Nx(x) - Sx(x)) * t;
   };
   const hz = (pts) => pts.map(([x, y]) => [x, y, Math.round(H(x, y) * 10) / 10]);
-  const hall = { mat: 'cobblestone', paint: { h: 56, mat: 'plaster_band_ochre' }, cornice: {} };
+  const hall = { mat: 'cobblestone', paint: { h: 56, mat: 'plaster_white#mustard' }, cornice: {} };
   const XS = [-1304, -1150, -1052, -900, -742, -600, -316], YS = [2072, 2300, 2400, 2500, 2586];
   for (let i = 0; i < XS.length - 1; i++) for (let j = 0; j < YS.length - 1; j++) {
     const x0 = XS[i], x1 = XS[i + 1], y0 = YS[j], y1 = YS[j + 1];

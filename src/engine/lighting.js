@@ -22,8 +22,8 @@ export const lightUniforms = {
   rpAmbGround: { value: new THREE.Color(0.30, 0.24, 0.17) },
   rpSpecRef: { value: 1 },   // luminance of open-sky irradiance (specular occlusion reference)
   rpIndirect: { value: 1 },  // debug / global ambient multiplier
-  rpIndoor: { value: 1.5 },
-  rpIndoorFloor: { value: 0.55 }, // min ambient in sealed spaces, as a fraction of open-sky irradiance
+  rpIndoor: { value: 2.6 },
+  rpIndoorFloor: { value: 0.9 }, // min ambient in sealed spaces, as a fraction of open-sky irradiance
   rpVMRot: { value: new THREE.Matrix3() },
   rpVMPos: { value: new THREE.Vector3() },
   rpVMSun: { value: 1 },
@@ -104,7 +104,8 @@ ${vm ? 'rpSunVis = rpVMSun;' : `
          : 'irradiance = rpGIEval(rpWP + rpGN * rpGIBias, rpWN);'}
     float rpEncl = 1.0 - rpSkyVis;
     // enclosed spaces in Dust II read warm (sand bounce through the openings), not grey
-    irradiance *= rpIndirect * (1.0 + rpIndoor * rpEncl * rpEncl * vec3(1.04, 1.0, 0.9));
+    // (covered areas + tunnels: ~+1..1.5 EV of the missing multi-bounce; open shade untouched)
+    irradiance *= rpIndirect * (1.0 + rpIndoor * smoothstep(0.3, 0.85, rpEncl) * vec3(1.04, 1.0, 0.9));
     // CS:GO's radiosity never lets a tunnel go black: floor the ambient in sealed spaces
     irradiance = max(irradiance, vec3(1.04, 1.0, 0.92) * (rpSpecRef * rpIndoorFloor * rpEncl * rpIndirect));
   }

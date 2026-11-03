@@ -119,6 +119,16 @@ void atSetup() {
     at_macro = m1 + 0.8 * m2;
   #endif
 }
+// normals switch over a much narrower band than colour: a 20% share of the hidden sample
+// keeps its strong edge normals (flake rims, brick joints) visible as ghost embossing
+vec4 atTexN(sampler2D t) {
+  #ifdef AT_ANTITILE
+    float wn = smoothstep(0.42, 0.58, at_w);
+    return mix(textureGrad(t, vAtUv + at_oa, at_dx, at_dy), textureGrad(t, vAtUv + at_ob, at_dx, at_dy), wn);
+  #else
+    return texture2D(t, vAtUv);
+  #endif
+}
 vec4 atTex(sampler2D t) {
   #ifdef AT_ANTITILE
     return mix(textureGrad(t, vAtUv + at_oa, at_dx, at_dy), textureGrad(t, vAtUv + at_ob, at_dx, at_dy), at_w);
@@ -193,7 +203,7 @@ function patch(shader, u, flags) {
     .replace('texture2D( aoMap, vAoMapUv ).r', 'at_orm.r');
   aoChunk = '#if defined( USE_AOMAP ) && !defined( USE_ROUGHNESSMAP )\n at_orm = atTex(aoMap);\n#endif\n' + aoChunk;
   const nrmChunk = THREE.ShaderChunk.normal_fragment_maps
-    .replace('texture2D( normalMap, vNormalMapUv )', 'atTex( normalMap )');
+    .replace('texture2D( normalMap, vNormalMapUv )', 'atTexN( normalMap )');
   shader.fragmentShader = shader.fragmentShader
     .replace('#include <common>', defs + '#include <common>\n' + PARS + FRAG_FUNCS)
     .replace('#include <map_fragment>', FRAG_MAP)

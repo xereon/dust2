@@ -1,8 +1,8 @@
 // Old boxy 70s saloon (original design, Dust II B-site style: faded white paint, rust, flat tyre),
 // plus loose tyres and tyre stacks.
 import * as THREE from 'three';
-import { PropBuilder, rect, slab, cbox, rod, lathe, relathe, dome, paint, tintBy, mat, lerp, smooth, clamp, DEG, boxUV, uvXform } from './core.js';
-import { labelUV } from './tex.js';
+import { PropBuilder, rect, slab, cbox, rod, lathe, relathe, dome, paint, tintBy, mat, lerp, smooth, clamp, DEG, boxUV, uvXform, sweep } from './core.js';
+import { labelUV, vn } from './tex.js';
 
 // ---- tyres ------------------------------------------------------------------------------------------
 const TYRE_R = 11.5, TYRE_W = 6.6, RIM_R = 7.2;
@@ -48,13 +48,13 @@ export function tyreStack(n = 4) {
 }
 
 // ---- car ----------------------------------------------------------------------------------------------
-const CAR_PAINT = ['white', 'sky', 'sand', 'red'];
+const CAR_PAINT = ['carwhite', 'sky', 'sand', 'red'];
 /**
  * car(variant = 0): old boxy saloon, 160 × 64 × 55, front toward +x, centred, on the ground.
  * variant: 0 faded white, 1 pale blue, 2 sand, 3 red. Flat front-left tyre, rust, dust.
  */
 export function car(variant = 0) {
-  const P = `paint:${CAR_PAINT[((variant % 4) + 4) % 4]}:0.18`;
+  const P = `carpaint:${CAR_PAINT[((variant % 4) + 4) % 4]}`;
   const pb = new PropBuilder('car', 'car' + variant), r = pb.rand;
   const W = 64, WB = 95, wx = WB / 2, wy = TYRE_R - 0.4, AR = 14;
   // ---- lower body: side profile with wheel arches, extruded across the width with rounded edges
@@ -77,9 +77,13 @@ export function car(variant = 0) {
     if (ny < -0.6 && y < 12) return [0.18, 0.17, 0.16];
     const arch = (Math.hypot(x - wx, y - wy) < AR + 0.8 || Math.hypot(x + wx, y - wy) < AR + 0.8) && Math.abs(z) < W / 2 - 1.5;
     if (arch) return [0.14, 0.13, 0.12];
-    // road grime / rust bloom creeping up from the sills and arches, dusty flat tops
-    const d = smooth(20, 9, y) * 0.45 + (ny > 0.8 ? 0.08 : 0);
-    return [1 - d * 0.3, 1 - d * 0.42, 1 - d * 0.6];
+    // road grime creeping up from the sills, dusty flat tops, brown-orange rust bloom
+    // only where it really forms: round the arch lips and along the sills / valances
+    const d = smooth(20, 9, y) * 0.4 + (ny > 0.8 ? 0.06 : 0);
+    const ra = Math.min(Math.abs(Math.hypot(x - wx, y - wy) - AR), Math.abs(Math.hypot(x + wx, y - wy) - AR));
+    const rust = clamp(smooth(4.5, 0.5, ra) * 0.7 + smooth(13, 9.5, y) * 0.5, 0, 1) * (0.45 + 0.55 * vn(x / 9 + 3, y / 5 + z / 30));
+    const c = [1 - d * 0.28, 1 - d * 0.38, 1 - d * 0.55];
+    return [lerp(c[0], 0.62, rust * 0.8), lerp(c[1], 0.43, rust * 0.8), lerp(c[2], 0.27, rust * 0.8)];
   });
   pb.add(P, body);
   // wheel-well tubs block the see-through between arches
@@ -136,12 +140,54 @@ export function car(variant = 0) {
     pb.add(CH, cbox([-76, 21.6, zs * (W / 2 + bev * 0.1) - 0.3], [77, 22.8, zs * (W / 2 + bev * 0.1) + 0.3], 0.2), null, chrome);
     for (const hx of [-3.5, -35.5]) pb.add(CH, cbox([hx - 2.4, 29.2, zs * (W / 2) - 0.6], [hx + 2.4, 30.4, zs * (W / 2) + 0.6], 0.25), null, chrome);
   }
+  // flared arch lips (paint), a shoulder crease, black sills, chrome drip rails + window surrounds
+  const arcTube = (cx, zs, R0, r0) => {
+    const pts = [];
+    for (let i = 0; i <= 16; i++) { const a = lerp(0.1, Math.PI - 0.1, i / 16); pts.push(new THREE.Vector3(cx + Math.cos(a) * R0, wy + Math.sin(a) * R0, zs * (W / 2 - 0.2))); }
+    return sweep(new THREE.CatmullRomCurve3(pts), 24, 6, r0);
+  };
+  for (const zs of [-1, 1]) {
+    for (const cx of [-wx, wx]) pb.add(P, boxUV(arcTube(cx, zs, AR + 0.7, 1.05), 1 / 64), null, [0.9, 0.72, 0.56]);
+    pb.add(P, boxUV(cbox([-76, 26.6, zs * (W / 2) - 0.5], [77.5, 27.4, zs * (W / 2) + 0.5], 0.35), 1 / 64), null, [0.98, 0.98, 0.97]);
+    pb.add('rubber', cbox([-wx + AR + 1.2, 8.6, zs * (W / 2) - 0.9], [wx - AR - 1.2, 11.2, zs * (W / 2) + 0.4], 0.4), null, [0.32, 0.3, 0.28]);
+    // drip rail along the roof edge
+    const dz = zs * (Wc / 2 * 0.88 + 0.4);
+    pb.add(CH, sweep(new THREE.CatmullRomCurve3([new THREE.Vector3(5, 50.6, dz), new THREE.Vector3(-12, 51.2, dz), new THREE.Vector3(-30.2, 50.8, dz)]), 8, 4, 0.32), null, chrome);
+    // chrome surrounds traced round both side windows (follow the tumblehome)
+    for (const w of [[[24.2, 35], [-7.2, 35], [-7.2, 48.3], [5.2, 48.3]], [[-10.4, 35], [-40.5, 35], [-30.2, 48.3], [-10.4, 48.3]]]) {
+      const zz = zs * (cdep / 2 + cbv + 0.15);
+      const loop = w.concat([w[0]]).map(([x, y]) => new THREE.Vector3(zs < 0 ? x : x, y, zz));
+      for (let i = 0; i < loop.length - 1; i++) {
+        const g = rod(loop[i].toArray(), loop[i + 1].toArray(), 0.28, 4);
+        pb.add(CH, tumble(g), null, chrome);
+      }
+    }
+  }
+  // wrap-around bumper ends, overriders and rubber rub strips
+  for (const xs of [1, -1]) {
+    const x0 = xs > 0 ? 73 : -73, x1 = xs > 0 ? 81 : -81;
+    const tint = xs > 0 ? chrome : [0.82, 0.78, 0.72];
+    for (const zs of [-1, 1]) {
+      pb.add(CH, cbox([Math.min(x0, x1), 11, zs * (W / 2 + 0.8) - 1.6], [Math.max(x0, x1), 16.2, zs * (W / 2 + 0.8) + 0.4], 0.9), null, tint);
+      pb.add(CH, cbox([xs * 81.5 - 1.6, 9.5, zs * 14 - 1.6], [xs * 81.5 + 1.6, 18.5, zs * 14 + 1.6], 0.7), null, tint);
+    }
+    pb.add('rubber', cbox([xs * 82.5 - 0.6, 13, -W / 2 + 2], [xs * 82.5 + 0.7, 14.3, W / 2 - 2], 0.25), null, [0.2, 0.2, 0.2]);
+  }
+  // fuel filler + boot lock trim
+  { const f = lathe([[1.9, 0, true], [1.8, 0.4], [0.01, 0.5]], 10); f.rotateX(Math.PI / 2); f.translate(-60, 27.8, W / 2 + 0.05); pb.add(CH, f, null, chrome); }
+  pb.add(CH, cbox([-80.6, 27.4, -9], [-79.8, 28.6, 9], 0.2), null, chrome);
   // mirror on the driver side only
   pb.add(P, cbox([22, 35.5, W / 2 - 0.5], [26.5, 39.5, W / 2 + 4.2], 0.8), null, [0.95, 0.95, 0.95]);
   pb.add('rubber', rod([24, 34, W / 2 - 1], [24.2, 36, W / 2 + 1.5], 0.4, 5), null, [0.3, 0.3, 0.3]);
   // grille + four round headlamps
-  pb.add('rubber', cbox([79.2, 17.6, -17], [80.6, 26.8, 17], 0.3), null, [0.2, 0.2, 0.2]);
-  for (let y = 18.8; y < 26.4; y += 1.9) pb.add(CH, cbox([80.1, y - 0.3, -17], [80.9, y + 0.3, 17], 0.1), null, chrome);
+  pb.add('rubber', cbox([79.2, 17.6, -17], [80.6, 26.8, 17], 0.3), null, [0.12, 0.12, 0.12]);
+  // chrome surround framing grille + lamps, egg-crate bars, badge
+  pb.add(CH, cbox([80, 26.6, -32], [81.2, 27.8, 32], 0.4), null, chrome);
+  pb.add(CH, cbox([80, 16.8, -32], [81.2, 18, 32], 0.4), null, chrome);
+  for (const zz of [-32, -17.6, 17.6, 32]) pb.add(CH, cbox([80, 17, zz - 0.6], [81.2, 27.6, zz + 0.6], 0.3), null, chrome);
+  for (let y = 19.4; y < 26.4; y += 2.2) pb.add(CH, cbox([80.3, y - 0.32, -17], [81, y + 0.32, 17], 0.1), null, chrome);
+  for (let z = -14; z <= 14.1; z += 3.5) pb.add(CH, cbox([80.3, 18, z - 0.25], [80.9, 26.6, z + 0.25], 0.08), null, [0.85, 0.85, 0.86]);
+  { const b = lathe([[2.2, 0, true], [2, 0.5], [0.01, 0.7]], 12); b.rotateZ(-Math.PI / 2); b.translate(81, 22.3, 0); pb.add(CH, b, null, [1, 0.95, 0.85]); }
   for (const hz of [-28.2, -21, 21, 28.2]) {
     const ring = lathe([[3.6, 0, true], [3.7, 0.8, true], [3.0, 1.1, true], [2.9, 0.4]], 14); ring.rotateZ(-Math.PI / 2); ring.translate(79.6, 22.3, hz);
     pb.add(CH, ring, null, chrome);

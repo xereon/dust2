@@ -115,7 +115,7 @@ export function metalCrate(size = [80, 56, 56], variant = 0) {
   // doors always go on a short end: build long-along-x, then turn if the caller wants it along z
   const turn = D0 > L0, L = turn ? D0 : L0, D = turn ? L0 : D0;
   const col = ['blue', 'green', 'teal', 'grey'][((variant % 4) + 4) % 4];
-  const P = `paint:${col}:0.35`;
+  const P = `paint:${col}:0.24`;
   const pb = new PropBuilder('metalCrate', `${L}:${H}:${D}:${variant}`);
   const t = 3, hx = L / 2, hz = D / 2;
   // posts + rails

@@ -38,6 +38,7 @@ export const PAINT = {
   ochre: 0xd9b26e, teal: 0x86aca4, white: 0xfbf6ec, warm: 0xf6e3c4, cream: 0xf3e6cc,
   sand: 0xe9cf9f, pink: 0xf0d6c8, grey: 0xd8d4cc, dark: 0xb8ab94, blue: 0x8fb0c2,
   green: 0x93ad95, red: 0xb5584a, rust: 0xa5703f, cool: 0xe6e6e2,
+  mustard: 0xd4b88a, curbred: 0xc07060,
   decal: 0xfffffd, // floor overlays (paint marks, stone patches): own instance, offset, no shadow casting
 };
 // Fallback world units per texture repeat (TextureLib.info(key).world wins when present).
@@ -342,7 +343,8 @@ export class Kit {
       const z = z0 + rise * (k + 1);
       const am = (aa + ab) / 2;
       const pts = [[...P(r0, aa), z], [...P(r1, aa), z], [...P(r1, am), z], [...P(r1, ab), z], [...P(r0, ab), z]];
-      this.region(`${id}_${k}`, pts, { mat: 'stone_block', riserMat: 'stone_block', base: false, ...o, nav: false, stairOf: id });
+      const rm = (Array.isArray(r1) ? (r1[0] + r1[1]) / 2 : r1);
+      this.region(`${id}_${k}`, pts, { mat: 'stone_block', riserMat: 'stone_block', base: false, uvArc: { c, r: rm }, ...o, nav: false, stairOf: id });
       const za = z0 + rise * k, zb = z0 + rise * (k + 1);
       // nav + clip ramp per tread (smooth helix)
       const Q = [[...P(r0, aa), za], [...P(r1, aa), za], [...P(r1, ab), zb], [...P(r0, ab), zb]];
@@ -405,7 +407,7 @@ export class Kit {
         e.wallMat = pick(R.o.wallMats) ?? R.o.wallMat ?? 'plaster_white';
         e.paint = pick(R.o.paints) ?? R.o.paint ?? null;
         // painted base bands only on about one outdoor wall in four (Dust II leaves most bare)
-        if (e.paint && R.o.ceil == null && !R.o.keepPaint && /band/.test(e.paint.mat)) {
+        if (e.paint && R.o.ceil == null && !R.o.keepPaint && /band|#mustard|#teal/.test(e.paint.mat)) {
           const mx = (e.a.x + e.b.x) / 2, my = (e.a.y + e.b.y) / 2;
           const hsh = Math.abs(Math.sin(mx * 12.9898 + my * 78.233) * 43758.5453) % 1;
           if (hsh > 0.27) e.paint = null;
@@ -676,7 +678,12 @@ export class Kit {
     for (let c = 0; c < cols; c++) {
       const ua = lerp(u0, u1, c / cols), ub = lerp(u0, u1, (c + 1) / cols);
       const a = this._ptOn(e, ua), b = this._ptOn(e, ub);
-      const sa = -(e.s0 + ua * e.len) / S, sb = -(e.s0 + ub * e.len) / S;
+      let sa = -(e.s0 + ua * e.len) / S, sb = -(e.s0 + ub * e.len) / S;
+      if (R.o.uvArc) {
+        // walls of a winding stair: one continuous u around the well instead of restarting per step
+        const { c: C0, r: rr } = R.o.uvArc, arc = (p) => Math.atan2(p.y - C0[1], p.x - C0[0]) * rr;
+        sa = arc(a) / S; sb = arc(b) / S;
+      }
       // band levels (relative to each end's floor, same count at both ends)
       const hmin = Math.min(wallTop - a.z, wallTop - b.z);
       const rel = [0, 8, 30, 80];
@@ -766,7 +773,9 @@ export class Kit {
     let capA = !(t._inner && t._inner[0]), capB = !(t._inner && t._inner[1]);
     if (u0 < 1e-6 && wallAt(prev, false)) { const m = miter(prev, e, e.a); if (m) { a2 = m; capA = false; } }
     if (u1 > 1 - 1e-6 && wallAt(next, true)) { const m = miter(e, next, e.b); if (m) { b2 = m; capB = false; } }
-    const mat = t.mat;
+    // a kerb painted red on one side of the street only (redSide = outward wall direction)
+    const red = t.redSide && (e.nx * t.redSide[0] + e.ny * t.redSide[1] > 0.5);
+    const mat = red ? t.redMat : t.mat;
     const S = this.texWorld(mat);
     const s0 = -(e.s0 + u0 * e.len) / S, s1 = -(e.s0 + u1 * e.len) / S;
     let zA0, zA1, zB0, zB1;
@@ -798,7 +807,7 @@ export class Kit {
         if (area2(poly.map(([x, y]) => ({ x, y }))) < 0) poly = poly.reverse();
         this.colPrism(poly, Math.min(zA0, zB0) - 32, zt, surfOf(t.topMat || mat));
       }
-      if (t.line) {
+      if (t.line && !red) {
         // painted lane edge line on the road beside the kerb
         const o0 = t.out + t.line, o1 = o0 + 4;
         const P0 = [A.x - e.nx * o0, A.y - e.ny * o0], P1 = [B.x - e.nx * o0, B.y - e.ny * o0];
@@ -860,10 +869,15 @@ export class Kit {
     // points on the vault: param i across the width, at the two ends of j0 (depth ends)
     const inw = [-j0.nx, -j0.ny];
     const prof = [];
+    // round (semicircle) or pointed (two-centred, equilateral) profile
+    const pointed = !!o.arch.pointed;
+    const pz = (w) => { const x = Math.min(w, W - w) / W; return spring + rise * Math.sqrt(Math.max(0, 1 - (1 - x) * (1 - x))) / 0.8660254; };
     for (let i = 0; i <= K; i++) {
       const th = Math.PI * i / K;
-      prof.push({ w: (1 - Math.cos(th)) / 2 * W, z: spring + rise * Math.sin(th), th });
+      if (pointed) { const w = (1 - Math.cos(th)) / 2 * W; prof.push({ w, z: i === K / 2 ? crown : pz(w), th }); }
+      else prof.push({ w: (1 - Math.cos(th)) / 2 * W, z: spring + rise * Math.sin(th), th });
     }
+    prof.pointed = pointed;
     const Pt = (end, i) => { const base = end ? j0.b : j0.a; return [base.x + inw[0] * prof[i].w, base.y + inw[1] * prof[i].w, prof[i].z]; };
     // vault (intrados), facing down/in
     let arc = 0;
@@ -907,7 +921,7 @@ export class Kit {
     const NC = 8;
     for (let i = 0; i < NC; i++) {
       const w0 = W * i / NC, w1 = W * (i + 1) / NC;
-      const z = (w) => { const c = clamp(1 - 2 * w / W, -1, 1); return spring + rise * Math.sqrt(Math.max(0, 1 - c * c)); };
+      const z = pointed ? pz : (w) => { const c = clamp(1 - 2 * w / W, -1, 1); return spring + rise * Math.sqrt(Math.max(0, 1 - c * c)); };
       const lo = Math.min(z(w0), z(w1));
       const q = (end, w) => { const base = end ? j0.b : j0.a; return [base.x + inw[0] * w, base.y + inw[1] * w]; };
       this.colPrism([q(0, w0), q(0, w1), q(1, w1), q(1, w0)], lo, topZ, 'plaster');
@@ -920,7 +934,9 @@ export class Kit {
     const K = prof.length - 1;
     const cx = W / 2;
     const a = W / 2;
-    const at = (i, r) => ({ w: cx - (a + r) * Math.cos(prof[i].th), z: spring + (rise + r) * Math.sin(prof[i].th) });
+    const at = prof.pointed
+      ? (i, r) => ({ w: cx + (prof[i].w - cx) * (1 + r / a), z: prof[i].z + r * (prof[i].z - spring) / rise })
+      : (i, r) => ({ w: cx - (a + r) * Math.cos(prof[i].th), z: spring + (rise + r) * Math.sin(prof[i].th) });
     const P3 = (w, z, d) => [base.x + inw[0] * w + outDir[0] * d, base.y + inw[1] * w + outDir[1] * d, z];
     for (let i = 0; i < K; i++) {
       const a0 = prof[i], a1 = prof[i + 1];

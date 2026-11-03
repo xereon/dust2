@@ -114,7 +114,9 @@ function initBaker() {
   const baker = new Baker(r);
   baker.profile = !!state.profile;
   const q = World.quality || 'high';
-  state.aniso = own ? 8 : Math.min(baker.maxAniso, q === 'low' ? 2 : q === 'medium' ? 8 : 16);
+  // the render pipeline owns the anisotropy policy (quality preset); fall back to our own
+  const ra = Number(World.renderer?.anisotropy);
+  state.aniso = own ? 8 : Math.max(1, Math.min(baker.maxAniso, Number.isFinite(ra) && ra > 0 ? ra : (q === 'low' ? 2 : q === 'medium' ? 8 : 16)));
   state.qs = qualityScale();
   state.jobs = new Map();
   const add = (kind, key, def) => state.jobs.set(key, { kind, key, def });

@@ -6,10 +6,10 @@ import { zx, zy, zc } from './util.js';
 
 const KERB = { h: 8, out: 12, mat: 'curb_redwhite' };
 // raised sidewalk along the street walls: paved top, red/white kerb on its edge, lane line beside it
-const WALK = { h: 8, out: 70, mat: 'curb_redwhite', topMat: 'paving_setts', walk: true, line: 26 };
+const WALK = { h: 8, out: 70, mat: 'concrete_floor', redMat: 'concrete_floor#curbred', redSide: [1, 0], topMat: 'paving_setts', walk: true, line: 26 };
 
 export function build(K) {
-  const ochre = { h: 56, mat: 'plaster_band_ochre' };
+  const ochre = { h: 56, mat: 'plaster_white#mustard' };
   const teal = { h: 52, mat: 'plaster_band_teal' };
   const white = { h: 36, mat: 'plaster_wall#dark' };
 
@@ -34,16 +34,22 @@ export function build(K) {
   K.region('a_main', zc([
     [250, 2420], [513, 2420], [1040, 2420], [1040, 2330], [1245, 2330], [1245, 2780], [1001, 2780], [1001, 2794],
     [238, 2794], [238, 2718], [274, 2718], [274, 2574], [250, 2574],
-  ], 96), { mat: 'concrete_floor', bottom: 36, top: 400, tops: { 1: 128, 2: 128, 3: 128, 4: 128 }, paint: ochre, cornice: {} });
-  K.stairs('a_steps', [[1001, 2780], [1245, 2780], [1245, 2830], [1001, 2830]], 96, 120, 3, { mat: 'stone_block', tops: { e: 128, w: 400 } });
+  ], 96), { mat: 'flagstone', bottom: 36, top: 400, tops: { 1: 128, 2: 128, 3: 128, 4: 128, 6: 206, 7: 206 }, paint: ochre, cornice: {} });
+  K.stairs('a_steps', [[1001, 2780], [1245, 2780], [1245, 2830], [1001, 2830]], 96, 120, 3, { mat: 'stone_block', tops: { e: 128, w: 210 } });
   K.region('a_north', zc([[1001, 2830], [1245, 2830], [1245, 2790], [1265, 2790], [1598, 2790], [1598, 3089], [1001, 3089]], 120),
-    { mat: 'concrete_floor', top: 420, tops: { 1: 128, 2: 128, 4: 480, 5: 540 }, paint: ochre, cornice: {}, windows: 'arched' });
+    { mat: 'flagstone', top: 420, tops: { 1: 128, 2: 128, 4: 480, 5: 232, 6: 232 }, paint: ochre, cornice: {}, windows: 'arched' });
   K.region('aramp', zy([[1265, 2297], [1629, 2297], [1629, 2790], [1265, 2790]], 2297, -2, 2790, 112),
     { base: KERB, mat: 'asphalt', top: 420, tops: { w: 128 }, paint: teal, cornice: {} });
 
   // ---- under A: ramp from the underpass up to the top of long ------------------------------------
-  K.region('undera_m', zx([[513, 2042], [882, 2042], [882, 2006], [960, 2006], [960, 2404], [513, 2404]], 540, -122, 960, 0),
-    { mat: 'stone_block', top: 300, tops: { 4: 128 }, paint: white, cornice: {} });
+  K.region('undera_m', zx([[513, 2042], [540, 2042], [540, 2096], [900, 2096], [900, 2006], [960, 2006], [960, 2404], [513, 2404]], 540, -122, 960, 0),
+    { mat: 'stone_block', top: 300, tops: { 6: 128 }, paint: white, cornice: {} });
+  // steps climbing beside the ramp along its south wall
+  K.stairs('undera_st', [[540, 2096], [540, 2042], [900, 2042], [900, 2096]], -122, -17.4, 9, { mat: 'stone_block', top: 300 });
+  // timber post-and-beam frame in the underpass
+  for (const [x, y] of [[290, 2050], [390, 2050], [478, 2050], [262, 2546], [390, 2546], [478, 2546], [262, 2100], [262, 2320]])
+    K.box([x - 5, y - 5, -122], [x + 5, y + 5, 36], 'wood_planks', { color: 0.72 });
+  K.box([484, 2042, 22], [492, 2404, 36], 'wood_planks', { col: false, color: 0.7 });
   K.region('undera_e', zc([[960, 2006], [1228, 2006], [1228, 2314], [1024, 2314], [1024, 2404], [960, 2404]], 0),
     { mat: 'concrete_floor', top: 300, tops: { 2: 128, 3: 128, 4: 128 }, paint: teal, cornice: {} });
 
@@ -76,17 +82,24 @@ export function build(K) {
   // ---- long doors ---------------------------------------------------------------------------------
   // roofed sandstone-block passage with arched doorways and a checker tile floor
   K.region('ld_corr', zc([[507, 314], [550, 314], [722, 314], [772, 314], [772, 746], [723, 746], [550, 746], [507, 746]], 0),
-    { mat: 'stone_block', wallMat: 'stone_block', ceil: 214, ceilTop: 290, ceilMat: 'wood_planks', beams: { dir: 'x', step: 72 }, headerMat: 'stone_block', paint: null, base: { h: 10, out: 3, mat: 'stone_wall' } });
-  for (let y = 314, r = 0; y < 746; y += 24, r++) for (let x = 507, c = 0; x < 772; x += 24, c++) {
-    const k = (r + c) % 2 ? 2 : (r % 2 ? 0 : 1);
-    const col = [[0.52, 0.72, 0.58], [0.86, 0.52, 0.42], [1, 0.98, 0.94]][k];
-    const x1 = Math.min(772, x + 24), y1 = Math.min(746, y + 24);
-    K.poly('tile_floor#decal', [[x, y, 0.1], [x1, y, 0.1], [x1, y1, 0.1], [x, y1, 0.1]], { col, normal: [0, 0, 1], uv: (p) => [p[0] / 24, p[1] / 24] });
+    { mat: 'stone_block', wallMat: 'stone_block', ceil: 274, ceilTop: 350, ceilMat: 'wood_planks', beams: { dir: 'x', step: 72 }, headerMat: 'stone_block', paint: null, base: { h: 10, out: 3, mat: 'stone_wall' } });
+  // small diagonal tiles (green / terracotta / white) laid on the diagonal
+  {
+    const T = 8, h = T / Math.SQRT2;
+    const cols = [[0.47, 0.63, 0.52], [0.8, 0.5, 0.4], [0.9, 0.88, 0.82]];
+    for (let i = -60; i < 60; i++) for (let j = 0; j < 90; j++) {
+      const cx = 507 + (i + j) * h, cy = 314 + (j - i) * h;
+      if (cx - h < 509 || cx + h > 770 || cy - h < 316 || cy + h > 744) continue;
+      const k = ((i % 3) + 3 + (j % 2) * 2) % 3;
+      const c = cols[k], v = 0.94 + 0.06 * Math.sin(i * 7.1 + j * 3.3);
+      K.poly('plaster_white#decal', [[cx, cy - h + 0.4, 0.1], [cx + h - 0.4, cy, 0.1], [cx, cy + h - 0.4, 0.1], [cx - h + 0.4, cy, 0.1]],
+        { col: [c[0] * v, c[1] * v, c[2] * v], normal: [0, 0, 1] });
+    }
   }
   K.region('ld_door1', zc([[550, 272], [722, 272], [722, 314], [550, 314]], 0),
-    { mat: 'stone_block', wallMat: 'stone_block', arch: { spring: 130, crown: 190 }, ceilTop: 290, archMat: 'stone_block' });
+    { mat: 'stone_block', wallMat: 'stone_block', arch: { spring: 132, crown: 226, pointed: true }, ceilTop: 350, archMat: 'stone_block' });
   K.region('ld_door2', zc([[550, 746], [723, 746], [723, 784], [550, 784]], 0),
-    { mat: 'stone_block', wallMat: 'stone_block', arch: { spring: 130, crown: 190 }, ceilTop: 290, archMat: 'stone_block' });
+    { mat: 'stone_block', wallMat: 'stone_block', arch: { spring: 132, crown: 226, pointed: true }, ceilTop: 350, archMat: 'stone_block' });
 
   // ---- outside long ---------------------------------------------------------------------------------
   K.region('olong', zc([

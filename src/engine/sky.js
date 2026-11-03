@@ -149,8 +149,10 @@ export function setSkyParams({ sunDir, sunColor, E, sky = 1 }) {
   const k = E * sky;
   // Calibrated against pose-matched CS:GO frames (ACES, exposure 0.95): ~#6f9fd0 at 30 deg up,
   // a warm-grey (not white) horizon haze, warm dust below.
-  u.rpSkyZenith.value.setRGB(0.017, 0.062, 0.172).multiplyScalar(k);
-  u.rpSkyHorizon.value.setRGB(0.104, 0.118, 0.122).multiplyScalar(k);
+  // round 3: less cobalt (critic: ~#7fa6cf overhead, warm-grey ~#cfd3d2 at the horizon),
+  // same luminance as before so exposure/GI stay put
+  u.rpSkyZenith.value.setRGB(0.034, 0.064, 0.108).multiplyScalar(k);
+  u.rpSkyHorizon.value.setRGB(0.112, 0.116, 0.114).multiplyScalar(k);
   u.rpSkyHaze.value.setRGB(0.128, 0.118, 0.100).multiplyScalar(k);
   u.rpSkyGround.value.setRGB(0.070, 0.060, 0.047).multiplyScalar(k);
   u.rpSunGlow.value.copy(sunColor).multiplyScalar(k * (0.9 + 0.6 * (1 - elev)));

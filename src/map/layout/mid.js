@@ -1,10 +1,10 @@
 // Middle: top-mid courtyard, the mid lane (down to lower mid), catwalk (raised walkway on the
 // east of mid, turning east to short), short stairs, lower tunnels + tunnel stairs, mid doors
 // and CT mid.
-import { zx, zy, zc } from './util.js';
+import { zx, zy, zc, blindArch } from './util.js';
 
 export function build(K) {
-  const ochre = { h: 56, mat: 'plaster_band_ochre' };
+  const ochre = { h: 56, mat: 'plaster_white#mustard' };
   const teal = { h: 52, mat: 'plaster_band_teal' };
 
   // ---- top mid courtyard ---------------------------------------------------------------------
@@ -14,18 +14,21 @@ export function build(K) {
     [-754, 510], [-706, 257], [-701, 222],
   ], 0), { mat: 'cobblestone', top: 340, tops: { 3: 260, 4: 260, 5: 260, 11: 360, 12: 360 }, paint: ochre, cornice: {} });
   K.region('mid_top', zc([[-648, 558], [-124, 558], [-124, 737], [-250, 737], [-275, 737], [-521, 737], [-648, 737]], 0),
-    { mat: 'cobblestone', top: 330, tops: { 3: 32 }, paint: ochre, cornice: {} });
+    { mat: 'cobblestone', top: 330, tops: { 3: 16 }, paint: ochre, cornice: {} });
 
   // ---- mid lane (east side is the low wall to catwalk, top z 32) ------------------------------
   K.region('mid_a', zc([[-521, 737], [-275, 737], [-275, 760], [-521, 760]], 0),
-    { mat: 'sand_floor', top: 330, tops: { e: 32 }, paint: ochre, cornice: {} });
+    { mat: 'sand_floor', top: 330, tops: { e: 16 }, paint: ochre, cornice: {} });
   K.region('mid_b', zy([[-521, 760], [-275, 760], [-275, 790], [-330, 790], [-330, 1260], [-518, 1260], [-518, 1136], [-554, 1136], [-554, 872], [-521, 872]], 760, 0, 1260, -125),
-    { mat: 'sand_floor', top: 320, tops: { 1: 32 }, paint: ochre, cornice: {} });
-  K.region('mid_c', zc([[-518, 1260], [-330, 1260], [-330, 1300], [-275, 1300], [-275, 1546], [-316, 1546], [-518, 1546]], -125),
-    { mat: 'sand_floor', top: 230, tops: { 3: 32, 4: 240 }, paint: teal, cornice: {} });
-  // worn stone steps climbing the east side of the lane, at the foot of the catwalk wall
-  K.stairs('mid_st', [[-330, 1300], [-275, 1300], [-275, 790], [-330, 790]], -125, 0, 9,
-    { mat: 'stone_block', tops: { e: 32 } });
+    { mat: 'sand_floor', top: 320, tops: { 1: 16 }, paint: ochre, cornice: {} });
+  K.region('mid_c', zc([[-518, 1260], [-330, 1260], [-330, 1385], [-275, 1385], [-275, 1546], [-316, 1546], [-518, 1546]], -125),
+    { mat: 'sand_floor', top: 230, tops: { 3: 16, 4: 240 }, paint: teal, cornice: {} });
+  // catwalk stairs: worn stone steps climbing the east side of the lane from beside xbox, then a
+  // narrow ledge along the foot of the low catwalk wall up to top mid
+  K.stairs('mid_st', [[-330, 1385], [-275, 1385], [-275, 1120], [-330, 1120]], -125, -7, 9,
+    { mat: 'stone_block', tops: { e: 16 } });
+  K.region('mid_ledge', zc([[-330, 790], [-275, 790], [-275, 1120], [-330, 1120]], -7),
+    { mat: 'stone_block', tops: { e: 16 }, riserMat: 'stone_block', base: false, decor: false });
   K.region('mid_d', zc([[-518, 1546], [-316, 1546], [-316, 1646], [-518, 1646]], -128),
     { mat: 'sand_floor', top: 230, paint: teal, cornice: {} });
   K.region('ctmid', zc([[-602, 1646], [-518, 1646], [-316, 1646], [-316, 1718], [-254, 1718], [-254, 1806], [-316, 1806], [-316, 2072], [-602, 2072]], -128),
@@ -35,7 +38,7 @@ export function build(K) {
   K.region('cat', zc([
     [-250, 737], [-124, 737], [-124, 1265], [-62, 1328], [287, 1328], [287, 1342], [513, 1342], [513, 1760],
     [395, 1760], [395, 1655], [239, 1655], [239, 1550], [74, 1550], [74, 1610], [-145, 1610], [-145, 1546], [-250, 1546],
-  ], 0), { mat: 'paving_setts', top: 300, tops: { 16: 32, 1: 330, 2: 300, 3: 300, 4: 300 }, paint: ochre, cornice: {} });
+  ], 0), { mat: 'paving_setts', top: 300, tops: { 16: 16, 1: 330, 2: 300, 3: 300, 4: 300 }, paint: ochre, cornice: {} });
   K.stairs('short_st', [[239, 1655], [395, 1655], [395, 1800], [239, 1800]], 0, 96, 12,
     { mat: 'stone_block', top: 360 });
 
@@ -60,11 +63,8 @@ export function build(K) {
     }
     K.prismSolid(ring(5), -38, -30, 'lamp_glow', { col: false, bottomFace: true });
   }
-  for (const [x0, x1, y, sg] of [[-960, -880, 1309, 1], [-760, -680, 1309, 1], [-1110, -1030, 1552, -1], [-900, -820, 1552, -1]]) {
-    const ys = y + sg * 0.5;
-    const P = [[x0, ys, -112], [x1, ys, -112], [x1, ys, -20], [(x0 + x1) / 2, ys, -20 + (x1 - x0) * 0.4], [x0, ys, -20]];
-    K.poly('plaster_wall#dark', sg > 0 ? P.slice().reverse() : P, { col: 0.5, normal: [0, sg, 0] });
-  }
+  for (const [x0, x1, y, sg] of [[-960, -880, 1309, 1], [-760, -680, 1309, 1], [-1110, -1030, 1552, -1], [-900, -820, 1552, -1]])
+    blindArch(K, [x0, y], [x1, y], [0, sg], -112, -30, { mat: 'plaster_wall', col: 0.85 });
   K.region('ltun_door', zc([[-548, 1363], [-518, 1363], [-518, 1498], [-548, 1498]], -116),
     { ...tun, arch: { spring: -36, crown: 14 }, ceilTop: 230, dark: 0 });
   K.region('tst_exit', zc([[-1135, 1230], [-1014, 1230], [-1014, 1320], [-1135, 1320]], -104),

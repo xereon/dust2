@@ -204,7 +204,7 @@ function sign(K, at, d, z, mx, my, r) {
 }
 
 /** Recessed dark window with a timber frame, stone sill and (optionally) shutters or bars. */
-function window_(K, w, [px, py], ux, uy, mx, my, z, ww, wh, yaw, shutters, r, bars = false, arched = false) {
+export function window_(K, w, [px, py], ux, uy, mx, my, z, ww, wh, yaw, shutters, r, bars = false, arched = false) {
   const hw = ww / 2, o = 0.6;
   const P = (s, zz, off) => [px + ux * s + mx * off, py + uy * s + my * off, zz];
   if (arched) {

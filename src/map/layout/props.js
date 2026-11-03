@@ -1,3 +1,4 @@
+import { window_ } from './decor.js';
 // Prop placement at the real Dust II spots (Source coordinates), read off the overview.
 // Uses props.js factories when available and falls back to textured boxes so the map is
 // always complete and always has the same collision footprint.
@@ -73,6 +74,38 @@ function siteSign(K, [x, y], z, [mx, my], k = 1) {
   rect(s1 - 4 * k, zb + t, s1 + 3 * k, (zb + zt) / 2 - t / 2, or, 1.4);
   // text lines
   for (let i = 0; i < 3; i++) rect(-W * 0.36, z + H * (0.22 - i * 0.07), W * (0.36 - i * 0.1), z + H * (0.22 - i * 0.07) + 2.4 * k, [0.3, 0.27, 0.24], 1.4);
+}
+
+/** Hotel block north-west of A: three storeys of tall arched windows with stone surrounds and balconies. */
+function hotel(K) {
+  const x0 = 560, x1 = 990, y0 = 2860, y1 = 3150, zb = -40, top = 560;
+  K.box([x0, y0, zb], [x1, y1, top], 'plaster_white', { col: false, color: 0.93 });
+  K.box([x0 - 4, y0 - 4, top], [x1 + 4, y1 + 4, top + 10], 'plaster_trim', { col: false, color: 0.95 });
+  for (const zr of [0, 120, 240]) K.box([x0 - 3, y0 - 3, 256 + zr - 6], [x1 + 3, y1 + 3, 256 + zr], 'plaster_trim', { col: false, color: 0.9 });
+  let seed = 7;
+  const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const faces = [
+    { a: [x0, y0], ux: 1, uy: 0, mx: 0, my: -1, L: x1 - x0 },     // south face, toward A
+    { a: [x1, y0], ux: 0, uy: 1, mx: 1, my: 0, L: y1 - y0 },      // east face, toward goose
+  ];
+  for (const f of faces) {
+    const yaw = Math.atan2(f.mx, -f.my) * 180 / Math.PI;
+    const n = Math.floor(f.L / 72);
+    for (const zr of [270, 390, 500]) {
+      for (let k = 0; k < n; k++) {
+        const d = (k + 0.5) * f.L / n;
+        const px = f.a[0] + f.ux * d + f.mx * 0.3, py = f.a[1] + f.uy * d + f.my * 0.3;
+        window_(K, null, [px, py], f.ux, f.uy, f.mx, f.my, zr - 40, 30, 46, yaw, null, r, false, true);
+      }
+      // balcony slab + iron railing along the storey
+      if (zr < 500) {
+        const bd = 26, za = zr - 52;
+        const A = [f.a[0] + f.mx * 0, f.a[1] + f.my * 0], B = [f.a[0] + f.ux * f.L, f.a[1] + f.uy * f.L];
+        K.slab([A[0] + f.mx * bd / 2, A[1] + f.my * bd / 2], [B[0] + f.mx * bd / 2, B[1] + f.my * bd / 2], za - 6, za, bd, 'stone_block', { col: false, color: 0.9 });
+        K.slab([A[0] + f.mx * (bd - 1), A[1] + f.my * (bd - 1)], [B[0] + f.mx * (bd - 1), B[1] + f.my * (bd - 1)], za, za + 30, 1.5, 'metal_grate', { col: false });
+      }
+    }
+  }
 }
 
 /** Pillar of rough dressed stone blocks, courses of two or three blocks with ragged joints. */
@@ -267,13 +300,18 @@ export function build(K) {
   // the big timber gate in B's north wall and the tarp-covered pallets
   prop(K, 'bigDoorMetal', [150, 160, 0, { paint: 'brown' }], [-1620, 2895, 4], 0);
   siteSign(K, [-1334, 2440], 40, [-1, 0], 1.6);
+  siteSign(K, [-1805, 2895], 100, [0, -1], 1.1);
+  // the tower rising behind B's north wall
+  K.box([-1700, 2960, -40], [-1600, 3060, 720], 'plaster_wall', { col: false, color: 0.82 });
+  K.box([-1706, 2954, 720], [-1594, 3066, 736], 'stone_block', { col: false, color: 0.85 });
+  for (const z of [430, 560, 660]) K.poly('window_frame', [[-1662, 2959.4, z], [-1638, 2959.4, z], [-1638, 2959.4, z + 40], [-1662, 2959.4, z + 40]], { col: 0.1, normal: [0, -1, 0] });
   prop(K, 'tarp', [84, 64, 56, 'bluegrey'], [-1590, 2776, 4], 2);
   prop(K, 'tarp', [60, 52, 44, 'bluegrey'], [-1420, 2430, 4], -12);
   prop(K, 'stoneBlocks', [48, 40, 5], [-1690, 2600, 4], 0);
   prop(K, 'stoneBlocks', [48, 40, 4], [-1690, 2650, 4], 90);
   // bombsite markers
   bombMark(K, [-1545, 2645], 4, 54, 14);
-  bombMark(K, [1118, 2462], 96, 44, -8);
+  bombMark(K, [1150, 2440], 96, 58, -8);
   // B floor: dusty dirt with worn flagstone patches
   floorPatch(K, 'flagstone', [-1545, 2650], 4, 140, 1);
   floorPatch(K, 'flagstone', [-1430, 2380], 4, 110, 2);
@@ -281,6 +319,15 @@ export function build(K) {
   floorPatch(K, 'flagstone', [-1560, 2200], 4, 120, 4);
   barrel(K, [-1774, 2786, 32], 2);
   car(K, [-1950, 3080, 32], 90, 0);
+  // ---- beyond A's low back walls: the hotel facade (arched windows, balconies) and a house
+  K.clip([238, 2794, 206], [1001, 2860, 640]);
+  K.clip([940, 2794, 232], [1001, 3089, 640]);
+  K.clip([1001, 3089, 232], [1598, 3150, 640]);
+  hotel(K);
+  palm(K, [760, 2838, 206], 300, 2);
+  K.box([1060, 3160, -40], [1380, 3420, 380], 'plaster_white', { col: false, color: 0.9 });
+  K.box([1056, 3156, 380], [1384, 3424, 398], 'plaster_trim', { col: false, color: 0.95 });
+  K.box([1400, 3150, -40], [1600, 3360, 300], 'plaster_wall', { col: false, color: 0.88 });
   // palms on the terrace behind A and in the T-spawn yard
   palm(K, [1090, 3030, 120], 300, 0); palm(K, [1470, 3040, 120], 260, 1); palm(K, [1320, 3060, 120], 330, 2);
   palm(K, [-2150, -1000, 128], 280, 1);

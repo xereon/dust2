@@ -4,10 +4,10 @@ import { rect, zx, zc } from './util.js';
 
 const KERB = { h: 8, out: 12, mat: 'curb_redwhite' };
 // raised sidewalk along the street walls: paved top, red/white kerb on its edge, lane line beside it
-const WALK = { h: 8, out: 70, mat: 'curb_redwhite', topMat: 'paving_setts', walk: true, line: 26 };
+const WALK = { h: 8, out: 70, mat: 'concrete_floor', redMat: 'concrete_floor#curbred', redSide: [0, -1], topMat: 'paving_setts', walk: true, line: 26 };
 
 export function build(K) {
-  const ochre = { h: 56, mat: 'plaster_band_ochre' };
+  const ochre = { h: 56, mat: 'plaster_white#mustard' };
   const teal = { h: 52, mat: 'plaster_band_teal' };
 
   // ---- T spawn plateau (z 128) -----------------------------------------------------------

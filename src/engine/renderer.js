@@ -35,7 +35,7 @@ const CV = {
   sun_intensity: [1.0, 0, 4, 'sun intensity (x map value)'],
   sky_intensity: [1.0, 0, 4, 'sky light intensity (x) — rebakes GI'],
   bounce_intensity: [1.2, 0, 3, 'bounce light (x) — rebakes GI'],
-  saturation: [0.86, 0, 2, 'grade saturation'],
+  saturation: [0.64, 0, 2, 'grade saturation'],
   contrast: [1.18, 0.3, 2, 'grade S-curve (1 = neutral)'],
   highlights: [0.12, 0, 0.5, 'grade highlight stretch'],
   grain: [0.15, 0, 3, 'film grain amount'],
@@ -377,6 +377,7 @@ export class RenderPipeline {
     this._applyAniso(map.root);
     this.shadows.staticRoot = map.root;
     this.shadows.invalidate();
+    this._placeLamps(map.root);
     this.bounds = GIVolume.bounds(map);
     this.shadows.setBounds(this.bounds);
     this._applySun();
@@ -387,6 +388,44 @@ export class RenderPipeline {
     this._viewScene.environmentIntensity = 0.5;
     this._bakeGI();
     Dbg.log('[renderer] setMap', Math.round(performance.now() - t0), 'ms', this.gi.stats);
+  }
+
+  // Hanging lamps (bright emissive meshes in the map) get a warm pooled point light each.
+  // Created once per map, max 8, so the scene's light count (and every program) never changes.
+  _placeLamps(root) {
+    for (const l of this.lamps || []) l.parent?.remove(l);
+    this.lamps = [];
+    const cells = new Map(), v = new THREE.Vector3();
+    root.updateMatrixWorld(true);
+    root.traverse((o) => {
+      const m = o.material;
+      if (!o.isMesh || Array.isArray(m) || !m?.emissive || (m.emissiveIntensity ?? 0) < 3) return;
+      const pos = o.geometry?.attributes?.position;
+      if (!pos) return;
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+        const k = `${Math.floor(v.x / 64)},${Math.floor(v.y / 64)},${Math.floor(v.z / 64)}`;
+        let c = cells.get(k);
+        if (!c) cells.set(k, (c = { p: new THREE.Vector3(), n: 0, lo: Infinity }));
+        c.p.add(v); c.n++; c.lo = Math.min(c.lo, v.y);
+      }
+    });
+    // merge neighbouring cells into lamps
+    const lamps = [];
+    for (const c of cells.values()) {
+      c.p.multiplyScalar(1 / c.n);
+      const near = lamps.find((L) => L.p.distanceTo(c.p) < 96);
+      if (near) { near.p.lerp(c.p, c.n / (near.n + c.n)); near.n += c.n; near.lo = Math.min(near.lo, c.lo); }
+      else lamps.push({ p: c.p.clone(), n: c.n, lo: c.lo });
+    }
+    for (const L of lamps.slice(0, 8)) {
+      const light = new THREE.PointLight(0xffc98f, 7000, 360, 2);
+      light.position.set(L.p.x, L.lo - 6, L.p.z);
+      light.castShadow = false;
+      light.userData.rpSkip = true;
+      this._scene.add(light);
+      this.lamps.push(light);
+    }
   }
 
   _sunE() { return this.sunBase * (World.cvar.sun_intensity ?? 1); }
