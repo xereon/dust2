@@ -26,7 +26,7 @@ import { FinalPass } from './post/final.js';
 import { makeRT } from './post/common.js';
 
 const CV = {
-  exposure: [0.77, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
+  exposure: [0.82, 0.05, 8, 'scene exposure (pre-tonemap multiplier)'],
   bloom_strength: [0.05, 0, 1, 'bloom mix'],
   bloom_threshold: [1.6, 0, 20, 'bloom luminance threshold (exposed HDR)'],
   ao_intensity: [1.5, 0, 4, 'GTAO power (0 = off)'],

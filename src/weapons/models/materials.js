@@ -84,17 +84,17 @@ function tiled(m) {
 
 const DEFS = {
   // --- metals ---
-  steel: () => std(TX.metalSet({ key: 'steel', base: sc(84, 84, 86), rough: 0.42, metal: 0.72, grain: 0.5, smudge: 0.24 }),
+  steel: () => std(TX.metalSet({ key: 'steel', base: sc(92, 92, 94), rough: 0.4, metal: 0.42, grain: 0.5, smudge: 0.3 }),
     { tile: 5, env: 1.9, wear: { amt: 0.9, color: srgb(170, 168, 162), rough: 0.26, metal: 1 } }),
-  blued: () => std(TX.metalSet({ key: 'blued', base: sc(70, 73, 80), rough: 0.38, metal: 0.8, var: 0.12, grain: 0.35, smudge: 0.24 }),
+  blued: () => std(TX.metalSet({ key: 'blued', base: sc(80, 83, 90), rough: 0.36, metal: 0.5, var: 0.12, grain: 0.35, smudge: 0.3 }),
     { tile: 5, env: 1.9, wear: { amt: 0.85, color: srgb(165, 165, 165), rough: 0.25, metal: 1 } }),
-  park: () => std(TX.metalSet({ key: 'park', base: sc(82, 82, 78), rough: 0.5, metal: 0.55, var: 0.12, grain: 0.6, smudge: 0.24 }),
+  park: () => std(TX.metalSet({ key: 'park', base: sc(90, 90, 86), rough: 0.46, metal: 0.32, var: 0.12, grain: 0.6, smudge: 0.3 }),
     { tile: 4, env: 1.8, wear: { amt: 0.8, color: srgb(150, 148, 142), rough: 0.3, metal: 1 } }),
-  gunmetal: () => std(TX.metalSet({ key: 'gunmetal', base: sc(88, 89, 92), rough: 0.38, metal: 0.82, var: 0.1, grain: 0.3, smudge: 0.24 }),
+  gunmetal: () => std(TX.metalSet({ key: 'gunmetal', base: sc(96, 97, 100), rough: 0.36, metal: 0.55, var: 0.1, grain: 0.3, smudge: 0.3 }),
     { tile: 5, env: 1.9, wear: { amt: 0.8, color: srgb(175, 175, 175), rough: 0.22, metal: 1 } }),
   bright: () => std(TX.metalSet({ key: 'bright', base: sc(160, 160, 158), rough: 0.28, metal: 1, var: 0.08, smudge: 0.1, grain: 0.3 }),
     { tile: 4, env: 1.8, wear: { amt: 0.3, color: srgb(200, 200, 200), rough: 0.15, metal: 1 } }),
-  alu: () => std(TX.metalSet({ key: 'alu', base: sc(62, 62, 65), rough: 0.46, metal: 0.45, var: 0.1, grain: 0.35, smudge: 0.24 }),
+  alu: () => std(TX.metalSet({ key: 'alu', base: sc(72, 72, 75), rough: 0.42, metal: 0.28, var: 0.1, grain: 0.35, smudge: 0.3 }),
     { tile: 5, env: 1.7, wear: { amt: 0.9, color: srgb(185, 185, 190), rough: 0.3, metal: 1 } }),
   stainless: () => std(TX.brushedSet({ key: 'stainless', base: sc(176, 176, 174), rough: 0.3 }),
     { tile: [6, 3], env: 1.6, wear: { amt: 0.4, color: srgb(220, 220, 218), rough: 0.14, metal: 1 } }),
@@ -103,15 +103,15 @@ const DEFS = {
   copper: () => std(TX.metalSet({ key: 'copper', base: sc(200, 110, 70), rough: 0.3, metal: 1, var: 0.1, scratches: 10 }),
     { tile: 3, wear: false }),
   // --- wood / plastics ---
-  wood_ak: () => std(TX.woodSet({ key: 'ak', dark: sc(70, 38, 20), light: sc(150, 92, 52), rough: 0.5, rings: 16, lam: 3 }),
+  wood_ak: () => std(TX.woodSet({ key: 'ak', dark: sc(82, 52, 32), light: sc(168, 112, 68), rough: 0.5, rings: 16, lam: 3 }),
     { physical: true, clearcoat: 0.55, clearcoatRoughness: 0.28, env: 1.4, tile: [16, 5], ns: 0.35, wear: { amt: 0.7, color: srgb(170, 110, 60), rough: 0.6, metal: 0, k0: 5, k1: 16 } }),
   wood_walnut: () => std(TX.woodSet({ key: 'walnut', dark: sc(40, 22, 12), light: sc(110, 64, 34), rough: 0.5, rings: 18 }),
     { physical: true, clearcoat: 0.3, clearcoatRoughness: 0.45, tile: [12, 4], wear: { amt: 0.6, color: srgb(150, 105, 65), rough: 0.6, metal: 0 } }),
   bakelite: () => std(TX.ribSet({ key: 'bake', base: sc(84, 44, 26), rough: 0.4, freq: 12 }),
     { tile: [3, 3], ns: 0.45, env: 1.4, wear: { amt: 0.4, color: srgb(140, 70, 40), rough: 0.3, metal: 0 } }),
-  polymer: () => std(TX.polymerSet({ key: 'polymer', base: sc(50, 50, 52), rough: 0.56, stip: 0.25, cells: 30 }),
+  polymer: () => std(TX.polymerSet({ key: 'polymer', base: sc(60, 60, 62), rough: 0.52, stip: 0.25, cells: 30 }),
     { tile: 4, env: 1.4, wear: { amt: 0.5, color: srgb(70, 70, 72), rough: 0.45, metal: 0, k0: 7, k1: 18 } }),
-  stipple: () => std(TX.polymerSet({ key: 'stipple', base: sc(48, 48, 50), rough: 0.66, stip: 1, cells: 44 }),
+  stipple: () => std(TX.polymerSet({ key: 'stipple', base: sc(56, 56, 58), rough: 0.66, stip: 1, cells: 44 }),
     { tile: 2.2, ns: 1.2, env: 1.3, wear: { amt: 0.4, color: srgb(70, 70, 72), rough: 0.45, metal: 0, k0: 7, k1: 18 } }),
   polymer_tan: () => std(TX.polymerSet({ key: 'ptan', base: sc(150, 128, 96), rough: 0.62, stip: 0.3, cells: 30 }),
     { tile: 4, wear: { amt: 0.5, color: srgb(185, 165, 130), rough: 0.5, metal: 0, k0: 7, k1: 18 } }),
@@ -141,11 +141,12 @@ const DEFS = {
   cloth_rag: () => std(TX.fabricSet({ key: 'rag', base: sc(170, 150, 120), rough: 0.9, freq: 36, size: 256 }), { tile: 3, wear: false }),
   // --- glass / emissive ---
   lens: () => {
-    const m = std(TX.paintSet({ key: 'lens', base: sc(4, 6, 9), rough: 0.04, orange: 0 }), {
-      physical: true, clearcoat: 0.6, clearcoatRoughness: 0.03, iridescence: 0.7, iridescenceIOR: 1.5,
-      iridescenceThicknessRange: [250, 500], env: 2.2, wear: false, tile: 4,
+    const m = std(TX.paintSet({ key: 'lens', base: sc(26, 40, 52), rough: 0.04, orange: 0 }), {
+      physical: true, clearcoat: 1, clearcoatRoughness: 0.02, iridescence: 1, iridescenceIOR: 1.6,
+      iridescenceThicknessRange: [300, 520], env: 3.0, wear: false, tile: 4,
     });
-    m.metalness = 0.2; m.metalnessMap = null; m.roughness = 0.05; m.roughnessMap = null; m.normalMap = null;
+    m.side = THREE.DoubleSide;
+    m.metalness = 0.65; m.metalnessMap = null; m.roughness = 0.05; m.roughnessMap = null; m.normalMap = null;
     return m;
   },
   glass_green: () => {
@@ -166,9 +167,9 @@ const DEFS = {
   glove_t: () => std(TX.leatherSet({ key: 'gt', base: sc(74, 47, 26), rough: 0.6, cells: 150 }), { tile: 1.6, ns: 0.45, wear: { amt: 0.5, color: [0.16, 0.1, 0.06], rough: 0.4, metal: 0, k0: 6, k1: 16 } }),
   glove_t2: () => std(TX.fabricSet({ key: 'gt2', base: sc(84, 70, 50), rough: 0.88, freq: 110 }), { tile: 1.8, ns: 0.5, wear: false }),
   sleeve_t: () => std(TX.fabricSet({ key: 'st', base: sc(96, 88, 62), rough: 0.9, freq: 110 }), { tile: 4, ns: 0.35, wear: false }),
-  skin: () => std(TX.skinSet({ key: 'skin', base: sc(150, 116, 96), rough: 0.58 }),
+  skin: () => std(TX.skinSet({ key: 'skin', base: sc(138, 110, 96), rough: 0.6 }),
     { physical: true, sheen: 0.15, sheenRoughness: 0.6, sheenColor: [0.4, 0.22, 0.16], tile: 3, ns: 0.5, wear: false }),
-  nail: () => std(TX.skinSet({ key: 'nail', base: sc(160, 132, 118), rough: 0.35 }), { tile: 1, wear: false }),
+  nail: () => std(TX.skinSet({ key: 'nail', base: sc(128, 108, 98), rough: 0.4 }), { tile: 1, wear: false }),
 };
 
 export function getMaterial(key) {

@@ -24,7 +24,7 @@ export const lightUniforms = {
   rpIndirect: { value: 1 },  // debug / global ambient multiplier
   rpIndoor: { value: 1.55 },
   rpIndoorFloor: { value: 0.64 }, // min ambient in sealed spaces, as a fraction of open-sky irradiance
-  rpOpenFill: { value: 0.6 },     // ambient scale in the open: CS:GO shade is ~1:3.5 vs sun on plaster
+  rpOpenFill: { value: 0.48 },     // ambient scale in the open: CS:GO shade is ~1:3.5 vs sun on plaster
   rpVMRot: { value: new THREE.Matrix3() },
   rpVMPos: { value: new THREE.Vector3() },
   rpVMSun: { value: 1 },
