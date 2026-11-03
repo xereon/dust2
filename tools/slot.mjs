@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const SLOTS = +process.env.DUST2_SHOT_SLOTS || 2;
-const MAX_HOLD_S = +process.env.DUST2_SHOT_MAX_HOLD || 600;
+const MAX_HOLD_S = +process.env.DUST2_SHOT_MAX_HOLD || 2400; // boots under load can exceed 10 min
 const DIR = '/tmp/dust2-shot-locks';
 const QDIR = path.join(DIR, 'q');
 fs.mkdirSync(QDIR, { recursive: true });

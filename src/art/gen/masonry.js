@@ -161,7 +161,7 @@ void surface(vec2 uv, inout Surf o) {
   float face = smoothstep(0.0, 0.0016, eN);                      // ~0.4u bevel
   float bump = fbmU(uv + c.rnd * 7.31, 8.0, 4, 0.5, 6.0);
   float fine = fbmU(uv, 110.0, 2, 0.5, 7.0);
-  vec4 pit = sparse(uv * 60.0, vec2(60.0), mix(0.0, 0.25, smoothstep(0.75, 1.0, hr.x)), 8.0);
+  vec4 pit = sparse(uv * 60.0, vec2(60.0), mix(0.0, 0.1, smoothstep(0.85, 1.0, hr.x)), 8.0);
   float pits = (1.0 - smoothstep(0.1, 0.22, pit.x * (0.8 + 0.5 * pit.y))) * step(0.0, pit.y);
   float tilt = dot(c.local - 0.5, hr.xy - 0.5) * 0.3;
   float hS = face * (0.7 + 0.06 * bump + 0.012 * fine + tilt - 0.12 * pits) - 0.3 * chip;
@@ -177,9 +177,10 @@ void surface(vec2 uv, inout Surf o) {
   float mot = fbmU(uv + c.rnd * 3.1, 14.0, 4, 0.55, 13.0);
   sc *= 0.96 + 0.05 * mot + 0.02 * fine;
   sc = mix(sc, sc * 1.05 + 0.01, chip);                           // fresh breaks are paler
-  sc *= 1.0 - pits * 0.2;
+  sc *= 1.0 - pits * 0.12;
   sc *= mix(vec3(1.0), vec3(0.86, 0.83, 0.78), L.x * 0.45);
   sc *= 1.0 - 0.08 * smoothstep(0.2, 0.7, L.w);                   // soft weathering drift
+  sc = mix(vec3(luma(sc)), sc, 0.82);                             // weathered limestone, not toy yellow
   vec3 mc = ${C('#cfc2a6')} * (0.92 + 0.06 * mf);                // pale lime mortar
   mc *= mix(vec3(1.0), vec3(0.9, 0.88, 0.84), L.x * 0.4);
   o.col = mix(sc, mc, isM);
