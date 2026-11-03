@@ -83,7 +83,7 @@ try {
     }, { team, step: STEP });
     if (!info) { console.log('no bot'); break; }
     skate.push(info);
-    await page.screenshot({ path: path.join(out, `clip_${String(k).padStart(2, '0')}.png`) });
+    await (await page.$('canvas#game')).screenshot({ path: path.join(out, `clip_${String(k).padStart(2, '0')}.png`), timeout: 240000 });
   }
   const S = await page.evaluate(() => window.__samples);
   // planted-foot drift: horizontal toe motion between consecutive frames while the toe is down

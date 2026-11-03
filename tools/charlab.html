@@ -146,6 +146,12 @@ async function main() {
       add(team, e, label);
     });
     camPos = V(0, 70, 560); camTarget = V(0, 34, 0); fov = 25;
+  } else if (view === 'side') {
+    // side-on: shoulder deformation with the arms forward (engaged rifle / pistol) vs low-ready
+    const P = [['T', { engaged: true }], ['T', { engaged: true, active: { def: { slot: 'secondary' }, key: 'glock' } }], ['T', {}],
+      ['CT', { engaged: true }], ['CT', { engaged: true, active: { def: { slot: 'secondary' }, key: 'usp' } }], ['CT', {}]];
+    P.forEach(([team, o], k) => add(team, ent({ origin: V((k - 2.5) * 44, 0, 0), yaw: 0, ...o }), ''));
+    camPos = V(0, 50, 420); camTarget = V(0, 40, 0); fov = 30;
   } else if (view === 'distance') {
     add('T', ent({ origin: V(-60, 0, -2000), yaw: -90 - 20 }));
     add('CT', ent({ origin: V(60, 0, -2000), yaw: -90 + 20 }));
