@@ -173,7 +173,7 @@ const WOOD_PALETTES = {
   tan: { E: [0.80, 0.66, 0.47], L: [0.60, 0.46, 0.30], G: [0.70, 0.66, 0.58], K: [0.40, 0.29, 0.19], weather: 0.3, crack: 0.45, rough: 0.8 },
 };
 export const PAINTS = {
-  teal: [0.33, 0.60, 0.60], blue: [0.28, 0.43, 0.56], green: [0.31, 0.47, 0.35], red: [0.56, 0.24, 0.20],
+  teal: [0.33, 0.60, 0.60], tarpteal: [0.44, 0.70, 0.68], blue: [0.28, 0.43, 0.56], green: [0.31, 0.47, 0.35], red: [0.56, 0.24, 0.20],
   olive: [0.38, 0.40, 0.26], cream: [0.86, 0.82, 0.72], white: [0.86, 0.84, 0.79], grey: [0.58, 0.59, 0.58],
   sand: [0.74, 0.64, 0.47], orange: [0.72, 0.40, 0.18], yellow: [0.80, 0.66, 0.25], black: [0.12, 0.12, 0.12],
   bluegrey: [0.55, 0.64, 0.70], sky: [0.55, 0.70, 0.78], brown: [0.46, 0.32, 0.22],
@@ -356,9 +356,10 @@ function glassTex() {
   const S = 256;
   return texSet(S, S, (x, y, o) => {
     const X = x / S, Y = y / S;
-    const d = sm(0.35, 0.85, fbm(X * 4, Y * 4, 4, 4, 4) + (1 - Y) * 0.25);
-    o.r = mix(0.05, 0.62, d * 0.8); o.g = mix(0.06, 0.58, d * 0.8); o.b = mix(0.07, 0.5, d * 0.8);
-    o.rough = mix(0.08, 0.75, d); o.h = d * 0.2;
+    // mostly clean dark glass (reflects the sky); dust only in soft patches and along the bottom
+    const d = sm(0.6, 0.95, fbm(X * 4, Y * 4, 4, 4, 4) + (1 - Y) * 0.18) * 0.7;
+    o.r = mix(0.2, 0.6, d); o.g = mix(0.23, 0.56, d); o.b = mix(0.26, 0.5, d);
+    o.rough = mix(0.06, 0.7, d); o.h = d * 0.15;
   }, { nStrength: 1 });
 }
 
@@ -379,7 +380,7 @@ function frondTex(dead) {
     const t = au / (maxLen + 0.01);
     const dry = dead ? 1 : sm(0.75, 1.0, t) * 0.8 + sm(0.8, 1, v) * 0.5;
     const shade = 0.85 + (f - 0.5) * 0.3;
-    let r = mix(0.36, 0.64, dry) * shade, g = mix(0.52, 0.53, dry) * shade, b = mix(0.20, 0.32, dry) * shade;
+    let r = mix(0.44, 0.68, dry) * shade, g = mix(0.6, 0.56, dry) * shade, b = mix(0.22, 0.32, dry) * shade;
     if (rib) { r = mix(0.55, 0.62, dry); g = mix(0.55, 0.52, dry); b = mix(0.28, 0.34, dry); }
     o.r = r; o.g = g; o.b = b; o.rough = 0.75; o.h = rib ? 1 : (leaf ? 0.5 - Math.abs(f - 0.5) : 0);
   }, { nStrength: 2, alpha: true });
@@ -387,11 +388,11 @@ function frondTex(dead) {
 
 // ---- label / stencil atlas (canvas) ----------------------------------------------------------------
 // 2 cols x 4 rows of 512x256 cells. Names -> cell index.
-export const LABELS = { num14: 0, num07: 1, arrows: 2, care: 3, stamp: 4, star: 5, hazard: 6, plate: 7 };
+export const LABELS = { num14: 0, num07: 1, arrows: 2, care: 3, stamp: 4, star: 5, hazard: 6, plate: 7, rt: 8, tag: 9 };
 export function labelUV(name) {
   const i = LABELS[name] ?? 0, c = i % 2, r = Math.floor(i / 2);
   // canvas textures are flipped (row 0 at top -> v = 1)
-  return { u0: c / 2, u1: (c + 1) / 2, v0: 1 - (r + 1) / 4, v1: 1 - r / 4 };
+  return { u0: c / 2, u1: (c + 1) / 2, v0: 1 - (r + 1) / 5, v1: 1 - r / 5 };
 }
 function makeCanvas(w, h) {
   if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
@@ -399,7 +400,7 @@ function makeCanvas(w, h) {
   return null;
 }
 function labelAtlas() {
-  const W = 1024, H = 1024, cv = makeCanvas(W, H);
+  const W = 1024, H = 1280, cv = makeCanvas(W, H); // 2 cols × 5 rows of 512×256 cells
   if (!cv) return null;
   const x = cv.getContext('2d');
   const ink = 'rgb(38,33,28)', red = 'rgb(150,44,34)';
@@ -447,6 +448,18 @@ function labelAtlas() {
     x.fillStyle = 'rgb(214,206,186)'; x.fillRect(16, 48, 480, 160); x.strokeStyle = 'rgb(30,30,30)'; x.lineWidth = 8; x.strokeRect(24, 56, 464, 144);
     txt('41 | ب | 2917', 256, 130, 76, 'rgb(25,25,25)', 'DejaVu Sans, sans-serif', 'bold', 0.85);
   });
+  // CS2 crate logo: blue triangle over a bar with spaced letters
+  cell(8, () => {
+    const blue = 'rgb(46,78,140)';
+    txt('R', 150, 70, 74, ink); txt('T', 362, 70, 74, ink);
+    x.beginPath(); x.moveTo(110, 200); x.lineTo(400, 200); x.lineTo(400, 120); x.closePath(); x.fillStyle = blue; x.fill();
+    x.fillStyle = ink; x.fillRect(100, 212, 312, 8); txt('TRANSPORT · ROUTIER', 256, 238, 22, ink);
+  });
+  // small spec block + a tricolour shipping flag
+  cell(9, () => {
+    txt('S.T.C.  1983', 200, 70, 40, ink); txt('P.B. 0.5 T', 200, 128, 40, ink); txt('Nº 2-14', 200, 186, 40, ink);
+    x.fillStyle = 'rgb(38,62,140)'; x.fillRect(380, 80, 30, 90); x.fillStyle = 'rgb(236,232,222)'; x.fillRect(410, 80, 30, 90); x.fillStyle = 'rgb(176,40,40)'; x.fillRect(440, 80, 30, 90);
+  });
   // weathering: erode paint (not the hazard sticker / plate) with noise
   const img = x.getImageData(0, 0, W, H), d = img.data;
   for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) {
@@ -454,7 +467,7 @@ function labelAtlas() {
     const ci = Math.floor(xx / 512) + Math.floor(y / 256) * 2;
     const e = fbm(xx / 40, y / 40, 4) + (vn(xx / 3, y / 3) - 0.5) * 0.35;
     // big crate numbers stay bold (CS2 stencils read from across the site); the rest erode
-    const k = ci >= 6 ? sm(0.2, 0.25, e) * 0.97 : ci <= 1 ? sm(0.22, 0.34, e) * 0.97 : sm(0.36, 0.52, e) * 0.9;
+    const k = ci === 6 || ci === 7 ? sm(0.2, 0.25, e) * 0.97 : ci <= 1 ? sm(0.22, 0.34, e) * 0.97 : sm(0.36, 0.52, e) * 0.9;
     d[j + 3] *= k;
   }
   x.putImageData(img, 0, 0);
@@ -517,7 +530,8 @@ export function material(key) {
     case 'rubber': m = std(tex('rubber', rubberTex)); break;
     case 'rope': m = std(tex('rope', ropeTex)); break;
     case 'glass': m = std(tex('glass', glassTex), { roughness: 1 }); m.envMapIntensity = 1.5; break;
-    case 'frond': m = std(tex('frond:' + (arg || ''), () => frondTex(arg === 'dead')), { side: THREE.DoubleSide, alphaTest: 0.35 }); break;
+    // FrontSide: fronds carry their own reversed copy with sky-bent normals (see nature.js frond)
+    case 'frond': m = std(tex('frond:' + (arg || ''), () => frondTex(arg === 'dead')), { alphaTest: 0.35 }); break;
     case 'foliage': m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, side: THREE.DoubleSide }); break;
     case 'plain': m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: arg ? +arg : 0.85 }); break;
     case 'seam': m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }); break;

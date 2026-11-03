@@ -18,7 +18,7 @@ export function buildKnife(b, variant = 'ct') {
   const D = b.detail;
   if (variant === 't') {
     // T default: satin clip-point blade, brass guard + pommel, wrapped dark handle
-    blade([[0, -0.35], [6.2, -0.35], [7.0, -0.1], [7.35, 0.25], [6.1, 0.42], [5.2, 0.38], [4.4, 0.55], [0, 0.55]], 0.55, -0.35, 0.2, 'stainless', b, { flat: true });
+    blade([[0, -0.35], [6.2, -0.35], [7.0, -0.1], [7.35, 0.25], [6.1, 0.42], [5.2, 0.38], [4.4, 0.55], [0, 0.55]], 0.55, -0.35, 0.2, 'satin', b, { flat: true });
     if (D) b.add('dark', box(0.03, 0.12, 3.2, { r: 0.01 }), { p: [0.08, 0.35, -2.2] });
     b.add('brass', side([[-0.45, -0.7], [0.05, -0.7], [0.05, 0.9], [-0.45, 0.9]], 0.62, { r: 0.12, bevel: 0.06 }));
     const handle = side([[-0.45, 0.6], [-0.45, -0.42], [-0.9, -0.55], [-1.5, -0.45], [-2.1, -0.58], [-2.7, -0.45], [-3.3, -0.58], [-4.2, -0.5], [-5.0, -0.52], [-5.1, 0.05], [-5.0, 0.6]], 0.9, { r: 0.18, bevel: 0.28, bseg: 3 });
@@ -30,7 +30,7 @@ export function buildKnife(b, variant = 'ct') {
     return knifeCfg(0.05);
   }
   // CT default: coated tanto-ish clip point, rubber handle with finger grooves, steel guard
-  blade([[0, -0.4], [5.6, -0.4], [6.6, -0.2], [7.0, 0.2], [6.2, 0.36], [0, 0.58]], 0.58, -0.4, 0.22, 'stainless', b);
+  blade([[0, -0.4], [5.6, -0.4], [6.6, -0.2], [7.0, 0.2], [6.2, 0.36], [0, 0.58]], 0.58, -0.4, 0.22, 'satin', b);
   if (D) {
     // edge bevel highlight + serrations near the guard
     b.add('stainless', deform(side([[0.2, -0.42], [5.6, -0.42], [6.55, -0.22], [6.8, 0.05], [6.1, -0.05], [5.5, -0.25], [0.2, -0.25]], 0.06, { bevel: 0.01, r: 0.02 }), (v) => { v.x *= 0.6; }, 30));

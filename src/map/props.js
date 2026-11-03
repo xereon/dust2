@@ -14,11 +14,15 @@
 // y ∈ [0, h], wall centre plane z = 0; "wall" = origin on the wall face, prop sticks out +z):
 //   crate(size=64, variant=0, opts)      floor   size number | [sx, sy(height), sz]; variant 0..5 or name:
 //        0 'classic' pale 2×2 panels · 1 'diag' tan brace+caps · 2 'xbrace' grey X+bands · 3 'plain' tan
-//        4 'cs2' grey-white 2×2 panels + steel bands + caps (A site / goose) · 5 'cs2grey' grey brace + bands
-//        opts override any field: {tint, frameTint, bandTint, bands, caps, panel:'cross'|'diag'|'x'|'mid'|'plain',
-//        planks:'h'|'v', noLabels, gap, plankW}
+//        4 'cs2'  CS2 A-site/goose crate: smooth WHITE painted sheet panels in a proud batten grid,
+//                 steel junction plates, two steel straps, "14"/red star/blue-triangle stencils
+//        5 'cs2grey' CS2 ramp crate: grey painted sheet, perimeter battens, side handles, "14"
+//        opts (wood variants 0..3) override: {tint, frameTint, bandTint, bands, caps,
+//        panel:'cross'|'diag'|'x'|'mid'|'plain', planks:'h'|'v', noLabels, gap, plankW};
+//        (panel variants 4/5): {paint:'cratewhite'|'crategrey'|<PAINTS key>, grid, handles, noLabels}
 //   crateStack(layout|'a_site'|'steps'|'tower'|'small')  floor, merged (≤3 draws)
-//   tarpCrate(size=64, color='teal', variant=4, {hang=0.34, ropes=true, crate:{...}})   floor   CS2 banded crate + roped teal canvas
+//   tarpCrate(size=64, color='teal', variant=4, {hang=0.22, ropes=true, crate:{...}})   floor   CS2 panel crate + pale-teal roped canvas
+//        ('teal' maps to the pale CS2 tarp teal; any PAINTS key works, e.g. 'olive', 'bluegrey')
 //   slatCrate(w=56, h=96, d=56)          floor   slatted timber crate / tower
 //   barrel(variant=0..5)                 floor   Ø22.5 × 34.5 drum: galv, blue-grey, 2-tone, blue, red, olive
 //   doubleDoor(w=112, h=108, open=0|[l,r], {depth=16, gap=1.4, paint})   opening, frame+leaves
@@ -33,9 +37,9 @@
 //   hangingRope(len=48)                  wall, peg at y = 0, rope hangs to -len
 //   ladder(h=120)                        floor against a wall at z = 0 (collider flagged ladder)
 //   utilityPole(h=300, {arms=2, transformer=true})   floor; userData.wireAttach = insulator tops (local)
-//   palm(h=260, variant) / plant(0 agave pot | 1 dry shrub | 2 potted palm) / urn(0..2)   floor
+//   palm(h=260, variant 0 fountain | 1 young upright | 2 old shaggy) / plant(0 agave pot | 1 dry shrub | 2 potted palm) / urn(0..2)   floor
 //   rubble(radius=32)                    floor, walkable (no colliders)
-//   car(variant 0 white | 1 blue | 2 sand | 3 red)   floor, 166 × 64 × 51, front toward +x
+//   car(variant 0 white | 1 blue | 2 ochre | 3 red)   floor, ~179 × 69 × 58, front toward +x
 //   tire(standing=false) / tyreStack(n=4) / pallet(w=48, d=40) / bench(len=56) / stoneBench(len=48)
 //   sandbags(len=96, rows=3) (along x) / plankFence(len=128, h=40) (along x, planks on +z)
 //   stoneBlocks(w=48, d=40, layers=5) / metalCrate([L, H, D], variant 0..3) / jerrycan(variant 0..3)

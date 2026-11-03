@@ -34,6 +34,8 @@ defCvar('sensitivity', 2.0, 0.05, 20, 'mouse sensitivity (CS scale)');
 defCvar('m_yaw', 0.022, 0.001, 1, 'degrees per count');
 defCvar('m_pitch', 0.022, 0.001, 1, 'degrees per count');
 defCvar('zoom_sensitivity_ratio', 1.0, 0.1, 3, 'sensitivity multiplier when scoped');
+defCvar('fullscreen_on_play', 1, 0, 1, 'go fullscreen + Keyboard Lock on play so Ctrl+W crouch-walk cannot close the tab');
+defCvar('confirm_leave', 1, 0, 1, 'ask before closing/reloading the tab once a match has started');
 
 export class Input {
   constructor(canvas) {
@@ -55,6 +57,9 @@ export class Input {
     addEventListener('keydown', (e) => {
       if (!this.enabled) return;
       if (e.code === 'Tab' || e.code === 'F1' || (this.locked && e.code === 'Space')) e.preventDefault();
+      // While playing, swallow browser shortcuts that pages are allowed to cancel (Ctrl+D/S/F/R,
+      // Ctrl+Shift+...). Reserved ones (Ctrl+W/T/N) only reach us under Keyboard Lock, see lock().
+      if (this.locked && (e.ctrlKey || e.metaKey || e.altKey) && e.code !== 'F11') e.preventDefault();
       if (BINDS[e.code] !== undefined) { held.add(e.code); this.buttons |= BINDS[e.code]; }
       if (!e.repeat && IMPULSES[e.code]) this.impulses.push(IMPULSES[e.code]);
     });
@@ -103,8 +108,35 @@ export class Input {
     const p = this.canvas.requestPointerLock?.({ unadjustedMovement: true });
     // unadjustedMovement is unsupported on some platforms; fall back.
     if (p && p.catch) p.catch(() => this.canvas.requestPointerLock());
+    this._guardUnload();
+    // Crouch is Ctrl, so crouch-walking presses Ctrl+W, which browsers reserve for "close tab".
+    // Chromium browsers (Chrome, Brave, Edge, Vivaldi, Opera) let a FULLSCREEN page capture
+    // reserved shortcuts with the Keyboard Lock API, so go fullscreen and lock the keyboard.
+    // Firefox/Safari have no Keyboard Lock; the beforeunload guard asks before leaving instead.
+    if (World.cvar.fullscreen_on_play && !World.harness && !document.fullscreenElement &&
+        document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen({ navigationUI: 'hide' })
+        .then(() => this._lockKeyboard())
+        .catch(() => { /* user or browser declined fullscreen; the unload guard still applies */ });
+    } else if (document.fullscreenElement) this._lockKeyboard();
   }
-  unlock() { if (document.pointerLockElement) document.exitPointerLock(); }
+  _lockKeyboard() {
+    try { navigator.keyboard?.lock?.()?.catch?.(() => {}); } catch { /* unsupported */ }
+  }
+  _guardUnload() {
+    if (this._unloadGuarded || World.harness) return;
+    this._unloadGuarded = true;
+    // Once you've started playing, closing/reloading the tab asks first (works in every browser).
+    addEventListener('beforeunload', (e) => {
+      if (!World.cvar.confirm_leave) return;
+      e.preventDefault();
+      e.returnValue = '';
+    });
+  }
+  unlock() {
+    if (document.pointerLockElement) document.exitPointerLock();
+    try { navigator.keyboard?.unlock?.(); } catch { /* unsupported */ }
+  }
 
   /** Consume mouse deltas into view angles. Call once per render frame. */
   applyMouse() {

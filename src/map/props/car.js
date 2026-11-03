@@ -49,8 +49,9 @@ export function tyreStack(n = 4) {
 
 // ---- car ----------------------------------------------------------------------------------------------
 const CAR_PAINT = ['carwhite', 'sky', 'ochre', 'red'];
+const CAR_SCALE = 1.08;
 /**
- * car(variant = 0): old boxy saloon, 160 × 64 × 55, front toward +x, centred, on the ground.
+ * car(variant = 0): old boxy saloon, ~179 × 69 × 58 (scaled 1.08), front toward +x, centred, on the ground.
  * variant: 0 faded white, 1 pale blue, 2 sand, 3 red. Flat front-left tyre, rust, dust.
  */
 export function car(variant = 0) {
@@ -68,8 +69,9 @@ export function car(variant = 0) {
   s.lineTo(77, 9); s.lineTo(79.4, 11); s.lineTo(80, 22); s.lineTo(79.6, 28.4); s.lineTo(77.5, 30.6);
   s.lineTo(50, 31.6); s.lineTo(28, 32.6); s.lineTo(-42, 33.2); s.lineTo(-74, 32.2); s.lineTo(-78.8, 30.2);
   s.lineTo(-80, 26); s.lineTo(-80, 12); s.lineTo(-77, 9);
-  const bev = 2.4, depth = W - 2 * bev;
-  let body = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: 1.6, bevelSegments: 3, curveSegments: 12, steps: 1 });
+  // generous multi-segment roll on every body edge: panels read as pressed steel, not a slab
+  const bev = 3.4, depth = W - 2 * bev;
+  let body = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: bev, bevelSize: 2.2, bevelSegments: 4, curveSegments: 12, steps: 1 });
   body.translate(0, 0, -depth / 2);
   body = boxUV(body, 1 / 64);
   paint(body, (x, y, z, nx, ny) => {
@@ -92,8 +94,8 @@ export function car(variant = 0) {
   const cs = new THREE.Shape();
   const cab = [[28, 32.6], [3.5, 53.2], [-31, 53.4], [-45, 33.3]];
   cs.moveTo(...cab[0]); for (let i = 1; i < cab.length; i++) cs.lineTo(...cab[i]); cs.lineTo(...cab[0]);
-  const cbv = 1.6, Wc = W - 5, cdep = Wc - 2 * cbv;
-  let cabin = new THREE.ExtrudeGeometry(cs, { depth: cdep, bevelEnabled: true, bevelThickness: cbv, bevelSize: 1.4, bevelSegments: 3, curveSegments: 4 });
+  const cbv = 2.4, cbs = 1.9, Wc = W - 5, cdep = Wc - 2 * cbv;
+  let cabin = new THREE.ExtrudeGeometry(cs, { depth: cdep, bevelEnabled: true, bevelThickness: cbv, bevelSize: cbs, bevelSegments: 4, curveSegments: 4 });
   cabin.translate(0, 0, -cdep / 2);
   const tumble = (g) => { const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i); p.setZ(i, p.getZ(i) * lerp(1, 0.88, smooth(33, 54, y))); } g.computeVertexNormals(); return g; };
   cabin = boxUV(tumble(cabin), 1 / 64);
@@ -117,7 +119,7 @@ export function car(variant = 0) {
   const screen = (a, b, inset) => {
     const d = [b[0] - a[0], b[1] - a[1]], L = Math.hypot(d[0], d[1]), n = [d[1] / L, -d[0] / L];
     const nn = n[0] * (a[0] > 0 ? 1 : -1) >= 0 ? n : [-n[0], -n[1]];
-    const off = 1.4 + 0.12;
+    const off = cbs + 0.12;
     const p0 = lerp2(a, b, 0.07), p1 = lerp2(a, b, 0.93);
     const zw = Wc / 2 - inset;
     const v = [];
@@ -259,7 +261,10 @@ export function car(variant = 0) {
       if (y > 6 && !inWheel) p.setY(i, y - clamp((x / 95 + 0.5) * 0.9 + (z / W + 0.5) * 0.8 - 0.4, 0, 2.2));
     }
   }
-  pb.box([-83, 0, -W / 2 - 1], [83, 33, W / 2 + 1], 'metal');
-  pb.box([-45, 33, -W / 2 + 3], [29, 54, W / 2 - 3], 'metal');
+  // real Dust II saloons (W123-class) are ~180u long: scale the whole car up uniformly
+  const K = CAR_SCALE, Ms = new THREE.Matrix4().makeScale(K, K, K);
+  for (const list of pb.buckets.values()) for (const g of list) g.applyMatrix4(Ms);
+  pb.box([-83 * K, 0, (-W / 2 - 1) * K], [83 * K, 33 * K, (W / 2 + 1) * K], 'metal');
+  pb.box([-45 * K, 33 * K, (-W / 2 + 3) * K], [29 * K, 54 * K, (W / 2 - 3) * K], 'metal');
   return pb.finish();
 }

@@ -81,7 +81,7 @@ float limePlaster(vec2 uv, vec4 L, vec4 L2, vec3 pc0, vec3 pc1, float loss, floa
   float det = fbmU(uv, 24.0, 3, 0.5, s + 15.0);
   float n = L.x + 0.16 * det + 0.03 * gnU(uv, 96.0, s + 16.0);
   float lostP = smoothstep(loss, loss + 0.07, n);
-  float lostR = smoothstep(loss + 0.25, loss + 0.3, n + 0.2 * L2.x);
+  float lostR = smoothstep(loss + 0.15, loss + 0.2, n + 0.2 * L2.x);
   // grime gathers around breaks with a wide (20-40u) falloff taken from the smooth field
   float halo = smoothstep(loss - 0.45, loss + 0.02, L.x) * (1.0 - lostP);
 
@@ -89,6 +89,7 @@ float limePlaster(vec2 uv, vec4 L, vec4 L2, vec3 pc0, vec3 pc1, float loss, floa
   float hR = 0.35, rR = 0.96, hB = 0.0, rB = 0.9; vec3 cR = vec3(0.4), cB = vec3(0.3);
   if (lostP > 0.0) {
     renderCoat(uv, hR, cR, rR);
+    cR = mix(cR, mix(pc0, pc1, 0.5) * 0.8, 0.5);   // render sits darker than its own lime finish
     if (lostR > 0.0) brickUnder(uv, 60.0, 20.0, hB, cB, rB);
   }
 

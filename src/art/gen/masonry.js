@@ -6,40 +6,48 @@ const PLASTER_LOW = (seed) => /* glsl */`
 void lowField(vec2 uv, out vec4 a, out vec4 b) { plasterLow(uv, ${seed.toFixed(1)}, a, b); }
 `;
 
-// Dominant Dust II wall: off-white lime plaster, crisp flakes to tan render and brick.
+// Dominant Dust II wall: off-white lime plaster, soft grey-brown weathering, a few large
+// feathered losses to render and brick. All wear is low-contrast with 20-60u falloffs.
 export const plaster_white = {
   hero: true, world: 256, normal: 1.0, ao: 0.9, aoRadius: 6, cavity: 0.4, cavRough: 0.04,
   antiTile: true, macro: [0.10, 0.05], surface: 'plaster', seed: 101,
   lowGlsl: PLASTER_LOW(0),
   glsl: /* glsl */`
 void surface(vec2 uv, inout Surf o) {
-  limePlaster(uv, LOWA(uv), LOWB(uv), ${C('#e0dacd')}, ${C('#d4c9b4')}, 0.56, 0.9, 0.0, o);
+  vec4 L = LOWA(uv), L2 = LOWB(uv);
+  // more patches reach brick (about one break in three), edges stay feathered
+  float cover = limePlaster(uv, L, L2, ${C('#ded8cb')}, ${C('#d0c6b2')}, 0.5, 0.9, 0.0, o);
+  // soft weathering: wide grey-brown grime blooms + vertical run-off, both low contrast
+  float bloom = smoothstep(0.1, 0.9, L.z) * (0.7 + 0.3 * L2.y);
+  float runs = smoothstep(0.05, 0.6, L.w);
+  vec3 g = mix(vec3(1.0), vec3(0.8, 0.78, 0.74), bloom * 0.55);
+  g *= mix(vec3(1.0), vec3(0.82, 0.8, 0.77), runs * 0.5);
+  o.col = mix(o.col, o.col * g, cover);
   float cr = crackNet(uv, 5.0, 0.25, 1.6, 40.0) * smoothstep(0.45, 0.55, o.h);
-  o.h -= cr * 0.05; o.col *= 1.0 - cr * 0.1; o.ao = 1.0 - cr * 0.12;
+  o.h -= cr * 0.05; o.col *= 1.0 - cr * 0.06; o.ao = 1.0 - cr * 0.08;
 }
 `,
 };
 
-// Older, warmer cream plaster (the classic sandstone-toned Dust look), more worn.
+// Warm tan plaster, darker and earthier: tunnel interiors, back walls, old render. Soft damp
+// darkening (large, smooth fields; no grey mottling). Map tints multiply this.
 export const plaster_wall = {
   hero: true, world: 256, normal: 1.0, ao: 0.9, aoRadius: 6, cavity: 0.4, cavRough: 0.04,
-  antiTile: true, macro: [0.12, 0.05], surface: 'plaster', seed: 11,
+  antiTile: true, macro: [0.10, 0.05], surface: 'plaster', seed: 11,
   lowGlsl: PLASTER_LOW(7),
   glsl: /* glsl */`
 void surface(vec2 uv, inout Surf o) {
-  // CS-style weathered lime: grey-white base, heavy grey-brown grime blooms and run-off,
-  // only a warm hint (tints from the map multiply this, so it must stay near-neutral)
-  vec4 L = LOWA(uv);
-  float cover = limePlaster(uv, L, LOWB(uv), ${C('#d6cfc2')}, ${C('#c9bfae')}, 0.42, 1.0, 7.0, o);
-  float grime = smoothstep(0.15, 0.85, L.z) * (0.6 + 0.4 * fbmU(uv, 10.0, 3, 0.5, 90.0));
-  float runs = L.w;
-  vec3 g = mix(vec3(1.0), vec3(0.66, 0.63, 0.58), grime * 0.75);
-  g *= mix(vec3(1.0), vec3(0.74, 0.72, 0.68), runs * 0.7);
+  vec4 L = LOWA(uv), L2 = LOWB(uv);
+  float cover = limePlaster(uv, L, L2, ${C('#a8957a')}, ${C('#9a8770')}, 0.38, 0.0, 7.0, o);
+  // damp blooms: warm umber, wide soft falloff; slight smooth run-off
+  float damp = smoothstep(0.15, 0.95, L.z);
+  float runs = smoothstep(0.1, 0.7, L.w);
+  vec3 g = mix(vec3(1.0), vec3(0.8, 0.76, 0.7), damp * 0.5);
+  g *= mix(vec3(1.0), vec3(0.88, 0.85, 0.8), runs * 0.4);
   o.col = mix(o.col, o.col * g, cover);
-  o.col = mix(o.col, vec3(luma(o.col)), 0.15 * cover);
-  o.rough = mix(o.rough, o.rough + 0.04 * grime, cover);
+  o.rough = mix(o.rough, o.rough + 0.03 * damp, cover);
   float cr = crackNet(uv, 5.0, 0.3, 1.6, 40.0) * smoothstep(0.45, 0.55, o.h);
-  o.h -= cr * 0.06; o.col *= 1.0 - cr * 0.14; o.ao = 1.0 - cr * 0.14;
+  o.h -= cr * 0.05; o.col *= 1.0 - cr * 0.06; o.ao = 1.0 - cr * 0.08;
 }
 `,
 };
@@ -135,7 +143,7 @@ void surface(vec2 uv, inout Surf o) {
 
 // Pale sandstone ashlar with rounded, eroded arrises and recessed mortar.
 export const stone_block = {
-  hero: true, world: 256, normal: 1.0, ao: 0.6, aoRadius: 5, cavity: 0.25, cavRough: 0.03,
+  hero: true, world: 256, normal: 1.1, ao: 0.9, aoRadius: 6, cavity: 0.4, cavRough: 0.03,
   antiTile: false, macro: [0.08, 0.04], surface: 'rock', seed: 21,
   lowGlsl: /* glsl */`
 void lowField(vec2 uv, out vec4 a, out vec4 b) {
@@ -157,30 +165,35 @@ void surface(vec2 uv, inout Surf o) {
   float eN = e - mortarW + 0.0012 * ero;
   // chips bitten out of the arrises: noisy, clustered, a few u deep into the face
   float chipN = fbmU(uv, 36.0, 3, 0.5, 16.0) + 0.3 * hr.z;
-  float chip = (1.0 - smoothstep(0.0, 0.003 + 0.005 * sat(chipN), eN)) * smoothstep(0.6, 0.7, chipN);
+  float chip = (1.0 - smoothstep(0.0, 0.004 + 0.008 * sat(chipN), eN)) * smoothstep(0.45, 0.6, chipN);
   float face = smoothstep(0.0, 0.0016, eN);                      // ~0.4u bevel
   float bump = fbmU(uv + c.rnd * 7.31, 8.0, 4, 0.5, 6.0);
   float fine = fbmU(uv, 110.0, 2, 0.5, 7.0);
   vec4 pit = sparse(uv * 60.0, vec2(60.0), mix(0.0, 0.1, smoothstep(0.85, 1.0, hr.x)), 8.0);
   float pits = (1.0 - smoothstep(0.1, 0.22, pit.x * (0.8 + 0.5 * pit.y))) * step(0.0, pit.y);
-  float tilt = dot(c.local - 0.5, hr.xy - 0.5) * 0.3;
-  float hS = face * (0.7 + 0.06 * bump + 0.012 * fine + tilt - 0.12 * pits) - 0.3 * chip;
+  // per-block relief: each face is slightly proud/recessed, tilted and gently domed
+  float tilt = dot(c.local - 0.5, hr.xy - 0.5) * 0.9;
+  vec2 lq = (c.local - 0.5) * 2.0;
+  float dome = 0.25 * (1.0 - dot(lq * lq, vec2(0.5)));
+  float proud = 0.35 * (hash1(c.id, 23.0) - 0.5);
+  float hS = face * (0.9 + proud + dome + 0.14 * bump + 0.006 * fine + tilt - 0.15 * pits) - 0.5 * chip;
   float mf = fbmU(uv, 140.0, 2, 0.6, 12.0);
-  float hM = 0.35 + 0.02 * mf;
+  float hM = 0.08 + 0.02 * mf;
+  hS = max(hS, (0.45 + 0.1 * tilt) * face);                      // faces never sink to mortar level
   o.h = max(hS, hM);
   float isM = 1.0 - smoothstep(0.0, 0.06, hS - hM);
   // per-block value + hue variance (the main thing that kills the 'toy' look)
   vec3 sc = mix(${C('#d4c09a')}, ${C('#c3aa80')}, hr.y);
   sc = mix(sc, ${C('#ddd0b2')}, smoothstep(0.6, 1.0, hr.z) * 0.7);
   sc = mix(sc, ${C('#b89a72')}, smoothstep(0.78, 1.0, c.rnd) * 0.7);
-  sc *= 0.86 + 0.24 * hash1(c.id, 19.0);
+  sc *= 0.8 + 0.3 * hash1(c.id, 19.0);
   float mot = fbmU(uv + c.rnd * 3.1, 14.0, 4, 0.55, 13.0);
   sc *= 0.96 + 0.05 * mot + 0.02 * fine;
   sc = mix(sc, sc * 1.05 + 0.01, chip);                           // fresh breaks are paler
   sc *= 1.0 - pits * 0.12;
   sc *= mix(vec3(1.0), vec3(0.86, 0.83, 0.78), L.x * 0.45);
   sc *= 1.0 - 0.08 * smoothstep(0.2, 0.7, L.w);                   // soft weathering drift
-  sc = mix(vec3(luma(sc)), sc, 0.82);                             // weathered limestone, not toy yellow
+  sc = mix(vec3(luma(sc)), sc, 0.82) * 0.92;                      // weathered limestone, not toy yellow
   vec3 mc = ${C('#cfc2a6')} * (0.92 + 0.06 * mf);                // pale lime mortar
   mc *= mix(vec3(1.0), vec3(0.9, 0.88, 0.84), L.x * 0.4);
   o.col = mix(sc, mc, isM);

@@ -30,12 +30,27 @@ function frond(pb, matKey, base, az, elev, len, width, droop, fold = 0.8, segs =
     }
     if (i) { const a = (i - 1) * 3; idx.push(a, a + 3, a + 1, a + 1, a + 3, a + 4, a + 1, a + 4, a + 2, a + 2, a + 4, a + 5); }
   }
+  // two-sided by geometry (front + reversed copy) with sky-bent normals: seen from below a
+  // translucent frond is bright against the sky, never a black underside
+  const n = pos.length / 3;
+  const idx2 = idx.slice();
+  for (let i = 0; i < idx.length; i += 3) idx2.push(idx[i] + n, idx[i + 2] + n, idx[i + 1] + n);
   const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos.concat(pos), 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv.concat(uv), 2));
   g.setIndex(idx); g.computeVertexNormals();
+  const nr = g.attributes.normal, nn = new Float32Array(n * 6);
+  for (let i = 0; i < n; i++) {
+    let x = nr.getX(i), y = nr.getY(i), z = nr.getZ(i);
+    if (y < 0) { x = -x; y = -y; z = -z; }
+    x *= 0.45; y = y * 0.45 + 0.75; z *= 0.45;
+    const l = Math.hypot(x, y, z) || 1;
+    nn[i * 3] = nn[(i + n) * 3] = x / l; nn[i * 3 + 1] = nn[(i + n) * 3 + 1] = y / l; nn[i * 3 + 2] = nn[(i + n) * 3 + 2] = z / l;
+  }
+  g.setAttribute('normal', new THREE.BufferAttribute(nn, 3));
+  g.setIndex(idx2);
   // lighten toward the tips, darker near the crown (self-shadowed)
-  paint(g, (x, y, z, nx, ny, nz, i) => { const t = uv[i * 2 + 1] ?? 0; const k = lerp(0.78, 1.1, smooth(0, 0.5, t)); return [tint[0] * k, tint[1] * k, tint[2] * k]; });
+  paint(g, (x, y, z, nx, ny, nz, i) => { const t = uv[(i % n) * 2 + 1] ?? 0; const k = lerp(0.8, 1.12, smooth(0, 0.5, t)); return [tint[0] * k, tint[1] * k, tint[2] * k]; });
   pb.add(matKey, g);
   return P;
 }
@@ -64,21 +79,26 @@ export function palm(h = 260, variant = 0) {
   boot.applyMatrix4(new THREE.Matrix4().makeTranslation(top.x, top.y, top.z).multiply(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), T))));
   uvXform(boot, 1 / 64, 1 / 64);
   pb.add('wood:door', boot, null, [0.55, 0.45, 0.34]);
+  // per-variant character so neighbouring palms never read as clones:
+  // 0 full fountain, 1 young/upright, 2 old & shaggy (long dead skirt, heavy droop)
+  const C = [{ nf: 28, dead: 9, droop: 1.0, elev: [70, -4], len: 1.0, wid: 1.0 },
+    { nf: 22, dead: 4, droop: 0.7, elev: [78, 12], len: 0.85, wid: 0.92 },
+    { nf: 32, dead: 15, droop: 1.25, elev: [64, -14], len: 1.12, wid: 1.06 }][((variant % 3) + 3) % 3];
   // dead fronds hanging down around the trunk
   const crown = top.clone().add(new THREE.Vector3(0, 4, 0));
-  for (let k = 0; k < 9; k++) frond(pb, 'frond:dead', crown.clone().add(new THREE.Vector3(0, -4, 0)), r.f(0, Math.PI * 2), r.f(-80, -62) * DEG, r.f(45, 65), r.f(16, 22), 2, 0.5, 8, [0.95, 0.9, 0.85], r.f(-0.5, 0.5));
+  for (let k = 0; k < C.dead; k++) frond(pb, 'frond:dead', crown.clone().add(new THREE.Vector3(0, -4, 0)), r.f(0, Math.PI * 2), r.f(-80, -62) * DEG, r.f(45, 65), r.f(16, 22), 2, 0.5, 8, [0.95, 0.9, 0.85], r.f(-0.5, 0.5));
   // live fronds (golden-angle spiral)
   // a rounded fountain, not a flat star: steep young fronds on top, arching mid tier,
   // lower fronds that leave the crown near-level and hang well below it
-  const nf = 20 + r.i(0, 4);
+  const nf = C.nf + r.i(-2, 2), az0 = r.f(0, Math.PI * 2);
   for (let k = 0; k < nf; k++) {
-    const az = k * 2.39996 + r.f(-0.25, 0.25);
+    const az = az0 + k * 2.39996 + r.f(-0.3, 0.3);
     const tier = k / (nf - 1);
-    const elev = lerp(72, 2, tier) * DEG + r.f(-7, 7) * DEG;
-    const len = r.f(78, 104) * lerp(0.72, 1.05, Math.min(1, tier * 1.6));
-    const g = r.f(0.9, 1.08) * lerp(1.06, 0.92, tier);
-    const droop = len * lerp(0.25, 0.85, tier) * r.f(0.85, 1.15);
-    frond(pb, 'frond', crown.clone().add(new THREE.Vector3(0, lerp(3, -3, tier) + r.f(-1.5, 1.5), 0)), az, elev, len * 1.15, r.f(42, 52), droop * 1.15, 0.9, 14, [g, g, g * 0.94], r.f(-0.4, 0.4), r.f(-14, 14));
+    const elev = lerp(C.elev[0], C.elev[1], tier) * DEG + r.f(-8, 8) * DEG;
+    const len = r.f(80, 108) * C.len * lerp(0.7, 1.05, Math.min(1, tier * 1.6));
+    const g = r.f(0.92, 1.1) * lerp(1.08, 0.94, tier);
+    const droop = len * lerp(0.35, 1.05, tier) * C.droop * r.f(0.85, 1.15);
+    frond(pb, 'frond', crown.clone().add(new THREE.Vector3(0, lerp(3, -3, tier) + r.f(-1.5, 1.5), 0)), az, elev, len * 1.1, r.f(50, 62) * C.wid, droop, 0.42, 14, [g, g, g * 0.92], r.f(-0.5, 0.5), r.f(-16, 16));
   }
   // date clusters
   for (let k = 0; k < 4; k++) {

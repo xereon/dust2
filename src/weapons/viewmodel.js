@@ -15,6 +15,7 @@ import { buildWeaponModel, buildWorldModel as bwm, resolveKey } from './models/i
 import { Arm, handQuat, POSES } from './models/arms.js';
 import { makeClip, sample, samplePose } from './models/anims.js';
 import { setEnvironment } from './models/materials.js';
+import { GRIPS } from './models/grips.js';
 
 export const buildWorldModel = bwm;
 
@@ -37,7 +38,7 @@ const VECS = ['gp', 'gr', 'mp', 'mr', 'lhFreeP', 'rp', 'rr', 'silP', 'rhFreeP'];
 const STEPPED = ['magVis', 'vis', 'silVis', 'nade', 'shell'];   // visibility-like: never crossfaded
 // hand elbow offsets in camera space (in): forearm direction from the wrist
 const ELBOW_R = new THREE.Vector3(4.5, -8, 5);
-const ELBOW_L = new THREE.Vector3(-6.2, -6.8, 5);   // support forearm enters from the lower left (~30°)
+const ELBOW_L = new THREE.Vector3(-8.2, -4.6, 4.6);   // support forearm enters from the lower left (~30°)
 
 // critically-ish damped spring on a scalar array
 class Spring {
@@ -119,11 +120,13 @@ export class Viewmodel {
     const m = buildWeaponModel(key);
     const cfg = m.cfg;
     const hq = (h, left) => (h ? { p: new THREE.Vector3(...h.p), q: handQuat(h.across, h.palm, left), pose: h.pose } : null);
+    // fitted grips (tools/vmgrip.mjs): fingers curled onto this weapon's actual mesh
+    const fitted = (side, h) => { const g = GRIPS[`${key}_${side}`]; if (h && g) { h.preset = h.pose; h.pose = g; } return h; };
     const H = cfg.hands || {};
     e = {
       key, model: m, cfg, parts: m.parts, anchors: m.anchors,
       pivot: m.anchors.pivot ? m.anchors.pivot.p.clone() : new THREE.Vector3(0, -1, -6),
-      R: hq(H.R, false), L: hq(H.L, true),
+      R: fitted('R', hq(H.R, false)), L: fitted('L', hq(H.L, true)),
       magGrab: hq(H.magGrab, true), chargeGrab: hq(H.chargeGrab, true), silGrab: hq(H.silGrab, true),
       boltGrab: hq(H.boltGrab, false),
     };
@@ -544,7 +547,7 @@ export class Viewmodel {
       if (o.rhFree > 0) { this._v.set(o.rhFreeP[0], o.rhFreeP[1], o.rhFreeP[2]).add(e.R.p); p.lerp(this._v, o.rhFree); }
       this._place(A.R, p, q);
       const rp = this.rhPose;
-      if (rp) A.R.setPose(rp[0], rp[1], rp[2]); else A.R.setPose(e.R.pose || 'grip');
+      if (rp) A.R.setPose(this._poseRef(rp[0], e.R), this._poseRef(rp[1], e.R), rp[2]); else A.R.setPose(e.R.pose || 'grip');
     }
     if (e.L) {
       const p = this._tgtP.copy(e.L.p), q = this._tgtQ.copy(e.L.q);
@@ -559,10 +562,12 @@ export class Viewmodel {
       }
       this._place(A.L, p, q);
       const lp = this.lhPose;
-      if (lp) A.L.setPose(lp[0], lp[1], lp[2]); else A.L.setPose(e.L.pose || 'wrap');
+      if (lp) A.L.setPose(this._poseRef(lp[0], e.L), this._poseRef(lp[1], e.L), lp[2]); else A.L.setPose(e.L.pose || 'wrap');
     }
     void cfg;
   }
+  // clip pose names that mean "this hand's default grip" resolve to the fitted pose
+  _poseRef(name, h) { return (name === h.preset || name === 'wrap' || name === 'trigger' || name === 'cradle') && typeof h.pose === 'object' ? h.pose : name; }
   _blendPart(p, q, part, rel, w) {
     if (!part) return;
     this._partMatrix(part, this._m).multiply(rel);

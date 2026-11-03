@@ -86,13 +86,13 @@ export const paving_setts = {
   surface: 'rock', seed: 204,
   glsl: /* glsl */`
 void surface(vec2 uv, inout Surf o) {
-  vec2 wu = uv + 0.0008 * vec2(gnU(uv, 8.0, 1.0), gnU(uv, 8.0, 2.0));
-  Cell b = ashlar(wu, 8.0, 4.0, 6.0, 0.3, 3.0);
+  vec2 wu = uv + 0.0025 * vec2(gnU(uv, 6.0, 1.0), gnU(uv, 6.0, 2.0));
+  Cell b = ashlar(wu, 10.0, 5.0, 9.0, 0.7, 3.0);
   vec3 hr = hash3(b.id, 4.0);
   float settle = smoothstep(0.75, 1.0, hash1(b.id, 21.0));       // a few slabs have sunk
   float ero = fbmU(uv, 30.0, 3, 0.5, 5.0);
-  float e = roundEdge(b, 0.012) + 0.002 * ero - 0.0015 * hr.z;
-  float prof = pillow(e - 0.004, 0.01);
+  float e = roundEdge(b, 0.014) + 0.0035 * ero + 0.0015 * gnU(uv, 90.0, 13.0) - 0.002 * hr.z;
+  float prof = pillow(e - 0.004, 0.014);
   float bump = fbmU(uv + hr.xy, 20.0, 3, 0.5, 6.0);
   float cr = crackNet(uv, 7.0, 0.4, 1.4, 7.0) * step(0.45, hr.x);
   float corner = (1.0 - smoothstep(0.0, 0.25, length(min(b.local, 1.0 - b.local)))) * step(0.8, hr.z);
@@ -102,17 +102,17 @@ void surface(vec2 uv, inout Surf o) {
   float inJ = 1.0 - smoothstep(0.0, 0.05, hS - hJ);
   vec3 sc = mix(${C('#a89f90')}, ${C('#918879')}, hr.y);
   sc = mix(sc, ${C('#7a7166')}, smoothstep(0.7, 1.0, hr.x) * 0.8);
-  sc *= 0.88 + 0.24 * hr.z;                                    // +-12% per slab
+  sc *= 0.93 + 0.14 * hr.z;                                    // +-7% per slab
   sc *= 0.96 + 0.04 * bump + 0.03 * fbmU(uv, 70.0, 2, 0.5, 9.0);
   sc *= 1.0 - 0.22 * (1.0 - smoothstep(0.0, 0.85, prof));     // grime worked into arrises
   sc *= 1.0 - 0.1 * settle;
   float stain = smoothstep(0.3, 0.8, warpFbm(uv, 4.0, 0.3, 3, 12.0));
   sc *= mix(vec3(1.0), vec3(0.8, 0.79, 0.77), stain * 0.5);
   float drift = smoothstep(0.15, 0.7, warpFbm(uv, 3.0, 0.3, 3, 10.0) + 0.25 * fbmU(uv, 18.0, 2, 0.5, 11.0));
-  sc = mix(sc, ${C('#b9a888')}, drift * drift * 0.3);
+  sc = mix(sc, ${C('#b9a888')}, 0.12 + drift * 0.4);
   sc *= 1.0 - 0.22 * cr;
   sc = mix(sc, ${C('#8a8174')}, corner * 0.6);
-  vec3 jc = mix(${C('#6f665a')}, ${C('#c3b496')}, drift * 0.8);   // dark grime joints unless sanded over
+  vec3 jc = mix(${C('#857a6c')}, ${C('#c3b496')}, 0.3 + drift * 0.6);   // grimy joints, mostly sanded over
   o.col = mix(sc, jc, inJ);
   o.h = mix(o.h, max(o.h, 0.35), drift * 0.6);
   o.rough = mix(0.8 + 0.1 * drift, 0.96, inJ);
@@ -193,30 +193,51 @@ void surface(vec2 uv, inout Surf o) {
 
 // B-site irregular flagstones: big rounded polygons, sandy joints, warm tan.
 export const flagstone = {
-  world: 192, normal: 1.1, ao: 1.0, aoRadius: 6, cavity: 0.45, antiTile: true, macro: [0.1, 0.04],
+  world: 192, normal: 1.15, ao: 1.0, aoRadius: 5, cavity: 0.5, antiTile: true, macro: [0.12, 0.05],
   surface: 'rock', seed: 207,
+  lowGlsl: /* glsl */`
+void lowField(vec2 uv, out vec4 a, out vec4 b) {
+  a = vec4(warpFbm(uv, 3.0, 0.3, 3, 9.0), warpFbm(uv, 4.0, 0.3, 3, 12.0), fbmU(uv, 2.0, 3, 0.5, 13.0), 0.0);
+  b = vec4(0.0);
+}
+`,
   glsl: /* glsl */`
+// Crazy paving: 15-25u irregular polygons, worn crowns, grimy sand-filled grout, cracks.
 void surface(vec2 uv, inout Surf o) {
-  vec2 wq = uv + 0.012 * vec2(fbmU(uv, 6.0, 3, 0.5, 1.0), fbmU(uv + 0.4, 6.0, 3, 0.5, 2.0));
-  vec2 cen; vec4 w = worleyC(wq * 5.0, vec2(5.0), 0.95, 3.0, cen);
+  vec4 L = LOWA(uv);
+  vec2 wq = uv + 0.006 * vec2(fbmU(uv, 12.0, 2, 0.5, 1.0), fbmU(uv + 0.4, 12.0, 2, 0.5, 2.0));
+  vec2 cen; vec4 w = worleyC(wq * 12.0, vec2(12.0), 0.95, 3.0, cen);
   vec3 hr = hash3(vec2(w.z * 997.0, 1.0), 4.0);
-  float e = w.w - 0.03 - 0.02 * hr.x + 0.012 * fbmU(uv, 30.0, 3, 0.5, 5.0);
-  float prof = pillow(e, 0.07);
-  float bump = fbmU(uv + hr.xy, 10.0, 4, 0.5, 6.0);
-  float fine = fbmU(uv, 80.0, 2, 0.5, 7.0);
-  float hS = 0.6 * prof + (0.07 * bump + 0.01 * fine) * prof + 0.06 * dot(wq * 5.0 - cen, hr.yz - 0.5);
-  float hJ = 0.15 + 0.03 * fbmU(uv, 100.0, 2, 0.5, 8.0);
+  float e = w.w - 0.022 - 0.015 * hr.x + 0.012 * fbmU(uv, 50.0, 2, 0.5, 5.0);
+  float prof = pillow(e, 0.045);
+  float bump = fbmU(uv + hr.xy, 20.0, 3, 0.5, 6.0);
+  float fine = fbmU(uv, 110.0, 2, 0.5, 7.0);
+  float grit = gnU(uv, 380.0, 27.0), grit2 = gnU(uv, 260.0, 28.0);
+  float mott = fbmU(uv + hr.xz, 40.0, 3, 0.55, 29.0);
+  float cr = crackNet(uv, 9.0, 0.3, 1.2, 17.0) * step(0.55, hr.z) * prof;
+  float hS = 0.45 * prof + (0.06 * bump + 0.02 * fine + 0.015 * mott) * prof + 0.05 * dot(wq * 12.0 - cen, hr.yz - 0.5)
+           - 0.06 * cr - 0.06 * smoothstep(0.8, 1.0, hr.x);
+  float hJ = 0.12 + 0.03 * fbmU(uv, 130.0, 2, 0.5, 8.0);
   o.h = max(hS, hJ);
-  float inJ = 1.0 - smoothstep(0.0, 0.06, hS - hJ);
-  vec3 sc = mix(${C('#d2b88e')}, ${C('#c2a47c')}, hr.y);
-  sc = mix(sc, ${C('#dcc6a0')}, smoothstep(0.7, 1.0, hr.z) * 0.7);
-  sc = mix(sc, ${C('#b2987a')}, smoothstep(0.8, 1.0, hr.x) * 0.6);
-  sc *= 0.96 + 0.05 * bump + 0.015 * fine;
-  float dust = smoothstep(0.0, 0.6, warpFbm(uv, 3.0, 0.3, 3, 9.0));
-  sc = mix(sc, ${C('#dcc8a4')}, dust * 0.35);
-  sc *= 1.0 - 0.08 * (1.0 - prof);
-  o.col = mix(sc, ${C('#d6c09a')} * (0.95 + 0.05 * fine), inJ);
+  float inJ = 1.0 - smoothstep(0.0, 0.05, hS - hJ);
+  // ~20% darker than before, per-stone value spread, slight warm/orange cast
+  vec3 sc = mix(${C('#a48a6a')}, ${C('#8e7658')}, hr.y);
+  sc = mix(sc, ${C('#b49a76')}, smoothstep(0.7, 1.0, hr.z) * 0.6);
+  sc = mix(sc, ${C('#8a7560')}, smoothstep(0.8, 1.0, hr.x) * 0.7);
+  sc *= 0.9 + 0.2 * hash1(vec2(w.z * 991.0, 5.0), 9.0);
+  sc *= 0.95 + 0.05 * bump + 0.04 * fine + 0.07 * mott;
+  sc *= 1.0 - 0.14 * smoothstep(0.25, 0.8, grit);                  // dark grit
+  sc *= 1.0 + 0.09 * smoothstep(0.4, 0.85, grit2);                 // pale grit
+  sc *= 1.0 - 0.22 * (1.0 - smoothstep(0.0, 0.9, prof));          // grime worked into arrises
+  sc = mix(sc, sc * vec3(1.08, 0.9, 0.76), smoothstep(0.35, 0.9, L.z) * 0.5);  // rust/orange stains
+  float dust = smoothstep(0.1, 0.7, L.x);
+  sc = mix(sc, ${C('#b8a080')}, dust * 0.3);
+  sc *= mix(vec3(1.0), vec3(0.82, 0.8, 0.77), smoothstep(0.2, 0.8, L.y) * 0.45);
+  sc *= 1.0 - 0.2 * cr;
+  vec3 jc = mix(${C('#857462')}, ${C('#b49e7e')}, 0.35 + dust * 0.5) * (0.92 + 0.08 * fine);
+  o.col = mix(sc, jc, inJ);
   o.rough = mix(0.82 + 0.06 * dust, 0.97, inJ);
+  o.ao = 1.0 - cr * 0.2;
 }
 `,
 };

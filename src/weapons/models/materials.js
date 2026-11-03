@@ -98,6 +98,8 @@ const DEFS = {
     { tile: 5, env: 1.7, wear: { amt: 0.9, color: srgb(185, 185, 190), rough: 0.3, metal: 1 } }),
   stainless: () => std(TX.brushedSet({ key: 'stainless', base: sc(176, 176, 174), rough: 0.3 }),
     { tile: [6, 3], env: 1.6, wear: { amt: 0.4, color: srgb(220, 220, 218), rough: 0.14, metal: 1 } }),
+  satin: () => std(TX.brushedSet({ key: 'satin', base: sc(196, 196, 192), rough: 0.36 }),
+    { tile: [5, 1.5], env: 1.7, wear: { amt: 0.5, color: srgb(235, 235, 232), rough: 0.12, metal: 1, k0: 4, k1: 12 } }),
   brass: () => std(TX.metalSet({ key: 'brass', base: sc(205, 150, 70), rough: 0.28, metal: 1, var: 0.08, scratches: 20 }),
     { tile: 3, wear: false }),
   copper: () => std(TX.metalSet({ key: 'copper', base: sc(200, 110, 70), rough: 0.3, metal: 1, var: 0.1, scratches: 10 }),
@@ -167,9 +169,9 @@ const DEFS = {
   glove_t: () => std(TX.leatherSet({ key: 'gt', base: sc(74, 47, 26), rough: 0.6, cells: 150 }), { tile: 1.6, ns: 0.45, wear: { amt: 0.5, color: [0.16, 0.1, 0.06], rough: 0.4, metal: 0, k0: 6, k1: 16 } }),
   glove_t2: () => std(TX.fabricSet({ key: 'gt2', base: sc(84, 70, 50), rough: 0.88, freq: 110 }), { tile: 1.8, ns: 0.5, wear: false }),
   sleeve_t: () => std(TX.fabricSet({ key: 'st', base: sc(96, 88, 62), rough: 0.9, freq: 110 }), { tile: 4, ns: 0.35, wear: false }),
-  skin: () => std(TX.skinSet({ key: 'skin', base: sc(138, 110, 96), rough: 0.6 }),
+  skin: () => std(TX.skinSet({ key: 'skin', base: sc(128, 106, 94), rough: 0.62 }),
     { physical: true, sheen: 0.15, sheenRoughness: 0.6, sheenColor: [0.4, 0.22, 0.16], tile: 3, ns: 0.5, wear: false }),
-  nail: () => std(TX.skinSet({ key: 'nail', base: sc(128, 108, 98), rough: 0.4 }), { tile: 1, wear: false }),
+  nail: () => std(TX.skinSet({ key: 'nail', base: sc(112, 98, 90), rough: 0.45 }), { tile: 1, wear: false }),
 };
 
 export function getMaterial(key) {

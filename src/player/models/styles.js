@@ -144,7 +144,7 @@ function glovePaint(color, o = {}) {
 }
 
 // ---- T paints ---------------------------------------------------------------------------------
-const T_OLIVE = hex(0x5e5f3f), T_OLIVE_D = hex(0x43442d), T_OLIVE_L = hex(0x74704f);
+const T_OLIVE = hex(0x6c6d48), T_OLIVE_D = hex(0x4e4f34), T_OLIVE_L = hex(0x827d58);
 function tPantsPattern(ctx) {
   set3(ctx, T_OLIVE);
   const n = fbm(ctx.x * 0.11 + 3, ctx.y * 0.11, ctx.z * 0.11, 3);
@@ -299,7 +299,7 @@ function tanNylon(color) {
 }
 
 // ---- CT paints ----------------------------------------------------------------------------------
-const CT_CAMO = { base: hex(0x5f655a), dark: hex(0x3a3f37), mid: hex(0x7c806f), brown: hex(0x5a5040), light: hex(0x9a9a84), black: hex(0x262823) };
+const CT_CAMO = { base: hex(0x6a7064), dark: hex(0x434a40), mid: hex(0x868a78), brown: hex(0x655a47), light: hex(0xa4a48e), black: hex(0x2c2e29) };
 function ctCamo(ctx) {
   // multicam-style: small soft blobs in three tones over a mid base, thin dark branches
   const s = 0.48;
@@ -695,8 +695,8 @@ export const STYLE = {
     pantsBag: 0.55,
     pants: cloth({ color: 0x5e5f3f, pattern: tPantsPattern, wrinkle: legWrinkles, dust: 1.0, dustTop: 20 }),
     shirt: cloth({ color: 0xbdb8ae, pattern: plaid, wrinkle: shirtWrinkles, mottle: 0.08 }),
-    neck: knitPaint(0x66674a),
-    head: knitPaint(0x66674a, { holes: true, mouth: false, skin: 0xa77a5c }),
+    neck: knitPaint(0x737452),
+    head: knitPaint(0x737452, { holes: true, mouth: false, skin: 0xa77a5c }),
     skin: forearmPaint(),
     glove: glovePaint(0x8c8c88),
     boot: bootPaint(0x3d3128, { dust: 0.45 }),

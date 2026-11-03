@@ -170,7 +170,7 @@ function template(team) {
       const mat = bare ? st.skin : st.glove;
       // bare (fingerless) tips are slimmer than the gloved segments
       const r0 = bare ? f.R[j] * 0.8 : f.R[j] + 0.03, r1 = bare ? f.R[j + 1] * 0.74 : f.R[j + 1] + 0.03;
-      sb.add(mat, phalanx(r0, r1, f.L[j], 0.86, j === 2), fingerIdx[i][j], world[fingerIdx[i][j]], bare ? { c: 0xc4b6ae } : {});
+      sb.add(mat, phalanx(r0, r1, f.L[j], 0.86, j === 2), fingerIdx[i][j], world[fingerIdx[i][j]], bare ? { c: j === 2 ? 0xa89e9a : 0xb8aca6 } : {});
       if (bare && j === 2) {
         // nail
         sb.add('nail', G.deform(G.box(f.R[3] * 1.3, 0.05, f.L[2] * 0.62, { r: 0.08 }), (v) => { v.y -= 0.35 * v.x * v.x; }, 70),

@@ -63,6 +63,8 @@ function teamAssets(team) {
   const orm = flatTex(255, 235, 0);
   material.roughnessMap = orm; material.metalnessMap = orm; material.aoMap = orm;
   material.roughness = 1; material.metalness = 1;
+  // the renderer's screen-space AO already darkens ambient; keep the baked AO to cavities
+  material.aoMapIntensity = 0.55;
   material.name = `agent_${key}`;
   // hook the renderer's lighting patch now so the first visible frame doesn't recompile
   try { World.renderer?.setupMaterial?.(material); } catch (err) { /* renderer without hooks */ }

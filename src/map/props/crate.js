@@ -1,7 +1,7 @@
 // Dust II wooden crates: planked panels inside a bevelled frame, braces / mid rails,
 // darker end grain, metal corner caps with rivets, steel bands and stencilled markings.
 import * as THREE from 'three';
-import { PropBuilder, rect, bandPoly, clipOutsideBand, clamp, frame, slab, dome, paint, lerp, smooth } from './core.js';
+import { PropBuilder, rect, bandPoly, clipOutsideBand, clamp, frame, slab, dome, paint, lerp, smooth, sweep } from './core.js';
 import { board } from './woodkit.js';
 import { labelUV } from './tex.js';
 
@@ -11,11 +11,11 @@ const VARIANTS = [
   { panel: 'diag', planks: 'h', caps: true, bands: false, tint: [0.98, 0.9, 0.78], labels: [['arrows', 'ul'], ['stamp', 'lr']] },
   { panel: 'x', planks: 'v', caps: false, bands: true, tint: [0.84, 0.84, 0.83], labels: [['num07', 'top']] },
   { panel: 'plain', planks: 'v', caps: true, bands: true, tint: [1.0, 0.85, 0.66], labels: [['care', 'c']] },
-  // 4 — CS2 A-site / goose look: WHITE-painted panel crate (paint film over planks, a few
-  //     chips to grey wood), 2×2 panels, dark steel bands + caps, black stencil numbers
-  { panel: 'cross', planks: 'h', caps: true, bands: true, mat: 'woodpaint:cratewhite:0.84', bandY: [0.17, 0.83], plankW: 999, gap: 0.12, fwScale: 0.72, tint: [1.04, 1.04, 1.03], frameTint: [0.94, 0.94, 0.93], bandTint: [0.5, 0.52, 0.54], vary: 0.035, labels: [['num14', 'ul'], ['star', 'lr']] },
-  // 5 — CS2 GREY-painted crate with a diagonal brace and bands (stacked small grey crates by the ramp)
-  { panel: 'diag', planks: 'h', caps: true, bands: true, mat: 'woodpaint:crategrey:0.84', bandY: [0.2, 0.8], plankW: 999, gap: 0.12, fwScale: 0.72, tint: [1.0, 1.0, 1.0], frameTint: [0.88, 0.88, 0.88], bandTint: [0.46, 0.48, 0.5], vary: 0.035, labels: [['num14', 'ul']] },
+  // 4 — CS2 A-site / goose: smooth WHITE-painted sheet panels in a grid of proud battens,
+  //     steel junction plates + straps, black "14" / red star / blue-triangle stencils
+  { style: 'panel', paint: 'cratewhite', grid: true, labels: [['num14', 'ul'], ['star', 'lr'], ['rt', 'x'], ['tag', 'x2']] },
+  // 5 — CS2 grey ramp crate: perimeter frame + one sheet panel, side handles, "14"
+  { style: 'panel', paint: 'crategrey', grid: false, handles: true, labels: [['num14', 'c'], ['tag', 'x']] },
 ];
 export const CRATE_VARIANTS = VARIANTS.length;
 /** Named variants accepted wherever a crate variant is: crate(64, 'cs2'). */
@@ -29,6 +29,7 @@ export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
   const [sx, sy, sz] = Array.isArray(size) ? size : [size, size, size];
   if (typeof variant === 'string') variant = CRATE_NAMES[variant] ?? 0;
   const V = { ...VARIANTS[((variant % VARIANTS.length) + VARIANTS.length) % VARIANTS.length], ...opts };
+  if (V.style === 'panel') return buildPanelCrate(pb, [sx, sy, sz], V);
   const r = pb.rand;
   const S = Math.min(sx, sy, sz);
   const fw = clamp(S * 0.13, 3.2, 12) * (V.fwScale ?? 1); // frame board width
@@ -160,6 +161,111 @@ export function buildCrate(pb, size = 64, variant = 0, opts = {}) {
   pb.add(W, inner);
   // weathering: dirt creeping up from the ground, bleached tops
   pb.weather((x, y, z, nx, ny) => lerp(0.62, 1, smooth(0, Math.min(14, sy * 0.3), y)) * (ny > 0.9 ? 1.05 : 1), ['label']);
+  pb.box([-sx / 2, 0, -sz / 2], [sx / 2, sy, sz / 2], 'crate');
+  return pb;
+}
+
+/**
+ * CS2-style painted panel crate. Smooth sheet panels (no plank lines) recessed behind a grid
+ * of proud battens; light steel plates at every batten junction, thin steel straps near top
+ * and bottom, optional side handles. Materials: paint (panels + battens), galv, label.
+ */
+function buildPanelCrate(pb, [sx, sy, sz], V) {
+  const r = pb.rand, S = Math.min(sx, sy, sz);
+  const P = `paint:${V.paint || 'cratewhite'}:0.03`;
+  const bt = clamp(S * 0.016, 0.6, 1.4);          // batten proud height
+  const ew = clamp(S * 0.07, 2.2, 5.5);           // edge batten width
+  const gw = ew * 0.72;                           // grid batten width
+  const pt = 0.5;                                 // sheet thickness
+  const faces = [
+    { k: '+z', o: [0, sy / 2, sz / 2], r: [1, 0, 0], u: [0, 1, 0], n: [0, 0, 1], w: sx, h: sy, ix: 0, iy: 0 },
+    { k: '-z', o: [0, sy / 2, -sz / 2], r: [-1, 0, 0], u: [0, 1, 0], n: [0, 0, -1], w: sx, h: sy, ix: 0, iy: 0 },
+    { k: '+x', o: [sx / 2, sy / 2, 0], r: [0, 0, -1], u: [0, 1, 0], n: [1, 0, 0], w: sz, h: sy, ix: bt, iy: 0 },
+    { k: '-x', o: [-sx / 2, sy / 2, 0], r: [0, 0, 1], u: [0, 1, 0], n: [-1, 0, 0], w: sz, h: sy, ix: bt, iy: 0 },
+    { k: '+y', o: [0, sy, 0], r: [1, 0, 0], u: [0, 0, -1], n: [0, 1, 0], w: sx, h: sz, ix: bt, iy: bt, top: true },
+  ];
+  const labels = V.noLabels ? [] : V.labels.slice();
+  const batten = (M, x0, y0, x1, y1, k = 1) => {
+    if (x1 - x0 < 0.05 || y1 - y0 < 0.05) return;
+    const g = slab(rect(x0, y0, x1, y1), bt, Math.min(0.35, bt * 0.45), false);
+    g.translate(0, 0, -bt);
+    const t = r.f(1.0, 1.07) * k;
+    pb.add(P, g, M, [t, t, t * 0.995]);
+  };
+  const plate = (M, cx, cy, s, rivets = false) => {
+    const g = slab(rect(cx - s / 2, cy - s / 2, cx + s / 2, cy + s / 2), 0.18, 0.06, false);
+    pb.add('galv', g, M, [0.86, 0.86, 0.85]);
+    if (rivets) for (const [dx, dy] of [[-0.28, -0.28], [0.28, 0.28]]) {
+      const d = dome(Math.min(0.42, s * 0.09), 0.25, 5); d.translate(cx + dx * s, cy + dy * s, 0.18); pb.add('galv', d, M, [0.75, 0.75, 0.74]);
+    }
+  };
+  for (const F of faces) {
+    const M = frame(F.o, F.r, F.u, F.n);
+    const hw = F.w / 2, hh = F.h / 2;
+    const x0 = -hw + F.ix, x1 = hw - F.ix, y0 = -hh + F.iy, y1 = hh - F.iy;
+    // the sheet: one smooth panel per face, recessed behind the battens
+    const sheet = slab(rect(-hw + bt + 0.02, -hh + bt + 0.02, hw - bt - 0.02, hh - bt - 0.02), pt, 0.1, false);
+    sheet.translate(0, 0, -bt - pt);
+    pb.add(P, sheet, M, [1.07, 1.07, 1.06]);
+    // perimeter battens (butt joints like a real box: ±z full width, ±x and top inset)
+    batten(M, x0, y0, x0 + ew, y1); batten(M, x1 - ew, y0, x1, y1);
+    batten(M, x0 + ew, y0, x1 - ew, y0 + ew); batten(M, x0 + ew, y1 - ew, x1 - ew, y1);
+    const ox0 = x0 + ew, ox1 = x1 - ew, oy0 = y0 + ew, oy1 = y1 - ew;
+    // grid: vertical battens continuous, horizontal ones butt between them
+    const nc = V.grid && !F.top ? clamp(Math.round((ox1 - ox0) / 22), 2, 5) : 1;
+    const nr = V.grid && !F.top ? clamp(Math.round((oy1 - oy0) / 30), 2, 4) : 1;
+    const xs = [ox0 - ew / 2]; for (let i = 1; i < nc; i++) xs.push(lerp(ox0, ox1, i / nc)); xs.push(ox1 + ew / 2);
+    const ys = [oy0 - ew / 2]; for (let j = 1; j < nr; j++) ys.push(lerp(oy0, oy1, j / nr)); ys.push(oy1 + ew / 2);
+    for (let i = 1; i < nc; i++) batten(M, xs[i] - gw / 2, oy0, xs[i] + gw / 2, oy1, 0.98);
+    for (let j = 1; j < nr; j++) for (let i = 0; i < nc; i++) {
+      const a = i === 0 ? ox0 : xs[i] + gw / 2, b = i === nc - 1 ? ox1 : xs[i + 1] - gw / 2;
+      batten(M, a, ys[j] - gw / 2, b, ys[j] + gw / 2, 0.98);
+    }
+    // junction plates where battens meet (rivets on the outer corners only)
+    const ps = gw * 1.35;
+    for (let i = 0; i <= nc; i++) for (let j = 0; j <= nr; j++) {
+      const outer = (i === 0 || i === nc) && (j === 0 || j === nr);
+      if (!outer && (i === 0 || i === nc) && (j === 0 || j === nr)) continue;
+      if (!outer && !(i > 0 && i < nc) && !(j > 0 && j < nr)) continue;
+      plate(M, xs[i], ys[j], outer ? ew * 1.3 : ps, outer);
+    }
+    // stencils in grid cells (z just in front of the sheet)
+    if (!F.top && labels.length && (F.k === '+z' || F.k === '+x' || F.k === '-x')) {
+      const cell = (ci, cj) => { const a = ci === 0 ? ox0 : xs[ci] + gw / 2, b = ci === nc - 1 ? ox1 : xs[ci + 1] - gw / 2, c = cj === 0 ? oy0 : ys[cj] + gw / 2, d = cj === nr - 1 ? oy1 : ys[cj + 1] - gw / 2; return [(a + b) / 2, (c + d) / 2, b - a, d - c]; };
+      const zones = { ul: cell(0, nr - 1), lr: cell(nc - 1, 0), c: cell(Math.floor(nc / 2), Math.floor(nr / 2)), x: cell(nc - 1, nr - 1), x2: cell(0, 0) };
+      const take = F.k === '+z' ? 2 : 1;
+      for (let t = 0; t < take && labels.length; t++) {
+        const lab = labels.shift();
+        const z = zones[lab[1]] || zones.c;
+        addLabel(pb, lab[0], [z[0], z[1], z[2] * 0.95, z[3] * 0.85], [{ a: -1e9, b: 1e9 }], false, -bt + 0.04, M, r);
+      }
+    }
+    if (F.top) continue;
+    // thin steel straps wrapping the crate near top and bottom
+    const sh = clamp(S * 0.022, 1, 1.8), st = 0.14;
+    for (const fy of [0.11, 0.89]) {
+      const yc = -hh + F.h * fy, ext = F.k === '+z' || F.k === '-z' ? st : 0;
+      const g = slab(rect(-hw - ext, yc - sh / 2, hw + ext, yc + sh / 2), st, 0.04, false);
+      pb.add('galv', g, M, [0.72, 0.72, 0.72]);
+    }
+    // side handles (rope-style steel loops) on ±x faces
+    if (V.handles && (F.k === '+x' || F.k === '-x') && S >= 30) {
+      const hy = hh * 0.45, hl = Math.min(10, F.w * 0.22);
+      plate(M, -hl / 2 - 1, hy, 2.6, true); plate(M, hl / 2 + 1, hy, 2.6, true);
+      const c = new THREE.CatmullRomCurve3([new THREE.Vector3(-hl / 2 - 1, hy, 0.3), new THREE.Vector3(-hl / 2, hy - 2.4, 1.6), new THREE.Vector3(hl / 2, hy - 2.4, 1.6), new THREE.Vector3(hl / 2 + 1, hy, 0.3)]);
+      pb.add('galv', sweep(c, 10, 5, 0.42), M, [0.6, 0.6, 0.6]);
+    }
+  }
+  // dark interior so a hairline between sheet and batten never shows sky
+  const ins = bt + pt + 0.05;
+  const inner = slab(rect(-sx / 2 + ins, -sz / 2 + ins, sx / 2 - ins, sz / 2 - ins), sy - ins, 0, false);
+  inner.rotateX(-Math.PI / 2);
+  pb.add(P, inner, null, [0.25, 0.25, 0.25]);
+  // grime: ground dirt, grey run-off under each strap/top edge, slightly bleached top
+  pb.weather((x, y, z, nx, ny) => {
+    const g = lerp(0.6, 1, smooth(0, Math.min(16, sy * 0.3), y)) * lerp(0.9, 1, smooth(sy - 4, sy * 0.7, y));
+    return [g * (ny > 0.9 ? 1.03 : 1), g * (ny > 0.9 ? 1.03 : 1), g * 0.985];
+  }, ['label']);
   pb.box([-sx / 2, 0, -sz / 2], [sx / 2, sy, sz / 2], 'crate');
   return pb;
 }

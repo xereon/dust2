@@ -99,12 +99,14 @@ function ropeOver(pb, f, fx, pz, H, yEnd, r = 0.4, alongZ = false) {
 export function tarpCrate(size = 64, color = 'teal', variant = 4, opts = {}) {
   const [sx, sy, sz] = Array.isArray(size) ? size : [size, size, size];
   const pb = new PropBuilder('tarpCrate', `${sx}:${sy}:${color}:${variant}:${JSON.stringify(opts)}`);
-  buildCrate(pb, [sx, sy, sz], variant, { noLabels: true, ...(opts.crate || {}) });
-  const hx = sx / 2 + 0.4, hz = sz / 2 + 0.4, hang = sy * (opts.hang ?? 0.34);
-  const f = drapeFn({ hx, hz, H: sy + 0.2, lift: 0.35, re: 1.8, wr: 0.7, seed: sx + variant, bulge: 0.5 });
-  const g = clothGrid(f, hx + hang, hz + hang, 3, 0.05, sx);
-  paint(g, (x, y) => { const k = lerp(0.85, 1, smooth(sy * 0.55, sy, y)); return [k, k, k]; });
-  pb.add(`canvas:${color}`, g);
+  const panel = variant === 4 || variant === 5 || variant === 'cs2' || variant === 'cs2grey';
+  buildCrate(pb, [sx, sy, sz], variant, { noLabels: !panel, ...(opts.crate || {}) });
+  // CS2 A-site tarps: pale teal canvas pulled taut over the lid, hanging ~a fifth of the way
+  const hx = sx / 2 + 0.4, hz = sz / 2 + 0.4, hang = sy * (opts.hang ?? 0.22);
+  const f = drapeFn({ hx, hz, H: sy + 0.2, lift: 0.35, re: 1.8, wr: 0.42, seed: sx + (+variant || 0), bulge: 0.35 });
+  const g = clothGrid(f, hx + hang, hz + hang, 3, 0.02, sx);
+  paint(g, (x, y) => { const k = lerp(0.88, 1.02, smooth(sy * 0.7, sy, y)); return [k, k, k]; });
+  pb.add(`canvas:${color === 'teal' ? 'tarpteal' : color}`, g);
   if (opts.ropes !== false) for (const pz of [-sz * 0.25, sz * 0.25]) ropeOver(pb, f, hx, pz, sy, 1.5, 0.38);
   pb.colliders.length = 0;
   pb.box([-sx / 2 - 1, 0, -sz / 2 - 1], [sx / 2 + 1, sy + 1, sz / 2 + 1], 'crate');
