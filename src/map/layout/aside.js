@@ -81,8 +81,13 @@ export function build(K) {
 
   // ---- long doors ---------------------------------------------------------------------------------
   // roofed sandstone-block passage with arched doorways and a checker tile floor
-  K.region('ld_corr', zc([[507, 314], [550, 314], [722, 314], [772, 314], [772, 746], [723, 746], [550, 746], [507, 746]], 0),
-    { mat: 'stone_block', wallMat: 'stone_block', ceil: 274, ceilTop: 350, ceilMat: 'wood_planks', beams: { dir: 'x', step: 72 }, headerMat: 'stone_block', paint: null, base: { h: 10, out: 3, mat: 'stone_wall' } });
+  const ldc = { mat: 'stone_block', wallMat: 'stone_block', ceil: 274, ceilTop: 350, ceilMat: 'wood_planks', beams: { dir: 'x', step: 72 }, headerMat: 'stone_block', paint: null, base: { h: 10, out: 3, mat: 'stone_wall' } };
+  K.region('ld_corr', zc([[507, 314], [550, 314], [722, 314], [772, 314], [772, 420], [507, 420]], 0), ldc);
+  // the middle of the passage is open to the sky, crossed by old timber beams (sun shaft)
+  K.region('ld_corr_open', zc([[507, 420], [772, 420], [772, 640], [507, 640]], 0),
+    { mat: 'stone_block', wallMat: 'stone_block', top: 350, paint: null, base: { h: 10, out: 3, mat: 'stone_wall' }, decor: false, cornice: { mat: 'stone_block', h: 10, out: 4 } });
+  for (const y of [452, 530, 608]) K.box([507, y - 5, 262], [772, y + 5, 274], 'wood_planks', { col: false, color: 0.68 });
+  K.region('ld_corr_n', zc([[507, 640], [772, 640], [772, 746], [723, 746], [550, 746], [507, 746]], 0), ldc);
   // small diagonal tiles (green / terracotta / white) laid on the diagonal
   {
     const T = 8, h = T / Math.SQRT2;

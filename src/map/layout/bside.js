@@ -12,34 +12,37 @@ export function build(K) {
   K.region('utun_corr', zc([[-1736, 744], [-1588, 744], [-1588, 958], [-1736, 958]], 30),
     { ...tun, ceil: 176, beams: { dir: 'x', step: 96 } });
   // the hall is tall, with a broken timber skylight letting sun patches onto the floor
-  const uhall = { ...tun, ceil: 300, ceilTop: 316, beams: { dir: 'y', step: 128 } };
-  // the hall is tall; an open roof hole on its sun side (south-west of the lit patch, the sun
-  // stands at ~57 deg toward -x/-y) throws a sun patch onto the floor in front of the east exit
-  K.region('utun_hall_w', zc([[-2194, 1022], [-1867, 1022], [-1867, 958], [-1736, 958], [-1673, 958], [-1673, 1425], [-1906, 1425], [-2057, 1425], [-2194, 1425]], 32), uhall);
-  K.region('utun_hall_s', zc([[-1673, 958], [-1588, 958], [-1537, 958], [-1537, 1020], [-1520, 1020], [-1520, 1030], [-1673, 1030]], 32), uhall);
-  K.region('utun_hall_n', zc([[-1673, 1170], [-1520, 1170], [-1520, 1298], [-1653, 1298], [-1653, 1425], [-1673, 1425]], 32), uhall);
-  K.region('utun_hall_e', zc([[-1520, 1020], [-1293, 1020], [-1293, 1180], [-1293, 1298], [-1520, 1298]], 32), uhall);
+  const uhall = { ...tun, ceil: 250, ceilTop: 266, beams: { dir: 'y', step: 128 } };
+  // the hall is tall; an open roof hole with old joists toward its east end throws a sun patch
+  // onto the floor in front of the stairwell (sun ~57 deg, light travelling toward +x/+y)
+  K.region('utun_hall_w', zc([
+    [-2194, 1022], [-1867, 1022], [-1867, 958], [-1736, 958], [-1588, 958], [-1537, 958], [-1537, 1020], [-1520, 1020],
+    [-1520, 1298], [-1653, 1298], [-1653, 1425], [-1906, 1425], [-2057, 1425], [-2194, 1425],
+  ], 32), uhall);
+  K.region('utun_hall_es', zc([[-1520, 1020], [-1293, 1020], [-1293, 1050], [-1520, 1050]], 32), uhall);
+  K.region('utun_hall_en', zc([[-1520, 1180], [-1293, 1180], [-1293, 1298], [-1520, 1298]], 32), uhall);
+  K.region('utun_hall_ew', zc([[-1520, 1050], [-1480, 1050], [-1480, 1180], [-1520, 1180]], 32), uhall);
+  K.region('utun_hall_ee', zc([[-1390, 1050], [-1293, 1050], [-1293, 1180], [-1390, 1180]], 32), uhall);
   K.region('utun_exit', zc([[-2057, 1425], [-1906, 1425], [-1906, 1765], [-2057, 1765]], 32),
     { ...tun, ceil: 170, beams: { dir: 'x', step: 96 } });
   K.region('utun_exit_mouth', zc([[-2057, 1765], [-1906, 1765], [-1906, 1789], [-2057, 1789]], 32),
     { ...tun, arch: { spring: 118, crown: 170 }, ceilTop: 330, wallMat: 'adobe' });
-  K.region('utun_sky', zc([[-1673, 1030], [-1520, 1030], [-1520, 1170], [-1673, 1170]], 32), { ...tun, top: 316, decor: false });
-  // a couple of old joists left across the roof hole, and a short parapet around it on the roof
-  for (const x of [-1650, -1612, -1536]) K.box([x - 4, 1026, 304], [x + 4, 1174, 312], 'wood_planks', { col: false, color: 0.7 });
-  for (const y of [1060, 1136]) K.box([-1677, y - 3, 312], [-1516, y + 3, 316], 'wood_planks', { col: false, color: 0.66 });
-  // one joist broken and hanging into the hall
+  K.region('utun_sky', zc([[-1480, 1050], [-1390, 1050], [-1390, 1180], [-1480, 1180]], 32), { ...tun, top: 266, decor: false });
+  // broken skylight: joists across the hole (one snapped and hanging), lighter slats, a parapet
+  for (const x of [-1468, -1436, -1402]) K.box([x - 4, 1046, 254], [x + 4, 1184, 262], 'wood_planks', { col: false, color: 0.7 });
+  for (const y of [1078, 1112, 1150]) K.box([-1484, y - 2, 262], [-1386, y + 2, 266], 'wood_planks', { col: false, color: 0.66 });
   for (let i = 0; i < 6; i++) {
     const t0 = i / 6, t1 = (i + 1) / 6;
-    K.box([-1578, 1030 + t0 * 90, 304 - t1 * 70], [-1570, 1030 + t1 * 90, 312 - t0 * 70], 'wood_planks', { col: false, color: 0.62 });
+    K.box([-1424, 1054 + t0 * 80, 254 - t1 * 64], [-1416, 1054 + t1 * 80, 262 - t0 * 64], 'wood_planks', { col: false, color: 0.62 });
   }
-  for (const [a, b] of [[[-1681, 1022], [-1512, 1022]], [[-1512, 1178], [-1681, 1178]]]) K.slab(a, b, 316, 336, 8, 'plaster_wall', { col: false, color: 0.85 });
-  for (const [a, b] of [[[-1681, 1026], [-1681, 1174]], [[-1512, 1026], [-1512, 1174]]]) K.slab(a, b, 316, 336, 8, 'plaster_wall', { col: false, color: 0.85 });
+  for (const [a, b] of [[[-1488, 1042], [-1382, 1042]], [[-1382, 1188], [-1488, 1188]]]) K.slab(a, b, 266, 284, 8, 'plaster_wall', { col: false, color: 0.85 });
+  for (const [a, b] of [[[-1488, 1046], [-1488, 1184]], [[-1382, 1046], [-1382, 1184]]]) K.slab(a, b, 266, 284, 8, 'plaster_wall', { col: false, color: 0.85 });
   // shallow arched bays in the side walls
   for (const [x0, x1, y, sg] of [[-2185, -2075, 1425, -1], [-2010, -1930, 1022, 1], [-1500, -1400, 1020, 1], [-1600, -1480, 1298, -1]])
     blindArch(K, [x0, y], [x1, y], [0, sg], 32, 170, { mat: 'plaster_wall', col: 0.85, d: 14 });
   // support posts in the hall
-  K.box([-1798, 1042, 32], [-1782, 1058, 300], 'wood_planks', { color: 0.8 });
-  K.box([-1798, 1292, 32], [-1782, 1308, 300], 'wood_planks', { color: 0.8 });
+  K.box([-1798, 1042, 32], [-1782, 1058, 250], 'wood_planks', { color: 0.8 });
+  K.box([-1798, 1292, 32], [-1782, 1308, 250], 'wood_planks', { color: 0.8 });
 
   // ---- B site -------------------------------------------------------------------------------
   K.stairs('b_tunst', [[-2057, 1789], [-1906, 1789], [-1906, 1840], [-2057, 1840]], 32, 4, 4,
