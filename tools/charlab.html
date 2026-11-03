@@ -109,7 +109,7 @@ async function main() {
   await C.characterReady?.('T'); await C.characterReady?.('CT');
   const models = [];
   const add = (team, e, label) => {
-    const m = C.createCharacterModel(team, 0);
+    const m = C.createCharacterModel(team, Q.has('variant') ? +Q.get('variant') : undefined);
     e.team = team;
     scene.add(m.root);
     models.push({ m, e, label });
@@ -131,9 +131,9 @@ async function main() {
   } else if (view === 'action') {
     const poses = [
       ['T', { velocity: V(0, 0, 0), duckAmount: 1, ducking: true }, 'crouch'],
-      ['T', { velocity: V(250, 0, 0), yaw: 0 }, 'run'],
-      ['T', { pitch: -60 }, 'aim up'],
-      ['T', { pitch: 55 }, 'aim down'],
+      ['T', { velocity: V(250, 0, 0), yaw: 0, engaged: true }, 'run'],
+      ['T', { pitch: -60, engaged: true }, 'aim up'],
+      ['T', { pitch: 55, engaged: true }, 'aim down'],
       ['CT', { active: { def: { slot: 'secondary' }, key: 'usp' } }, 'pistol'],
       ['CT', { velocity: V(0, 0, -130), yaw: 0 }, 'walk strafe'],
       ['CT', { active: { def: { slot: 'knife' }, key: 'knife' }, velocity: V(160, 0, 0) }, 'knife run'],

@@ -302,18 +302,18 @@ function tanNylon(color) {
 const CT_CAMO = { base: hex(0x5f655a), dark: hex(0x3a3f37), mid: hex(0x7c806f), brown: hex(0x5a5040), light: hex(0x9a9a84), black: hex(0x262823) };
 function ctCamo(ctx) {
   // multicam-style: small soft blobs in three tones over a mid base, thin dark branches
-  const s = 0.6;
+  const s = 0.48;
   set3(ctx, CT_CAMO.base);
   const n1 = fbm(ctx.x * s, ctx.y * s * 0.7, ctx.z * s, 3);
   const n2 = fbm(ctx.x * s * 1.25 + 17, ctx.y * s * 0.9, ctx.z * s * 1.25 + 3, 3);
   const n3 = fbm(ctx.x * s * 1.6 + 41, ctx.y * s * 1.2, ctx.z * s * 1.6, 2);
   const n4 = fbm(ctx.x * s * 2.1 + 7, ctx.y * s * 1.6, ctx.z * s * 2.1 + 9, 2);
   if (n2 > 0.12) mix3(ctx, CT_CAMO.mid, sstep(0.12, 0.2, n2) * 0.85);
-  if (n1 > 0.16) mix3(ctx, CT_CAMO.dark, sstep(0.16, 0.24, n1) * 0.9);
+  if (n1 > 0.16) mix3(ctx, CT_CAMO.dark, sstep(0.16, 0.24, n1) * 0.7);
   if (n3 > 0.22) mix3(ctx, CT_CAMO.brown, sstep(0.22, 0.3, n3) * 0.8);
-  if (n4 > 0.3) mix3(ctx, CT_CAMO.light, sstep(0.3, 0.36, n4) * 0.6);
+  if (n4 > 0.3) mix3(ctx, CT_CAMO.light, sstep(0.3, 0.36, n4) * 0.4);
   const br = Math.abs(fbm(ctx.x * 0.9 + 5, ctx.y * 0.9, ctx.z * 0.9, 2));
-  if (br < 0.025 && n1 > 0.05) mix3(ctx, CT_CAMO.black, 0.55 * sstep(0.025, 0.01, br));
+  if (br < 0.025 && n1 > 0.05) mix3(ctx, CT_CAMO.black, 0.3 * sstep(0.025, 0.01, br));
 }
 function ctShirtDetail(ctx) {
   const k = ctx.part.data.kind;
@@ -747,12 +747,12 @@ export const STYLE = {
 export const VARIANTS = {
   T: [
     { name: 'phoenix', tint: { '^(shirt|sleeve|collar)': [1, 1, 1], '^glove': [0.2, 0.2, 0.2] }, hide: ['tog_head1', 'tog_kneeL', 'tog_kneeR'] },
-    { name: 'phoenix_blue', tint: { '^(shirt|sleeve|collar)': [0.72, 0.84, 1.12], '^glove': [1.0, 0.82, 0.6], '^vest': [0.92, 0.96, 0.86] }, hide: [] },
-    { name: 'phoenix_brown', tint: { '^(shirt|sleeve|collar)': [1.02, 0.86, 0.66], '^glove': [0.24, 0.22, 0.2], '^(hips|leg|cargo)': [0.9, 0.86, 0.8] }, hide: ['tog_head1'] },
+    { name: 'phoenix_blue', tint: { '^(shirt|sleeve|collar)': [0.5, 0.72, 1.3], '^glove': [1.0, 0.82, 0.6], '^vest': [0.92, 0.96, 0.86] }, hide: [] },
+    { name: 'phoenix_brown', tint: { '^(shirt|sleeve|collar)': [1.12, 0.78, 0.52], '^glove': [0.24, 0.22, 0.2], '^(hips|leg|cargo)': [0.9, 0.86, 0.8] }, hide: ['tog_head1'] },
   ],
   CT: [
     { name: 'seal', tint: { '^glove': [0.32, 0.32, 0.32] }, hide: [] },
-    { name: 'seal_coyote', tint: { '^(shirt|sleeve|hips|leg|cargo)': [1.16, 1.03, 0.8], '^glove': [0.95, 0.8, 0.6], '^(plates|cummer|pc_strap|mag_pouch|admin|radio_pouch|belt)': [1.35, 1.12, 0.85] }, hide: ['tog_head1'] },
-    { name: 'sas', tint: { '^(shirt|sleeve|hips|leg|cargo)': [0.62, 0.64, 0.66], '^glove': [0.22, 0.22, 0.22], '^(plates|cummer|pc_strap|mag_pouch|admin|radio_pouch)': [0.6, 0.6, 0.6], '^helmet$': [0.62, 0.62, 0.62] }, hide: ['tog_head2'] },
+    { name: 'seal_coyote', tint: { '^(shirt|sleeve|hips|leg|cargo)': [1.4, 1.15, 0.78], '^glove': [0.95, 0.8, 0.6], '^(plates|cummer|pc_strap|mag_pouch|admin|radio_pouch|belt)': [1.75, 1.38, 0.95], '^helmet$': [1.5, 1.3, 0.95] }, hide: ['tog_head1'] },
+    { name: 'sas', tint: { '^(shirt|sleeve|hips|leg|cargo)': [0.42, 0.44, 0.48], '^glove': [0.22, 0.22, 0.22], '^(plates|cummer|pc_strap|mag_pouch|admin|radio_pouch)': [0.42, 0.42, 0.42], '^helmet$': [0.45, 0.45, 0.45] }, hide: ['tog_head2'] },
   ],
 };

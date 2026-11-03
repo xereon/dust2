@@ -187,10 +187,14 @@ export function leaf(K, hinge, tip, z, h = 128, t = 5, mat = 'wood_door') {
 export function build(K) {
   // ---------------------------------------------------------------- doors
   // long doors: outer pair (west leaf swung in, east leaf swung out) and the inner pair
-  leaf(K, [553, 296], [621, 348], 0, 130);
-  leaf(K, [719, 296], [646, 252], 0, 130);
-  leaf(K, [553, 764], [620, 812], 0, 130);
-  leaf(K, [720, 764], [655, 716], 0, 130);
+  // detailed plank doors (props doubleDoor: framed leaves with iron straps and ring pulls), both
+  // pairs swung toward the north; the slab leaves remain only as the no-props fallback
+  prop(K, 'doubleDoor', [172, 132, [0.6, 0.85], { depth: 40, seed: 3 }], [636, 293, 0], 180, () => {
+    leaf(K, [553, 296], [621, 348], 0, 130); leaf(K, [719, 296], [646, 252], 0, 130);
+  });
+  prop(K, 'doubleDoor', [173, 132, [0.85, 0.7], { depth: 36, seed: 5 }], [636.5, 765, 0], 180, () => {
+    leaf(K, [553, 764], [620, 812], 0, 130); leaf(K, [720, 764], [655, 716], 0, 130);
+  });
   // mid doors: west leaf swung toward T, east leaf toward CT, the famous crack between them
   leaf(K, [-515, 1640], [-432, 1592], -128, 132);
   leaf(K, [-319, 1622], [-404, 1672], -128, 132);
