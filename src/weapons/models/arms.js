@@ -157,10 +157,10 @@ function template(team) {
   }
   if (st.armor) {
     // hard knuckle guard across the MCP line + wrist-side vent plate
-    const guard = G.deform(G.box(2.9, 0.15, 0.78, { r: 0.07 }), (v) => { v.y -= 0.15 * v.x * v.x; v.z += 0.12 * v.x; }, 60);
-    sb.add(st.armor, guard, root, world[root], { m: M([-0.02, 0.56, -3.28], [4, 0, -1]) });
+    const guard = G.deform(G.box(2.5, 0.09, 0.62, { r: 0.04 }), (v) => { v.y -= 0.17 * v.x * v.x; v.z += 0.12 * v.x; }, 60);
+    sb.add(st.armor, guard, root, world[root], { m: M([-0.02, 0.5, -3.25], [4, 0, -1]) });
     // vented ridges on the guard
-    sb.add(st.glove, G.deform(G.box(2.3, 0.14, 1.5, { r: 0.07 }), (v) => { v.y -= 0.12 * v.x * v.x; }, 60), root, world[root], { m: M([0.05, 0.52, -1.75], [2, 0, 0]) });
+    sb.add(st.glove, G.deform(G.box(2.1, 0.08, 1.3, { r: 0.04 }), (v) => { v.y -= 0.14 * v.x * v.x; }, 60), root, world[root], { m: M([0.05, 0.44, -1.75], [2, 0, 0]) });
   }
 
   // --- fingers ---
@@ -169,8 +169,8 @@ function template(team) {
       const bare = j >= 3 - st.bareTips;
       const mat = bare ? st.skin : st.glove;
       // bare (fingerless) tips are slimmer than the gloved segments
-      const r0 = bare ? f.R[j] * 0.88 : f.R[j] + 0.03, r1 = bare ? f.R[j + 1] * 0.85 : f.R[j + 1] + 0.03;
-      sb.add(mat, phalanx(r0, r1, f.L[j], 0.86, j === 2), fingerIdx[i][j], world[fingerIdx[i][j]]);
+      const r0 = bare ? f.R[j] * 0.8 : f.R[j] + 0.03, r1 = bare ? f.R[j + 1] * 0.74 : f.R[j + 1] + 0.03;
+      sb.add(mat, phalanx(r0, r1, f.L[j], 0.86, j === 2), fingerIdx[i][j], world[fingerIdx[i][j]], bare ? { c: 0xc4b6ae } : {});
       if (bare && j === 2) {
         // nail
         sb.add('nail', G.deform(G.box(f.R[3] * 1.3, 0.05, f.L[2] * 0.62, { r: 0.08 }), (v) => { v.y -= 0.35 * v.x * v.x; }, 70),
@@ -246,8 +246,11 @@ function template(team) {
 export const POSES = {
   relaxed: { f: [[15, 20, 12, 0], [18, 24, 12, 0], [22, 28, 14, 0], [26, 30, 16, 0]], t: [[0, 0, 0], 10, 10] },
   grip: { f: [[48, 85, 45, 0], [82, 100, 55, 0], [86, 100, 55, 0], [88, 96, 52, 0]], t: [[30, 0, 0], 25, 20] },
-  trigger: { f: [[26, 48, 30, 5], [82, 100, 55, 0], [86, 100, 55, 0], [88, 96, 52, 0]], t: [[30, 0, 0], 25, 20] },
+  trigger: { f: [[-20, 25, 12, 0], [82, 100, 55, 0], [86, 100, 55, 0], [88, 96, 52, 0]], t: [[30, 0, 0], 25, 20] },
   wrap: { f: [[52, 74, 38, 0], [56, 76, 38, 0], [58, 76, 38, 0], [60, 76, 38, 0]], t: [[6, -12, 0], 8, 10] },
+  // support hand cradling a handguard from below: low knuckle bend, deep finger curl over the
+  // far side, thumb laid forward along the near side (fitted against an AK handguard section)
+  cradle: { f: [[27, 111, 57, 0], [29, 112, 57, 0], [30, 112, 57, 0], [31, 110, 56, 0]], t: [[-7.6, 28.6, 12.8], 8, 10] },
   cup: { f: [[35, 55, 28, 0], [38, 58, 30, 0], [40, 60, 30, 0], [44, 62, 32, 0]], t: [[18, 0, 0], 20, 25] },
   pinch: { f: [[30, 55, 25, 0], [55, 80, 40, 0], [70, 90, 45, 0], [78, 90, 48, 0]], t: [[30, 0, 0], 25, 20] },
   flat: { f: [[5, 5, 3, 0], [5, 5, 3, 0], [5, 5, 3, 0], [5, 5, 3, 0]], t: [[-10, 0, 0], 5, 5] },

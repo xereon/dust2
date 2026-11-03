@@ -194,8 +194,8 @@ export function buildAK47(b) {
   b.anchor('sight', [0, 1.35, -10.0]);
   return {
     hands: {
-      R: { p: [0.98, -2.15, -2.5], across: [0, -0.968, 0.25], palm: [-1, 0, -0.05], pose: 'trigger' },
-      L: { p: [-0.3, -1.5, -14.6], across: [0, 0.08, 1], palm: [0.22, 0.97, 0], pose: 'wrap' },
+      R: { p: [0.98, -2.15, -2.5], across: [0, -0.968, 0.25], palm: [-0.9, 0, 0.45], pose: 'trigger' },
+      L: { p: [0.10, -1.56, -14.90], across: [0, 0.05, 1], palm: [-0.49, 0.87, 0], pose: 'cradle' },
       magGrab: { p: [-0.55, -3.6, -9.6], across: [0, 0, 1], palm: [0.9, 0.1, -0.35], pose: 'cup' },
       chargeGrab: { p: [1.3, 0.55, -7.2], across: [0, 0, 1], palm: [-0.4, -0.9, 0], pose: 'pinch' },
     },

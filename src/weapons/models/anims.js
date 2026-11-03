@@ -98,7 +98,7 @@ function rifleReload(cfg, empty, dur) {
     lhMag: [[0, 0], [0.04, 0], [0.14, 1, 'io'], [tSeat + 0.03, 1], [tSeat + 0.12, 0, 'io']],
     lhFree: [[0, 0], [0.3, 0], [0.36, 1, 'in2'], [0.46, 1], [0.5, 0, 'io']],
     lhFreeP: [[0, [-1, -18, -2]]],
-    lhPose: [[0, ['wrap', 'cup', 0]], [0.14, ['wrap', 'cup', 1], 'io'], [tSeat + 0.05, ['wrap', 'cup', 1]], [tSeat + 0.14, ['wrap', 'cup', 0], 'io']],
+    lhPose: [[0, ['cradle', 'cup', 0]], [0.14, ['cradle', 'cup', 1], 'io'], [tSeat + 0.05, ['cradle', 'cup', 1]], [tSeat + 0.14, ['cradle', 'cup', 0], 'io']],
   };
   const ev = [[0.2, 'mag_release'], [0.33, 'mag_drop'], [tSeat, 'mag_in']];
   if (E) {
@@ -106,7 +106,7 @@ function rifleReload(cfg, empty, dur) {
     ch.lhMag = [[0, 0], [0.04, 0], [0.14, 1, 'io'], [tSeat + 0.02, 1], [b0, 0, 'io']];
     ch.lhBolt = [[0, 0], [tSeat + 0.02, 0], [b0, 1, 'io'], [b2 + 0.02, 1], [b2 + 0.12, 0, 'io']];
     ch.bolt = [[0, 0], [b0, 0], [b1, 1, 'io'], [b1 + 0.02, 1], [b2, 0, 'in']];
-    ch.lhPose = [[0, ['wrap', 'cup', 0]], [0.14, ['wrap', 'cup', 1], 'io'], [tSeat + 0.02, ['wrap', 'cup', 1]], [b0, ['pinch', 'cup', 0], 'step'], [b2 + 0.04, ['pinch', 'cup', 0]], [b2 + 0.12, ['wrap', 'pinch', 0], 'step']];
+    ch.lhPose = [[0, ['cradle', 'cup', 0]], [0.14, ['cradle', 'cup', 1], 'io'], [tSeat + 0.02, ['cradle', 'cup', 1]], [b0, ['pinch', 'cup', 0], 'step'], [b2 + 0.04, ['pinch', 'cup', 0]], [b2 + 0.12, ['cradle', 'pinch', 0], 'step']];
     ch.gr = [[0, Z3], [0.1, [8, 6, -22], 'io'], [0.3, [5, 5, -18], 'io'], [0.5, [10, 8, -26], 'io'], [tSeat, [6.5, 7, -23], 'out'],
       [b0, [4, -4, 14], 'io'], [b1, [6, -5, 18], 'io'], [b2, [3, -4, 12], 'out'], [1, Z3, 'io']];
     ch.gp = [[0, Z3], [0.1, [-0.6, 0.9, 0.4], 'io'], [0.5, [-0.9, 1.1, 0.6], 'io'], [tSeat, [-0.7, 0.9, 0.6], 'out'], [b0, [-1.2, 0.8, 0.5], 'io'], [b1, [-1.1, 0.8, 1.3], 'io'], [b2, [-1.2, 0.8, 0.2], 'out'], [1, Z3, 'io']];
@@ -214,7 +214,7 @@ function inspect(o = {}) {
       gr: [[0, Z3], [0.12, [14, 24, 62], 'io'], [0.38, [18, 28, 70], 'sine'], [0.5, [6, 14, -28], 'io'], [0.72, [9, 18, -36], 'sine'], [0.84, [3, 6, -6], 'io'], [1, Z3, 'io']],
       lhFree: o.hands === 1 ? [[0, 0]] : [[0, 0], [0.08, 1, 'io'], [0.44, 1], [0.54, 0, 'io']],
       lhFreeP: [[0, o.lhUnder || [0.5, -3.5, -8]]],
-      lhPose: [[0, ['wrap', 'cup', 0]], [0.1, ['wrap', 'cup', 1], 'io'], [0.44, ['wrap', 'cup', 1]], [0.54, ['wrap', 'cup', 0], 'io']],
+      lhPose: [[0, ['cradle', 'cup', 0]], [0.1, ['cradle', 'cup', 1], 'io'], [0.44, ['cradle', 'cup', 1]], [0.54, ['cradle', 'cup', 0], 'io']],
     },
     ev: [],
   };

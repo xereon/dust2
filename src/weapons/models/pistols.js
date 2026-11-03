@@ -92,7 +92,7 @@ export function pistolCfg({ gripTop, ang, width = 1.2, slideTravel = 1.2, extra 
   const across = [0, -Math.cos(a), Math.sin(a)];
   const hw = width / 2;
   const at = (dy) => [gu - dy * Math.tan(a), gv - dy];
-  const [ru, rv] = at(1.25), [lu, lv] = at(1.75);
+  const [ru, rv] = at(1.25), [lu, lv] = at(2.05);
   return {
     hands: {
       // right palm wraps the rear-right of the grip (backstrap in the web of the hand); the support
@@ -146,6 +146,11 @@ export function buildPistol(b, o) {
     // ejection port (right) with the barrel hood inside
     b.add('dark', side([[L * 0.34, vt - 0.02], [L * 0.56, vt - 0.02], [L * 0.56, vt - 0.55], [L * 0.34, vt - 0.55]], 0.02, { x: W / 2 + 0.005, bevel: 0 }));
     b.add('steel', side([[L * 0.36, vt - 0.05], [L * 0.54, vt - 0.05], [L * 0.54, vt - 0.3], [L * 0.36, vt - 0.3]], 0.3, { x: W / 2 - 0.1, bevel: 0.02 }), { c: 0xb0b0b0 });
+    // bevelled port rim (catches a highlight on the slide's right flank)
+    b.add(o.slide, side([[L * 0.33, vt + 0.0], [L * 0.57, vt + 0.0], [L * 0.57, vt - 0.58], [L * 0.33, vt - 0.58]], 0.05,
+      { x: W / 2 + 0.012, bevel: 0.015, r: 0.04, holes: [[[L * 0.345, vt - 0.03], [L * 0.555, vt - 0.03], [L * 0.555, vt - 0.54], [L * 0.345, vt - 0.54]]] }), { c: 0xd0d0d0 });
+    // front cocking serrations (both flanks)
+    for (let i = 0; i < 6; i++) for (const sx of [1, -1]) b.add('dark', box(0.02, H * 0.42, 0.035, { r: 0.008 }), { p: [sx * (W / 2 + 0.006), vb + H * 0.5, -(L - 1.25 + i * 0.13)] });
     if (o.selector) b.add('steel', side([[0.4, vb + 0.35], [0.9, vb + 0.35], [0.9, vb + 0.55], [0.4, vb + 0.55]], 0.08, { x: -W / 2 - 0.03, r: 0.05 }));
   }
   b.part('body');

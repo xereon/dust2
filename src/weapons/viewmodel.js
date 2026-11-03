@@ -37,7 +37,7 @@ const VECS = ['gp', 'gr', 'mp', 'mr', 'lhFreeP', 'rp', 'rr', 'silP', 'rhFreeP'];
 const STEPPED = ['magVis', 'vis', 'silVis', 'nade', 'shell'];   // visibility-like: never crossfaded
 // hand elbow offsets in camera space (in): forearm direction from the wrist
 const ELBOW_R = new THREE.Vector3(4.5, -8, 5);
-const ELBOW_L = new THREE.Vector3(-8, -4.8, 4.5);   // support forearm enters from the lower left (~30°)
+const ELBOW_L = new THREE.Vector3(-6.2, -6.8, 5);   // support forearm enters from the lower left (~30°)
 
 // critically-ish damped spring on a scalar array
 class Spring {
