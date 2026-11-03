@@ -131,7 +131,7 @@ try {
     }
     const out = list.length === 1 && opt.out ? opt.out : path.join(outdir, `${name}.png`);
     const canvas = await page.$('canvas#game');
-    await (opt.fullpage ? page : canvas).screenshot({ path: out });
+    await (opt.fullpage ? page : canvas).screenshot({ path: out, timeout: +opt.shotTimeout || 300000 });  // SwiftShader frames take seconds under load
     console.log(`wrote ${out}`);
   }
   console.log(`boot ${bootMs}ms`);

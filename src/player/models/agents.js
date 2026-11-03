@@ -45,9 +45,9 @@ function torsoSkin(p) {
   let w = yChain(p.y, [BONE.pelvis, BONE.spine1, BONE.spine2, BONE.chest], [41.0, 45.0, 49.2], 1.8);
   const az = Math.abs(p.z);
   const side = p.z < 0 ? 'L' : 'R';
-  const wc = smooth(4.2, 7.0, az) * smooth(51.5, 55.5, p.y);
+  const wc = smooth(4.0, 6.8, az) * smooth(50.5, 55.0, p.y);
   if (wc > 0) {
-    const wa = smooth(6.6, 8.6, az) * smooth(58.5, 55, p.y) * 0.35;
+    const wa = smooth(5.8, 8.2, az) * smooth(59.0, 54.5, p.y) * 0.55;
     w = w.map(([b, x]) => [b, x * (1 - wc)]);
     w.push([BONE['clav_' + side], wc * (1 - wa)], [BONE['upperarm_' + side], wc * wa]);
   }
@@ -95,9 +95,9 @@ function legPt(side, which, t) {
 function buildHips(mb, S, R) {
   mb.part('hips', S.pants, { group: 'core', data: { kind: 'hips' } });
   const rings = [
-    vr(31.9, 1.4, 1.8, 2.2),
-    vr(33.0, 3.7, 4.2, 4.9, 2.2),
-    vr(34.8, 5.0, 5.6, 7.2, 2.3),
+    vr(33.6, 1.2, 1.6, 2.6),
+    vr(34.4, 3.4, 4.2, 5.6, 2.3),
+    vr(35.6, 4.55, 5.5, 7.2, 2.3),
     vr(37.8, 4.95, 5.45, 7.45, 2.4),
     vr(40.6, 4.6, 4.9, 7.1, 2.4),
     vr(42.4, 4.4, 4.6, 6.8, 2.4),
@@ -143,9 +143,9 @@ function headBump(th, r) {
   // nose
   b += 0.95 * Math.exp(-((a / 0.2) ** 2)) * Math.exp(-(((y - 65.6) / 0.95) ** 2));
   // brow ridge
-  b += 0.22 * Math.exp(-((a / 0.75) ** 2)) * Math.exp(-(((y - 67.55) / 0.4) ** 2));
+  b += 0.26 * Math.exp(-((a / 0.6) ** 2)) * Math.exp(-(((y - 67.45) / 0.35) ** 2));
   // eye sockets
-  b -= 0.32 * (Math.exp(-(((a - 0.5) / 0.22) ** 2)) + Math.exp(-(((a + 0.5) / 0.22) ** 2))) * Math.exp(-(((y - 66.75) / 0.45) ** 2));
+  b -= 0.36 * (Math.exp(-(((a - 0.3) / 0.16) ** 2)) + Math.exp(-(((a + 0.3) / 0.16) ** 2))) * Math.exp(-(((y - 66.72) / 0.42) ** 2));
   // cheekbones
   b += 0.18 * (Math.exp(-(((Math.abs(a) - 0.95) / 0.3) ** 2))) * Math.exp(-(((y - 65.6) / 0.6) ** 2));
   // chin
@@ -211,11 +211,11 @@ function buildArm(mb, S, R, side) {
     mb.part('sleeve_' + side, S.shirt, { group: g, data: { kind: 'sleeve', full: true } });
     mb.loft([
       ring(A.inner, up, 2.6, 2.6, 2.6, 2.6),
-      ring(armPt(side, 'u', -0.9), up, 3.2, 3.2, 3.0, 3.3),
-      ring(armPt(side, 'u', 1.6), up, 3.25, 3.2, 3.05, 3.3),
-      ring(armPt(side, 'u', 4.5), up, 2.95, 2.9, 2.8, 3.0),
-      ring(armPt(side, 'u', 8.0), up, 2.7, 2.65, 2.55, 2.7),
-      ring(armPt(side, 'u', 11.0), up, 2.35, 2.4, 2.25, 2.35),
+      ring(armPt(side, 'u', -0.9), up, 2.85, 2.85, 2.7, 2.95),
+      ring(armPt(side, 'u', 1.6), up, 2.85, 2.8, 2.65, 2.9),
+      ring(armPt(side, 'u', 4.5), up, 2.55, 2.5, 2.4, 2.6),
+      ring(armPt(side, 'u', 8.0), up, 2.35, 2.3, 2.2, 2.35),
+      ring(armPt(side, 'u', 11.0), up, 2.1, 2.15, 2.0, 2.1),
       ring(A.el, elT, 2.25, 2.45, 2.2, 2.3),
       ring(armPt(side, 'f', 1.8), fo, 2.4, 2.25, 2.25, 2.45),
       ring(armPt(side, 'f', 4.5), fo, 2.25, 2.1, 2.1, 2.3),

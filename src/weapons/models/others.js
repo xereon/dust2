@@ -10,7 +10,7 @@ const { side, cross, lathe, cyl, box, sphere, torus, deform, screw, picatinny } 
 
 const H = (R, L, extra = {}) => ({ hands: { R, L, ...extra } });
 const RH = (u, v, ang = 16, x = 0.98) => ({ p: [x, v, -u], across: [0, -Math.cos(ang * Math.PI / 180), Math.sin(ang * Math.PI / 180)], palm: [-1, 0, -0.05], pose: 'trigger' });
-const LHg = (u, v, x = -0.55) => ({ p: [x, v, -u], across: [0, 0.05, 1], palm: [0.45, 0.9, 0], pose: 'wrap' });
+const LHg = (u, v, x = -0.55) => ({ p: [x + 0.2, v, -u], across: [0, 0.08, 1], palm: [0.22, 0.97, 0], pose: 'wrap' });
 // left hand on a vertical foregrip
 const LHv = (u, v) => ({ p: [-0.95, v, -u], across: [0, -1, 0.15], palm: [1, 0, -0.1], pose: 'grip' });
 const MAGG = (u, v) => ({ p: [-0.65, v, -u], across: [0, 0, 1], palm: [0.95, 0.1, -0.2], pose: 'cup' });

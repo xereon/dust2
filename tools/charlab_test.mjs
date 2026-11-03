@@ -65,7 +65,7 @@ for (const team of ['T', 'CT']) {
   ok(top && top.hitgroup === 1, `${team} headshot from above -> ${top?.hitgroup}`);
   // just past the ear (outside the visible head) must miss the head
   const earZ = team === 'CT' ? 5.9 : 4.9;
-  const miss = rayVsHitboxes(hb, V(hc.x + 200, hc.y + 1.5, earZ), V(-1, 0, 0), 1000);
+  const miss = rayVsHitboxes(hb, V(hc.x + 200, hc.y + 1.5, hc.z + earZ), V(-1, 0, 0), 1000);
   ok(!miss || miss.hitgroup !== 1, `${team} ray just past the ear misses the head (got ${miss?.hitgroup})`);
   // body shot hits chest (from behind: from the front the support arm crosses the chest, as in CS)
   const chest = rayVsHitboxes(hb, V(-200, 52, 0), V(1, 0, 0), 1000);

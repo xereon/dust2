@@ -36,8 +36,8 @@ const SCALARS = ['magVis', 'bolt', 'slide', 'lhMag', 'lhBolt', 'lhFree', 'lhSil'
 const VECS = ['gp', 'gr', 'mp', 'mr', 'lhFreeP', 'rp', 'rr', 'silP', 'rhFreeP'];
 const STEPPED = ['magVis', 'vis', 'silVis', 'nade', 'shell'];   // visibility-like: never crossfaded
 // hand elbow offsets in camera space (in): forearm direction from the wrist
-const ELBOW_R = new THREE.Vector3(3.5, -8.5, 5);
-const ELBOW_L = new THREE.Vector3(-3.5, -8.5, 4.5);
+const ELBOW_R = new THREE.Vector3(4.5, -8, 5);
+const ELBOW_L = new THREE.Vector3(-8, -4.8, 4.5);   // support forearm enters from the lower left (~30°)
 
 // critically-ish damped spring on a scalar array
 class Spring {
@@ -211,6 +211,9 @@ export class Viewmodel {
     if (!this.cur) return;
     if (this.cur.R) this.inner.add(A.R.mount);
     if (this.cur.L) this.inner.add(A.L.mount);
+    // per-weapon hand scale (pistols read oversized next to a short slide otherwise)
+    const hs = this.cur.cfg.handScale || 1;
+    A.R.mount.scale.set(hs, hs, hs); A.L.mount.scale.set(-hs, hs, hs);
     this.arms = A;
   }
 
@@ -569,7 +572,7 @@ export class Viewmodel {
   _place(arm, palmP, q) {
     const m = arm.mount;
     m.quaternion.copy(q);
-    this._v.copy(PALM).applyQuaternion(q);
+    this._v.copy(PALM).multiplyScalar(m.scale.y).applyQuaternion(q);
     m.position.copy(palmP).sub(this._v);
   }
   _aimArms() {
@@ -622,11 +625,12 @@ export class Viewmodel {
   // ---- lighting / environment fallbacks ----
   _checkEnv() {
     const vs = this.scene;
-    const src = vs?.environment ? null : (World.scene?.environment || undefined);
-    const key = vs?.environment ? 'view' : src ? 'world' : 'own';
-    if (key !== this.envSrc) {
-      this.envSrc = key;
-      setEnvironment(key === 'view' ? null : key === 'world' ? src : undefined);
+    // use the renderer's env texture directly (not via scene.environment) so the per-material
+    // envMapIntensity tuned for gun metal still applies
+    const src = vs?.environment || World.scene?.environment || null;
+    if (src !== this.envSrc) {
+      this.envSrc = src;
+      setEnvironment(src || undefined);
     }
     // fallback lights only when the view scene has none
     let has = false;

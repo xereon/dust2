@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { World } from '../../core/world.js';
 import {
-  BONE, NBONES, PARENT, REST_OFS, BIND, ARM, LEG, ARM_L, ARM_R, LEG_L, LEG_R, HAND_L, HAND_R,
+  BONE, NCORE, PARENT, REST_OFS, BIND, ARM, LEG, ARM_L, ARM_R, LEG_L, LEG_R, HAND_L, HAND_R,
 } from './skeleton.js';
 
 const DEG = Math.PI / 180;
@@ -19,6 +19,7 @@ const frac = (x) => x - Math.floor(x);
 const _v = Array.from({ length: 16 }, () => new THREE.Vector3());
 const _q = Array.from({ length: 8 }, () => new THREE.Quaternion());
 const _ik = Array.from({ length: 7 }, () => new THREE.Vector3());   // two-bone IK only
+const _rd = new THREE.Vector3();
 const _gs = new THREE.Vector3(), _ge = new THREE.Vector3(), _qt = new THREE.Quaternion();
 const _m = new THREE.Matrix4();
 const _bx = new THREE.Vector3(), _by = new THREE.Vector3(), _bz = new THREE.Vector3();
@@ -95,6 +96,15 @@ export const HOLDS = {
   },
 };
 
+// low-ready idle (not engaging): extra muzzle-down pitch, hold offset delta, arm poles
+const READY = {
+  rifle: { pitch: 34, ofs: new THREE.Vector3(0, -0.5, -0.3) },
+  pistol: { pitch: 40, ofs: new THREE.Vector3(-4.5, -1.5, -0.8), poleR: new THREE.Vector3(-0.4, -1, 0.15), poleL: new THREE.Vector3(-0.4, -1, -0.15) },
+  knife: { pitch: 28, ofs: new THREE.Vector3(0, 0, -1) },
+  nade: { pitch: 15, ofs: new THREE.Vector3(0, -2, 0) },
+  c4: { pitch: 0, ofs: new THREE.Vector3(0, 0, 0) },
+};
+
 // torso yaw (deg, negative = turned right) per stance
 const BLADE = { rifle: -30, pistol: -8, knife: -14, nade: -22, c4: 0 };
 
@@ -123,7 +133,7 @@ export function holdKind(ent) {
 // ---- animator ---------------------------------------------------------------------------------
 export class Animator {
   constructor() {
-    this.Qm = Array.from({ length: NBONES }, () => new THREE.Quaternion());
+    this.Qm = Array.from({ length: NCORE }, () => new THREE.Quaternion());
     this.Pm = BIND.map((p) => p.clone());
     this.rootPos = new THREE.Vector3();
     this.rootYaw = 0;          // lower-body world yaw (deg)
@@ -133,6 +143,10 @@ export class Animator {
     this.recoil = 0; this.reloadT = -1; this.reloadDur = 2.4; this.drawT = 1;
     this.kind = 'rifle'; this.prevKind = 'rifle'; this.kindBlend = 1;
     this.turnLift = 0; this.time = Math.random() * 10; this.init = false;
+    // per-character idle personality so a squad never moves in lockstep
+    const r = Math.random;
+    this.idv = { yaw: (r() - 0.5) * 22, blade: (r() - 0.5) * 12, shiftP: r() * 6.28, shiftF: 0.09 + r() * 0.07, shiftA: 0.5 + r() * 0.7, breathF: 1.4 + r() * 0.6, ready: 0.85 + r() * 0.3 };
+    this.ready = 1; this.lastFire = -99;
     this.plant = 0; this.pelvisDrop = 0;
     this.weaponPos = new THREE.Vector3(); this.weaponQuat = new THREE.Quaternion();
     this.holdPos = new THREE.Vector3(); this.holdQuat = new THREE.Quaternion();
@@ -153,6 +167,7 @@ export class Animator {
   }
 
   fire(e) {
+    this.lastFire = this.time;
     if (this.kind === 'knife' || e?.weapon === 'knife') { this.slash = 1; this.slashHeavy = !!e?.heavy; this.slashSide = -this.slashSide || 1; return; }
     this.recoil = Math.min(1.25, this.recoil + 0.75);
   }
@@ -205,7 +220,7 @@ export class Animator {
       const d = angN(this.aimYaw - this.rootYaw);
       if (Math.abs(d) > 50) this.turning = true;
       if (this.turning && Math.abs(d) < 4) this.turning = false;
-      lowerTarget = this.turning ? this.aimYaw : this.rootYaw;
+      lowerTarget = this.turning ? this.aimYaw + this.idv.yaw * 0.5 : this.rootYaw;
       if (this.turning) this.turnLift = 0.3;
     }
     const dy = angN(lowerTarget - this.rootYaw);
@@ -233,6 +248,8 @@ export class Animator {
     this.recoil *= Math.exp(-dt * 13);
     this.slash = Math.max(0, this.slash - dt / (this.slashHeavy ? 0.55 : 0.35));
     this.pinT += dt; this.throwT += dt;
+    const engaged = !!(ent.bot?.target || ent.bot?.engaged || ent.scoped || ent.engaged) || this.time - this.lastFire < 2.5 || this.reloadT >= 0;
+    this.ready += ((engaged ? 0 : 1) - this.ready) * damp(engaged ? 9 : 2.5, dt);
     const planting = !!(ent.planting || ent.isPlanting || ent.defusing || ent.isDefusing);
     this.plant += ((planting ? 1 : 0) - this.plant) * damp(8, dt);
 
@@ -255,17 +272,19 @@ export class Animator {
     pelvisY += this.landX * (1 - this.duck * 0.5);
     pelvisY -= this.plant * 4;
     pelvisY += this.air * 1.5;
-    const breath = Math.sin(this.time * 1.7);
+    const breath = Math.sin(this.time * this.idv.breathF);
+    const idle = (1 - m) * (1 - this.air);
+    const shift = Math.sin(this.time * this.idv.shiftF * 6.283 + this.idv.shiftP) * this.idv.shiftA * idle;
     const swing = Math.sin(2 * Math.PI * (this.phase + 0.25)) * m;
     const leanF = 4 * runB * m * (back ? -0.6 : 1) + 13 * this.duck + 6 * this.plant + this.air * 3;
     const sideLean = -this.moveZ * 3 * runB * m;
-    const pelvisPos = _v[0].set(-0.2 - this.duck * 2.5, pelvisY, 0.6 * swing * (1 - runB) * m);
+    const pelvisPos = _v[0].set(-0.2 - this.duck * 2.5, pelvisY - Math.abs(shift) * 0.25, 0.6 * swing * (1 - runB) * m + shift * 0.9);
     // bladed stance: torso turned right so the support shoulder leads (rifles), head keeps the aim
-    const bladeT = (BLADE[this.kind] ?? 0) * (1 - 0.45 * m) * (1 - this.plant);
+    const bladeT = ((BLADE[this.kind] ?? 0) + this.idv.blade * this.ready) * (1 - 0.45 * m) * (1 - this.plant);
     this.blade += (bladeT - this.blade) * damp(8, dt);
     const blade = this.blade;
     const hipYaw = swing * 7 * (1 - this.duck * 0.5) + blade * 0.35 * (1 - m);
-    qYZ(Qm[BONE.pelvis], hipYaw, leanF * 0.6, sideLean + swing * 2.5 * (1 - runB));
+    qYZ(Qm[BONE.pelvis], hipYaw, leanF * 0.6, sideLean + swing * 2.5 * (1 - runB) - shift * 3.2);
     Pm[BONE.pelvis].copy(pelvisPos);
 
     // spine chain (twist toward the aim, pitch distribution, lean compensation)
@@ -331,6 +350,11 @@ export class Animator {
     }
     let yawK = 0;
     const ofs = _v[4].copy(H.ofs);
+    const RD = READY[kind], rw = Math.min(1, this.ready * this.idv.ready) * (1 - this.plant);
+    if (RD && rw > 0.001) {
+      // relax the aim: muzzle down, less head-follow of the aim pitch
+      pitch = pitch * (1 - 0.6 * rw) + RD.pitch * rw;
+    }
     if (kind === 'knife' && this.slash > 0) {
       // slash: sweep across the body (alternating), heavy = forward stab
       const t = 1 - this.slash, e = Math.sin(Math.PI * Math.min(1, t * 1.25));
@@ -363,6 +387,7 @@ export class Animator {
     const sway = Math.sin(this.phase * Math.PI * 4) * this.spd * 0.0035;
     ofs.y += sway - (1 - this.drawT) * 4;
     ofs.applyQuaternion(outQuat);
+    if (RD && rw > 0.001) ofs.add(_rd.copy(RD.ofs).multiplyScalar(rw).applyQuaternion(qYZ(_q[5], ay, 0)));
     outPos.copy(anc).add(ofs);
   }
 
@@ -418,8 +443,9 @@ export class Animator {
     this._clav('R', rG);
     this._clav('L', lG);
     // IK
-    this._armIK('R', rG, _q[3], _v[14].copy(H.poleR).applyQuaternion(qYZ(_q[5], ay, 0)));
-    this._armIK('L', lG, _q[4], _v[14].copy(H.poleL).applyQuaternion(qYZ(_q[5], ay, 0)));
+    const RD = READY[kind], rw = RD?.poleR ? Math.min(1, this.ready) : 0;
+    this._armIK('R', rG, _q[3], _v[14].copy(H.poleR).lerp(RD?.poleR || H.poleR, rw).applyQuaternion(qYZ(_q[5], ay, 0)));
+    this._armIK('L', lG, _q[4], _v[14].copy(H.poleL).lerp(RD?.poleL || H.poleL, rw).applyQuaternion(qYZ(_q[5], ay, 0)));
     this.holdQuat.copy(_q[3]);
   }
 
@@ -430,7 +456,7 @@ export class Animator {
     // target in chest-local frame
     const t = _v[11].copy(target).sub(Pm[BONE.chest]).applyQuaternion(_q[6].copy(ch).invert());
     const elev = clamp((t.y - 5) / 32, -0.1, 0.3);
-    const prot = clamp((t.x - 10) / 60, -0.05, 0.15);
+    const prot = clamp((t.x - 8) / 45, -0.05, 0.26);
     _q[2].setFromAxisAngle(AY, prot * s);
     _q[5].setFromAxisAngle(AX, -elev * s);
     _q[2].multiply(_q[5]);
@@ -614,7 +640,7 @@ export class Animator {
     const Qm = this.Qm, Pm = this.Pm;
     bones[0].position.copy(Pm[0]);
     bones[0].quaternion.copy(Qm[0]);
-    for (let i = 1; i < NBONES; i++) {
+    for (let i = 1; i < NCORE; i++) {
       const par = PARENT[i];
       bones[i].quaternion.copy(Qm[par]).invert().multiply(Qm[i]);
       // positions stay at rest offsets except where IK stretched nothing (lengths preserved)

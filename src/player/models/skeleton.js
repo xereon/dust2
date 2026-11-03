@@ -57,11 +57,18 @@ export const BONE_DEFS = [
   ['calf_R', 'thigh_R', LEG_R.knee],
   ['foot_R', 'calf_R', LEG_R.ankle],
   ['toe_R', 'foot_R', LEG_R.toe],
+  // gear toggles (variants): optional parts are skinned to these; scale 0 hides them
+  ['tog_head1', 'head', v(0.9, 62.6, 0)],
+  ['tog_head2', 'head', v(0.9, 62.6, 0)],
+  ['tog_kneeL', 'calf_L', LEG_L.knee],
+  ['tog_kneeR', 'calf_R', LEG_R.knee],
 ];
 
 export const BONE = {};
 BONE_DEFS.forEach(([n], i) => { BONE[n] = i; });
 export const NBONES = BONE_DEFS.length;
+/** Bones below NCORE are animated; the rest are rigid gear toggles (identity local rotation). */
+export const NCORE = BONE_DEFS.findIndex(([n]) => n.startsWith('tog_'));
 export const PARENT = BONE_DEFS.map(([, p]) => (p ? BONE[p] : -1));
 export const BIND = BONE_DEFS.map(([, , p]) => p.clone());
 // offset from parent joint in bind (== local position, since bind rotations are identity)

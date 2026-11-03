@@ -166,8 +166,8 @@ export function buildM4(b, key) {
   b.anchor('pivot', [0, -1.0, -5.5]);
   const hands = {
     R: { p: [0.98, -2.2, -0.8], across: [0, -0.96, 0.28], palm: [-1, 0, -0.05], pose: 'trigger' },
-    L: S ? { p: [-0.55, -1.08, -11.0], across: [0, 0.05, 1], palm: [0.45, 0.9, 0], pose: 'wrap' }
-      : { p: [-0.55, -1.12, -11.2], across: [0, 0.05, 1], palm: [0.45, 0.9, 0], pose: 'wrap' },
+    L: S ? { p: [-0.35, -1.08, -11.0], across: [0, 0.08, 1], palm: [0.22, 0.97, 0], pose: 'wrap' }
+      : { p: [-0.35, -1.12, -11.2], across: [0, 0.08, 1], palm: [0.22, 0.97, 0], pose: 'wrap' },
     magGrab: { p: [-0.62, -3.2, -5.6], across: [0, 0, 1], palm: [0.95, 0.1, -0.2], pose: 'cup' },
     chargeGrab: { p: [0.15, 1.9, 0.95], across: [1, 0, 0], palm: [0, -0.9, -0.4], pose: 'pinch' },
     silGrab: { p: [-0.95, 0.0, -23.5], across: [0, 0.1, 1], palm: [0.95, 0.2, 0], pose: 'cup' },

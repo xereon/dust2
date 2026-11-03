@@ -124,7 +124,7 @@ export function buildAWP(b) {
   return {
     hands: {
       R: { p: [1.02, -3.0, 2.75], across: [0, -0.93, 0.37], palm: [-1, 0, -0.05], pose: 'trigger' },
-      L: { p: [-0.5, -2.55, -13.8], across: [0, 0.05, 1], palm: [0.45, 0.9, 0], pose: 'wrap' },
+      L: { p: [-0.3, -2.45, -13.8], across: [0, 0.08, 1], palm: [0.22, 0.97, 0], pose: 'wrap' },
       magGrab: { p: [-0.7, -3.8, -3.8], across: [0, 0, 1], palm: [0.95, 0.1, -0.2], pose: 'cup' },
       boltGrab: { p: [2.2, -0.3, 0.2], across: [0, -0.3, 1], palm: [-0.6, -0.4, -0.5], pose: 'pinch' },
     },
@@ -168,7 +168,7 @@ export function buildSSG(b) {
   return {
     hands: {
       R: { p: [0.95, -2.7, 2.6], across: [0, -0.94, 0.33], palm: [-1, 0, -0.05], pose: 'trigger' },
-      L: { p: [-0.5, -2.2, -12.5], across: [0, 0.05, 1], palm: [0.45, 0.9, 0], pose: 'wrap' },
+      L: { p: [-0.3, -2.1, -12.5], across: [0, 0.08, 1], palm: [0.22, 0.97, 0], pose: 'wrap' },
       magGrab: { p: [-0.7, -3.3, -3.2], across: [0, 0, 1], palm: [0.95, 0.1, -0.2], pose: 'cup' },
       boltGrab: { p: [1.95, -0.2, -0.3], across: [0, -0.3, 1], palm: [-0.6, -0.4, -0.5], pose: 'pinch' },
     },
@@ -221,7 +221,7 @@ export function buildAutoSniper(b, key) {
   return {
     hands: {
       R: { p: [0.98, -2.2, -0.9], across: [0, -0.96, 0.28], palm: [-1, 0, -0.05], pose: 'trigger' },
-      L: { p: [-0.55, -1.75, -14.5], across: [0, 0.05, 1], palm: [0.45, 0.9, 0], pose: 'wrap' },
+      L: { p: [-0.35, -1.7, -14.5], across: [0, 0.08, 1], palm: [0.22, 0.97, 0], pose: 'wrap' },
       magGrab: { p: [-0.62, -3.4, -5.8], across: [0, 0, 1], palm: [0.95, 0.1, -0.2], pose: 'cup' },
       chargeGrab: scar ? { p: [-1.6, 0.5, -8.0], across: [0, -0.1, 1], palm: [0.9, -0.3, 0], pose: 'pinch' } : { p: [-1.5, 1.0, -12.3], across: [0, -0.1, 1], palm: [0.9, -0.3, 0], pose: 'pinch' },
     },

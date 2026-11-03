@@ -4,7 +4,7 @@
 // the brush world with World.collision.hullTrace (small boxes). Sleeps once settled and stays.
 import * as THREE from 'three';
 import { World } from '../../core/world.js';
-import { BONE, BIND, NBONES, PARENT, REST_OFS } from './skeleton.js';
+import { BONE, BIND, NCORE, PARENT, REST_OFS } from './skeleton.js';
 import { qFromXY } from './pose.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -252,12 +252,12 @@ export class Ragdoll {
     });
     // FK positions from the pelvis (keeps the skin unstretched)
     Pm[0].set(0, 0, 0);
-    for (let i = 1; i < NBONES; i++) {
+    for (let i = 1; i < NCORE; i++) {
       const par = PARENT[i];
       Pm[i].copy(REST_OFS[i]).applyQuaternion(Qm[par]).add(Pm[par]);
     }
     const bones = model.bones;
     bones[0].position.copy(Pm[0]); bones[0].quaternion.copy(Qm[0]);
-    for (let i = 1; i < NBONES; i++) bones[i].quaternion.copy(Qm[PARENT[i]]).invert().multiply(Qm[i]);
+    for (let i = 1; i < NCORE; i++) bones[i].quaternion.copy(Qm[PARENT[i]]).invert().multiply(Qm[i]);
   }
 }

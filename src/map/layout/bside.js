@@ -4,7 +4,7 @@ import { zx, zy, zc, blindArch } from './util.js';
 
 export function build(K) {
   const tun = { mat: 'concrete_floor', wallMat: 'plaster_wall', ceilMat: 'wood_planks', paint: { h: 36, mat: 'plaster_wall#dark' } };
-  const stoneWall = { wallMat: 'plaster_wall', paint: null, tint: [0.9, 0.84, 0.74], base: { h: 34, out: 4, mat: 'stone_wall' } };
+  const stoneWall = { wallMat: 'plaster_wall', paint: null, tint: [0.88, 0.75, 0.6], base: { h: 34, out: 4, mat: 'stone_wall' } };
 
   // ---- upper tunnels ------------------------------------------------------------------------
   K.region('utun_mouth', zc([[-1736, 716], [-1588, 716], [-1588, 744], [-1736, 744]], 30),

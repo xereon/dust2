@@ -30,7 +30,7 @@ export function buildKnife(b, variant = 'ct') {
     return knifeCfg(0.05);
   }
   // CT default: coated tanto-ish clip point, rubber handle with finger grooves, steel guard
-  blade([[0, -0.4], [5.6, -0.4], [6.6, -0.2], [7.0, 0.2], [6.2, 0.36], [0, 0.58]], 0.58, -0.4, 0.22, 'blued', b);
+  blade([[0, -0.4], [5.6, -0.4], [6.6, -0.2], [7.0, 0.2], [6.2, 0.36], [0, 0.58]], 0.58, -0.4, 0.22, 'stainless', b);
   if (D) {
     // edge bevel highlight + serrations near the guard
     b.add('stainless', deform(side([[0.2, -0.42], [5.6, -0.42], [6.55, -0.22], [6.8, 0.05], [6.1, -0.05], [5.5, -0.25], [0.2, -0.25]], 0.06, { bevel: 0.01, r: 0.02 }), (v) => { v.x *= 0.6; }, 30));

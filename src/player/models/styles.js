@@ -48,45 +48,42 @@ function knitPaint(color, o = {}) {
     // knit ribs (vertical) + loop rows
     const rib = Math.sin((ctx.u / 0.42) * Math.PI * 2);
     const row = Math.sin((ctx.v / 0.3) * Math.PI * 2 + rib * 0.6);
-    ctx.h += rib * 0.018 + row * 0.006 + vnoise(ctx.x * 5, ctx.y * 5, ctx.z * 5) * 0.008;
-    const kk = 0.93 + rib * 0.05; ctx.r *= kk; ctx.g *= kk; ctx.b *= kk;
+    ctx.h += rib * 0.03 + row * 0.008 + vnoise(ctx.x * 5, ctx.y * 5, ctx.z * 5) * 0.008;
+    const kk = 0.9 + rib * 0.08; ctx.r *= kk; ctx.g *= kk; ctx.b *= kk;
     ctx.rough = 0.95;
     if (o.holes) {
+      // one wide eye slot (~3.6 x 1.25 in) showing brows, lids and eyes
       const a = headAngle(ctx), y = ctx.y;
-      const hole = (da, dy, ca, cy) => Math.hypot((a - ca) / da, (y - cy) / dy);
-      const eL = hole(0.26, 0.5, 0.5, 66.75), eR = hole(0.26, 0.5, -0.5, 66.75);
-      const mo = o.mouth ? hole(0.27, 0.42, 0, 63.6) : 9;
-      const d = Math.min(eL, eR, mo);
+      const sx = a / 0.47, sy = (y - 66.85) / 0.63;
+      const d = Math.pow(sx ** 4 + sy ** 4, 0.25);
       if (d < 1.0) {
         set3(ctx, skinC);
         const n = fbm(ctx.x * 1.5, ctx.y * 1.5, ctx.z * 1.5, 2);
         ctx.r *= 1 + n * 0.08; ctx.g *= 1 + n * 0.1; ctx.b *= 1 + n * 0.1;
-        ctx.rough = 0.5; ctx.h = -0.05 * (1 - d);
-        // skin in the opening is shadowed by the knit rim
-        const sh = 0.72 + 0.28 * sstep(0.95, 0.45, d); ctx.r *= sh; ctx.g *= sh; ctx.b *= sh;
-        if (d === eL || d === eR) {
-          const ca = d === eL ? 0.5 : -0.5;
-          const ed = Math.hypot((a - ca) / 0.16, (ctx.y - 66.72) / 0.19);
+        ctx.rough = 0.5; ctx.h = -0.06 * (1 - d * d);
+        // skin is shadowed by the thick knit rim
+        const sh = 0.7 + 0.3 * sstep(0.98, 0.55, d); ctx.r *= sh; ctx.g *= sh; ctx.b *= sh;
+        for (const ca of [0.3, -0.3]) {
+          const ex = (a - ca) / 0.135, ey = (y - 66.72) / 0.16;
+          const ed = Math.hypot(ex, ey);
+          // brow: dark hair band arching above each eye
+          const by = y - (67.2 - 0.09 * ex * ex);
+          if (Math.abs(ex) < 1.25 && by > -0.06 && by < 0.1) { set3(ctx, C0); ctx.rough = 0.8; ctx.h += 0.02; }
           if (ed < 1) {
-            // eye: dark iris, thin sclera edges, glossy
-            const ir = Math.hypot((a - ca) / 0.075, (ctx.y - 66.72) / 0.14);
+            const ir = Math.hypot((a - ca) / 0.06, (y - 66.72) / 0.13);
             set3(ctx, ir < 1 ? C0 : C1);
-            if (ir < 0.45) set3(ctx, C2);
-            ctx.rough = 0.18; ctx.h = -0.06;
-            ctx.occ = 0.75;
-          } else if (ed < 1.35) { // lids
-            ctx.r *= 0.72; ctx.g *= 0.65; ctx.b *= 0.62; ctx.h = -0.02;
+            if (ir < 0.5) set3(ctx, C2);
+            ctx.rough = 0.15; ctx.h = -0.05; ctx.occ = 0.8;
+          } else if (ed < 1.45) {
+            // lids + socket shading
+            const k2 = 0.62 + 0.25 * (ed - 1) / 0.45; ctx.r *= k2; ctx.g *= k2 * 0.95; ctx.b *= k2 * 0.95; ctx.h = -0.03;
           }
-        } else {
-          const lip = Math.hypot(headAngle(ctx) / 0.2, (ctx.y - 63.58) / 0.2);
-          if (lip < 1) { mix3(ctx, C3, 0.65); ctx.rough = 0.4; }
-          if (Math.abs(ctx.y - 63.58) < 0.035 && Math.abs(a) < 0.17) { set3(ctx, C4); ctx.h = -0.08; }
         }
-      } else if (d < 1.28) {
-        // rolled / hemmed rim around the opening
-        const t = (d - 1.0) / 0.28;
-        ctx.h += Math.sin(t * Math.PI) * 0.07;
-        const k2 = 0.85 + 0.15 * Math.sin(t * Math.PI); ctx.r *= k2; ctx.g *= k2; ctx.b *= k2;
+      } else if (d < 1.3) {
+        // thick rolled knit rim around the slot
+        const t = (d - 1.0) / 0.3;
+        ctx.h += Math.sin(t * Math.PI) * 0.09;
+        const k2 = 0.82 + 0.18 * Math.sin(t * Math.PI); ctx.r *= k2; ctx.g *= k2; ctx.b *= k2;
       }
     }
   };
@@ -161,8 +158,9 @@ function legWrinkles(ctx) {
     const side = ctx.part.data.side === 'L' ? -1 : 1;
     const back = ctx.nx < -0.2 ? 1 : 0;
     // irregular knee bunching (stronger at the back of the knee)
-    folds(ctx, ctx.y - 20.5 + vnoise(ctx.u * 0.6, 1.3, side) * 1.2, 3.4, 0.05 + 0.03 * back, 0.85 + vnoise(ctx.u * 0.4, 7, side) * 0.25, 1.3);
-    folds(ctx, ctx.y - 9.6, 1.5, 0.055, 1.6, 4.1);    // bunching above the boots
+    folds(ctx, ctx.y - 20.5 + vnoise(ctx.u * 0.6, 1.3, side) * 1.2, 4.2, 0.09 + 0.05 * back, 0.85 + vnoise(ctx.u * 0.4, 7, side) * 0.25, 1.3);
+    folds(ctx, ctx.y - 9.8, 2.2, 0.1, 1.5, 4.1);      // bunching above the boots
+    folds(ctx, ctx.y - 29, 5, 0.035, 0.45, 9.2);       // long thigh drape
     // outer side seam
     if (ctx.nz * side > 0.9) stitch(ctx, (1 - ctx.nz * side) * 6, 0.1, 0.02);
     // inner seam
@@ -301,20 +299,21 @@ function tanNylon(color) {
 }
 
 // ---- CT paints ----------------------------------------------------------------------------------
-const CT_CAMO = { base: hex(0x5d635a), dark: hex(0x363b35), mid: hex(0x7a7f70), brown: hex(0x4b4538), black: hex(0x232522) };
+const CT_CAMO = { base: hex(0x5f655a), dark: hex(0x3a3f37), mid: hex(0x7c806f), brown: hex(0x5a5040), light: hex(0x9a9a84), black: hex(0x262823) };
 function ctCamo(ctx) {
-  const s = 0.14;
+  // multicam-style: small soft blobs in three tones over a mid base, thin dark branches
+  const s = 0.6;
   set3(ctx, CT_CAMO.base);
-  const n1 = fbm(ctx.x * s, ctx.y * s * 0.8, ctx.z * s, 3);
-  const n2 = fbm(ctx.x * s * 1.3 + 17, ctx.y * s, ctx.z * s * 1.3 + 3, 3);
-  const n3 = fbm(ctx.x * s * 2.2 + 41, ctx.y * s * 2.2, ctx.z * s * 2.2, 2);
-  const n4 = vnoise(ctx.x * 0.9, ctx.y * 0.9, ctx.z * 0.9);
-  if (n2 > 0.18) mix3(ctx, CT_CAMO.mid, sstep(0.18, 0.24, n2) * 0.9);
-  if (n1 > 0.12) mix3(ctx, CT_CAMO.dark, sstep(0.12, 0.18, n1) * 0.95);
-  if (n3 > 0.3) mix3(ctx, CT_CAMO.brown, sstep(0.3, 0.36, n3) * 0.85);
-  // thin dark branches
-  const br = Math.abs(fbm(ctx.x * 0.3 + 5, ctx.y * 0.3, ctx.z * 0.3, 2));
-  if (br < 0.03 && n4 > 0.05) mix3(ctx, CT_CAMO.black, 0.45 * sstep(0.03, 0.012, br));
+  const n1 = fbm(ctx.x * s, ctx.y * s * 0.7, ctx.z * s, 3);
+  const n2 = fbm(ctx.x * s * 1.25 + 17, ctx.y * s * 0.9, ctx.z * s * 1.25 + 3, 3);
+  const n3 = fbm(ctx.x * s * 1.6 + 41, ctx.y * s * 1.2, ctx.z * s * 1.6, 2);
+  const n4 = fbm(ctx.x * s * 2.1 + 7, ctx.y * s * 1.6, ctx.z * s * 2.1 + 9, 2);
+  if (n2 > 0.12) mix3(ctx, CT_CAMO.mid, sstep(0.12, 0.2, n2) * 0.85);
+  if (n1 > 0.16) mix3(ctx, CT_CAMO.dark, sstep(0.16, 0.24, n1) * 0.9);
+  if (n3 > 0.22) mix3(ctx, CT_CAMO.brown, sstep(0.22, 0.3, n3) * 0.8);
+  if (n4 > 0.3) mix3(ctx, CT_CAMO.light, sstep(0.3, 0.36, n4) * 0.6);
+  const br = Math.abs(fbm(ctx.x * 0.9 + 5, ctx.y * 0.9, ctx.z * 0.9, 2));
+  if (br < 0.025 && n1 > 0.05) mix3(ctx, CT_CAMO.black, 0.55 * sstep(0.025, 0.01, br));
 }
 function ctShirtDetail(ctx) {
   const k = ctx.part.data.kind;
@@ -519,6 +518,21 @@ function tGear(mb, R, H) {
     mb.part('cargo_' + side, S.pants, { group: 'leg' + side, data: { kind: 'pocket' } });
     limbBox(mb, H, R, side, 't', 0.48, 1.35, 3.55, V(0.45, 2.6, 1.95), (c) => [[BONE['thigh_' + side], 1]], { r: 0.4, bend: 0.12 });
   }
+  // variant gear: knee pads and goggles pushed up on the forehead (toggle bones)
+  kneePads(mb, H, R, S, 'tog_knee', 3.55);
+  mb.part('t_goggles', S.goggles, { group: 'head', data: { kind: 'goggles' } });
+  {
+    const tg = [[BONE.tog_head1, 1]];
+    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0.62, 'YXZ'));
+    mb.rbox(V(4.55, 69.35, 0), V(0.4, 0.85, 3.05), 0.34, q, tg, { seg: R.boxSeg2, bend: 0.26, mid: 3 });
+    mb.part('t_goggle_strap', S.strap, { group: 'head' });
+    const pts = [];
+    for (let k = 0; k <= 12; k++) {
+      const th = 1.0 + (k / 12) * (Math.PI * 2 - 2.0);
+      pts.push(V(1.0 + Math.cos(th) * 4.05, 69.0 - 0.6 * Math.cos(th), -Math.sin(th) * 3.55));
+    }
+    mb.tube(pts, 0, 4, tg, { rect: [0.06, 0.45], n: 8, smooth: 2 });
+  }
   // drop-leg pouch on the right thigh (as in the CS2 reference)
   mb.part('thigh_pouch', S.pouch, { group: 'legR' });
   limbBox(mb, H, R, 'R', 't', 0.3, 1.2, 4.3, V(0.9, 2.2, 1.6), (c) => [[BONE.thigh_R, 1]], { r: 0.4 });
@@ -612,10 +626,11 @@ function ctGear(mb, R, H) {
     mb.rbox(p.clone().add(V(0.2, 0, 0)), V(0.3, 0.85, 1.1), 0.18, q, hs, { seg: 1 });
     const nv = p.clone().add(V(0.9, 1.25, 0));
     const q2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0.95, 'YXZ'));
-    mb.rbox(nv, V(0.75, 0.6, 1.35), 0.3, q2, hs, { seg: 1 });
+    const tg1 = [[BONE.tog_head1, 1]];
+    mb.rbox(nv, V(0.75, 0.6, 1.35), 0.3, q2, tg1, { seg: 1 });
     for (const s of [-1, 1]) {
       const e0 = nv.clone().add(V(0.35, 0.2, 0.72 * s));
-      mb.tube([e0, e0.clone().add(V(0.75, 0.75, 0))], 0.4, 8, hs, {});
+      mb.tube([e0, e0.clone().add(V(0.75, 0.75, 0))], 0.4, 8, tg1, {});
     }
     for (const s of [-1, 1]) {
       const pr = hpt(Math.PI / 2 * s * -1, 0.3);
@@ -632,7 +647,8 @@ function ctGear(mb, R, H) {
   }
   // goggles over the eyes + strap around the helmet
   mb.part('goggles', S.goggles, { group: 'head', data: { kind: 'goggles' } });
-  mb.rbox(V(5.3, 66.75, 0), V(0.42, 0.92, 3.2), 0.36, null, hs, { seg: R.boxSeg2, bend: 0.24, mid: 3 });
+  const tg2 = [[BONE.tog_head2, 1]];
+  mb.rbox(V(5.3, 66.85, 0), V(0.42, 0.92, 3.2), 0.36, null, tg2, { seg: R.boxSeg2, bend: 0.24, mid: 3 });
   mb.part('goggle_strap', S.strap, { group: 'head' });
   {
     const pts = [];
@@ -641,7 +657,7 @@ function ctGear(mb, R, H) {
       const la = 0.02;
       pts.push(hpt(th, la).add(V(0, -0.3 - 0.4 * Math.cos(th), 0)).multiplyScalar(1).addScaledVector(V(Math.cos(th), 0, -Math.sin(th)), 0.12));
     }
-    mb.tube(pts, 0, 4, hs, { rect: [0.08, 0.5], n: 8, smooth: 2 });
+    mb.tube(pts, 0, 4, tg2, { rect: [0.08, 0.5], n: 8, smooth: 2 });
   }
   // belt, holster on right thigh, knee pads
   mb.part('belt', S.belt, { group: 'core' });
@@ -652,16 +668,23 @@ function ctGear(mb, R, H) {
   limbBox(mb, H, R, 'R', 't', 0.28, 1.45, 4.25, V(0.85, 3.2, 1.6), () => [[BONE.thigh_R, 1]], { r: 0.45 });
   mb.part('cargo', S.pants, { group: 'legL', data: { kind: 'pocket' } });
   limbBox(mb, H, R, 'L', 't', 0.48, 1.35, 3.55, V(0.45, 2.6, 1.95), () => [[BONE.thigh_L, 1]], { r: 0.4, bend: 0.12 });
-  mb.part('kneepad', S.kneepad, { group: 'legL', data: { kind: 'kneepad' } });
+  kneePads(mb, H, R, S, 'calf_', 3.25);
+}
+
+/** Knee pads (polymer shell + strap) skinned to `prefix` + side (calf bones or toggles). */
+function kneePads(mb, H, R, S, prefix, fwd) {
+  const V2 = (x, y, z) => new THREE.Vector3(x, y, z);
   for (const side of ['L', 'R']) {
+    mb.part('kneepad_' + side, S.kneepad, { group: 'leg' + side, data: { kind: 'kneepad' } });
     const L = side === 'L' ? H.LEG_L : H.LEG_R;
     const s = side === 'L' ? -1 : 1;
-    const c = L.knee.clone().add(V(3.25, -0.9, 0.15 * s));
-    mb.ellipsoid(c, V(0.95, 2.35, 2.05), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, -0.06)), R.limbU, 6, [[BONE['calf_' + side], 1]], { lat0: -Math.PI / 2, lat1: Math.PI / 2 });
+    const sk = [[H.BONE[prefix + side], 1]];
+    const c = L.knee.clone().add(V2(fwd, -0.9, 0.15 * s));
+    mb.ellipsoid(c, V2(0.95, 2.35, 2.05), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, -0.06)), R.limbU, 6, sk, { lat0: -Math.PI / 2, lat1: Math.PI / 2 });
     const st = L.knee.clone().lerp(L.ankle, 0.17);
-    const pts = ringPts(st.y, 3.35, 3.35, 3.05, 2, 0, 14, 0, Math.PI * 2);
+    const pts = ringPts(st.y, fwd + 0.1, fwd + 0.1, fwd - 0.2, 2, 0, 14, 0, Math.PI * 2);
     for (const p of pts) { p.x += st.x; p.z += st.z; }
-    mb.tube(pts, 0, 4, [[BONE['calf_' + side], 1]], { rect: [0.1, 0.4], n: 8, closed: true });
+    mb.tube(pts, 0, 4, sk, { rect: [0.1, 0.4], n: 8, closed: true });
   }
 }
 
@@ -672,10 +695,10 @@ export const STYLE = {
     pantsBag: 0.55,
     pants: cloth({ color: 0x5e5f3f, pattern: tPantsPattern, wrinkle: legWrinkles, dust: 1.0, dustTop: 20 }),
     shirt: cloth({ color: 0xbdb8ae, pattern: plaid, wrinkle: shirtWrinkles, mottle: 0.08 }),
-    neck: knitPaint(0x5a5b3c),
-    head: knitPaint(0x5a5b3c, { holes: true, mouth: true, skin: 0xa77a5c }),
+    neck: knitPaint(0x66674a),
+    head: knitPaint(0x66674a, { holes: true, mouth: false, skin: 0xa77a5c }),
     skin: forearmPaint(),
-    glove: glovePaint(0x1f1f1f),
+    glove: glovePaint(0x8c8c88),
     boot: bootPaint(0x3d3128, { dust: 0.45 }),
     sole: rubberSole(),
     vest: meshVest(0xc3b896, { hole: 0x7a7055, binding: 0xa49675, dust: true }),
@@ -684,6 +707,9 @@ export const STYLE = {
     belt: nylon({ color: 0x3a3c3f }),
     metal: metal({ color: 0x5a5a58, rough: 0.35, metal: 0.9 }),
     polymerDark: polymer({ color: 0x252525, rough: 0.55 }),
+    goggles: lensPaint(),
+    strap: nylon({ color: 0x2a2a28 }),
+    kneepad: polymer({ color: 0x3c3a33, rough: 0.6, wear: 0.4, wearColor: 0x7a7262 }),
     gear: tGear,
   },
   CT: {
@@ -691,10 +717,10 @@ export const STYLE = {
     pantsBag: 0.45,
     pants: cloth({ color: 0x5d635a, pattern: ctCamo, wrinkle: legWrinkles, dust: 0.7, dustTop: 14 }),
     shirt: cloth({ color: 0x5d635a, pattern: ctCamo, detail: ctShirtDetail }),
-    neck: knitPaint(0x1f2022),
-    head: knitPaint(0x1f2022, { holes: true, mouth: false, skin: 0x9a7058 }),
+    neck: knitPaint(0x2a2b2d),
+    head: knitPaint(0x2a2b2d, { holes: true, mouth: false, skin: 0x9a7058 }),
     skin: skin({ color: 0x9a7058 }),
-    glove: glovePaint(0x2a2a2c, { pad: 0x3a3b36 }),
+    glove: glovePaint(0x8c8c88, { pad: 0xa0a094 }),
     boot: bootPaint(0x2a2826, { dust: 0.4, lace: 0x1a1a1a, rough: 0.55 }),
     sole: rubberSole(),
     carrier: rangerNylon(0x454b3c, { molle: true }),
@@ -712,4 +738,21 @@ export const STYLE = {
     kneepad: polymer({ color: 0x222325, rough: 0.5, wear: 0.35, wearColor: 0x6e6a60 }),
     gear: ctGear,
   },
+};
+
+/**
+ * Per-variant looks on a shared atlas: vertex-colour tints multiply baked parts (matched by part
+ * name), and `hide` collapses gear toggle bones. Index = variant % length.
+ */
+export const VARIANTS = {
+  T: [
+    { name: 'phoenix', tint: { '^(shirt|sleeve|collar)': [1, 1, 1], '^glove': [0.2, 0.2, 0.2] }, hide: ['tog_head1', 'tog_kneeL', 'tog_kneeR'] },
+    { name: 'phoenix_blue', tint: { '^(shirt|sleeve|collar)': [0.72, 0.84, 1.12], '^glove': [1.0, 0.82, 0.6], '^vest': [0.92, 0.96, 0.86] }, hide: [] },
+    { name: 'phoenix_brown', tint: { '^(shirt|sleeve|collar)': [1.02, 0.86, 0.66], '^glove': [0.24, 0.22, 0.2], '^(hips|leg|cargo)': [0.9, 0.86, 0.8] }, hide: ['tog_head1'] },
+  ],
+  CT: [
+    { name: 'seal', tint: { '^glove': [0.32, 0.32, 0.32] }, hide: [] },
+    { name: 'seal_coyote', tint: { '^(shirt|sleeve|hips|leg|cargo)': [1.16, 1.03, 0.8], '^glove': [0.95, 0.8, 0.6], '^(plates|cummer|pc_strap|mag_pouch|admin|radio_pouch|belt)': [1.35, 1.12, 0.85] }, hide: ['tog_head1'] },
+    { name: 'sas', tint: { '^(shirt|sleeve|hips|leg|cargo)': [0.62, 0.64, 0.66], '^glove': [0.22, 0.22, 0.22], '^(plates|cummer|pc_strap|mag_pouch|admin|radio_pouch)': [0.6, 0.6, 0.6], '^helmet$': [0.62, 0.62, 0.62] }, hide: ['tog_head2'] },
+  ],
 };

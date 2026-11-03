@@ -1062,6 +1062,21 @@ export class Kit {
         h[d] = dist[d] > FAR ? CITY : h[c]; q.push(d);
       }
     }
+    // 2b. away from the street walls, snap heights to 64u blocks (max of the block) so the
+    // nearest-wall frontiers read as whole buildings, not a 16u staircase "comb"
+    {
+      const B = 4;
+      for (let bj = 0; bj < ny; bj += B) for (let bi = 0; bi < nx; bi += B) {
+        let m = -Infinity;
+        for (let j = bj; j < Math.min(ny, bj + B); j++) for (let i = bi; i < Math.min(nx, bi + B); i++) {
+          const c = j * nx + i; if (!open[c] && dist[c] >= 3 && !Number.isNaN(h[c])) m = Math.max(m, h[c]);
+        }
+        if (m === -Infinity) continue;
+        for (let j = bj; j < Math.min(ny, bj + B); j++) for (let i = bi; i < Math.min(nx, bi + B); i++) {
+          const c = j * nx + i; if (!open[c] && dist[c] >= 3 && !Number.isNaN(h[c])) h[c] = m;
+        }
+      }
+    }
     // 3. greedy rectangles of equal height -> roof quads
     const done = new Uint8Array(nx * ny);
     const mat = 'plaster_wall';

@@ -9,6 +9,7 @@ import { World } from '../core/world.js';
 import { defCvar } from '../core/cvars.js';
 import { buildSkeleton, BONE, HAND_R } from './models/skeleton.js';
 import { buildAgent } from './models/agents.js';
+import { VARIANTS } from './models/styles.js';
 import { layoutAtlas, bakeAtlas, bakeAtlasAsync, vertexPaint } from './models/paint.js';
 import { Animator, HOLDS, holdKind } from './models/pose.js';
 import { makeHeldItem, vmAvailable } from './models/weapon.js';
@@ -23,6 +24,7 @@ defCvar('r_character_lod_dist', 1500, 200, 8000, 'distance where agents switch t
 const DEG = Math.PI / 180;
 const IDENT = new THREE.Matrix4();
 const cache = new Map();   // team -> assets
+const nextVariant = { T: 0, CT: 0 };   // round-robin when the caller doesn't pick one
 
 function flatTex(r, g, b, srgb) {
   const t = new THREE.DataTexture(new Uint8Array([r, g, b, 255]), 1, 1);
@@ -48,6 +50,12 @@ function teamAssets(team) {
   geo[0].setAttribute('color', new THREE.BufferAttribute(vcol, 3));
   // LOD1 has different vertices: sample LOD0 colours by nearest bind position per island
   geo[1].setAttribute('color', new THREE.BufferAttribute(new Float32Array(geo[1].attributes.position.count * 3).fill(0.35), 3));
+  // per-vertex part names for variant tints (both LODs share the part order)
+  const partNames = [mb0, mb1].map((mb) => {
+    const out = new Array(mb.pos.length / 3);
+    for (const is of mb.islands) for (let k = is.vStart; k < is.vEnd; k++) out[k] = is.part.name;
+    return out;
+  });
   const material = new THREE.MeshStandardMaterial({
     map: flatTex(255, 255, 255, true), normalMap: flatTex(128, 128, 255), roughnessMap: null, metalnessMap: null, aoMap: null,
     roughness: 0.9, metalness: 0, vertexColors: true,
@@ -58,12 +66,12 @@ function teamAssets(team) {
   material.name = `agent_${key}`;
   // hook the renderer's lighting patch now so the first visible frame doesn't recompile
   try { World.renderer?.setupMaterial?.(material); } catch (err) { /* renderer without hooks */ }
-  a = { geo, material, tris: geo.map((g) => g.index.count / 3), ready: null, baked: false };
+  a = { key, geo, material, partNames, variants: new Map(), tris: geo.map((g) => g.index.count / 3), ready: null, baked: false };
   const applyMaps = ({ maps }) => {
     material.map = maps.map; material.normalMap = maps.normalMap;
     material.roughnessMap = maps.ormMap; material.metalnessMap = maps.ormMap; material.aoMap = maps.ormMap;
-    for (const g of geo) { g.attributes.color.array.fill(1); g.attributes.color.needsUpdate = true; }
     a.baked = true;
+    for (const v of a.variants.values()) refreshVariantColors(a, v);
   };
   // Default: bake synchronously (one-time ~0.5-1 s per team, at match start) so an agent is
   // never seen untextured. r_character_async_bake 1 time-slices it behind the vertex paint.
@@ -76,6 +84,43 @@ function teamAssets(team) {
   cache.set(key, a);
   return a;
 }
+/**
+ * Variant geometry: shares every attribute + index with the team geometry except `color`,
+ * which carries the variant's per-part tint (times the vertex paint until the atlas bakes).
+ */
+function variantAssets(a, vi) {
+  const list = VARIANTS[a.key] || [{ tint: {}, hide: [] }];
+  const idx = ((vi % list.length) + list.length) % list.length;
+  let v = a.variants.get(idx);
+  if (v) return v;
+  const def = list[idx];
+  const rules = Object.entries(def.tint || {}).map(([re, c]) => [new RegExp(re), c]);
+  v = { def, idx, geo: [], tints: [] };
+  a.geo.forEach((base, lod) => {
+    const g = new THREE.BufferGeometry();
+    for (const [k, attr] of Object.entries(base.attributes)) if (k !== 'color') g.setAttribute(k, attr);
+    g.setIndex(base.index);
+    const n = base.attributes.position.count, tint = new Float32Array(n * 3).fill(1);
+    const names = a.partNames[lod];
+    for (let i = 0; i < n; i++) {
+      for (const [re, c] of rules) if (re.test(names[i] || '')) { tint[i * 3] = c[0]; tint[i * 3 + 1] = c[1]; tint[i * 3 + 2] = c[2]; break; }
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+    g.boundingSphere = base.boundingSphere;
+    v.geo.push(g); v.tints.push(tint);
+  });
+  refreshVariantColors(a, v);
+  a.variants.set(idx, v);
+  return v;
+}
+function refreshVariantColors(a, v) {
+  v.geo.forEach((g, lod) => {
+    const out = g.attributes.color.array, tint = v.tints[lod], ph = a.geo[lod].attributes.color.array;
+    for (let i = 0; i < out.length; i++) out[i] = a.baked ? tint[i] : tint[i] * ph[i];
+    g.attributes.color.needsUpdate = true;
+  });
+}
+
 /** Resolves when the team's texture atlas has been baked. */
 export function characterReady(team) { return teamAssets(team).ready; }
 /** Start building both teams' assets early (e.g. during loading). */
@@ -102,13 +147,15 @@ class CharacterModel {
     const A = teamAssets(team);
     this._isAgent = true;
     this.team = team === 'CT' ? 'CT' : 'T';
-    this.variant = variant | 0;
+    const V = variantAssets(A, variant ?? nextVariant[this.team]++);
+    this.variant = V.idx; this.variantName = V.def.name;
     this.root = new THREE.Group();
-    this.root.name = `agent_${this.team}`;
+    this.root.name = `agent_${this.team}_${V.def.name || V.idx}`;
     const { bones, skeleton, root } = buildSkeleton();
     this.bones = bones; this.skeleton = skeleton;
+    for (const b of V.def.hide || []) if (BONE[b] !== undefined) bones[BONE[b]].scale.setScalar(1e-4);
     this.root.add(root);
-    this.meshes = A.geo.map((g, lod) => {
+    this.meshes = V.geo.map((g, lod) => {
       const m = new THREE.SkinnedMesh(g, A.material);
       m.bind(skeleton, IDENT);
       m.castShadow = true; m.receiveShadow = true;
@@ -213,6 +260,6 @@ class CharacterModel {
   }
 }
 
-export function createCharacterModel(team = 'T', variant = 0) {
+export function createCharacterModel(team = 'T', variant) {
   return new CharacterModel(team, variant);
 }
