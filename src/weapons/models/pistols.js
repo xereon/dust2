@@ -33,7 +33,10 @@ export function buildDeagle(b) {
   b.part('slide', [0, 0, 0]);
   b.add(ST, side([[0, -0.52], [5.75, -0.52], [5.75, 0.62], [5.55, 0.82], [0.45, 0.82], [0.0, 0.55]], 1.26, { r: 0.07, bevel: 0.07 }));
   if (D) {
-    for (let i = 0; i < 11; i++) b.add(ST, side([[0.35 + i * 0.13, -0.35], [0.41 + i * 0.13, -0.35], [0.41 + i * 0.13, 0.7], [0.35 + i * 0.13, 0.7]], 1.32, { r: 0.02, bevel: 0.025 }), { c: 0x8a8a8a });
+    for (let i = 0; i < 11; i++) {
+      b.add(ST, side([[0.35 + i * 0.13, -0.35], [0.41 + i * 0.13, -0.35], [0.41 + i * 0.13, 0.7], [0.35 + i * 0.13, 0.7]], 1.32, { r: 0.02, bevel: 0.025 }));
+      b.add('dark', side([[0.42 + i * 0.13, -0.33], [0.47 + i * 0.13, -0.33], [0.47 + i * 0.13, 0.68], [0.42 + i * 0.13, 0.68]], 1.28, { r: 0.01, bevel: 0.0 }));
+    }
     // ambidextrous safety levers
     for (const s of [1, -1]) b.add('blued', side([[0.2, 0.25], [1.1, 0.35], [1.15, 0.6], [0.25, 0.6]], 0.1, { x: 0.66 * s, r: 0.08, bevel: 0.03 }));
     // rear sight
@@ -122,7 +125,13 @@ export function buildPistol(b, o) {
   if (D) {
     const [s0, s1] = o.serr || [0.25, 1.35];
     const n = Math.floor((s1 - s0) / 0.12);
-    for (let i = 0; i < n; i++) for (const sx of [1, -1]) b.add(o.slide, box(0.04, H * 0.7, 0.05, { r: 0.012 }), { p: [sx * (W / 2 + 0.005), vb + H * 0.45, -(s0 + i * 0.12)], c: 0x777777 });
+    // slide serrations: dark grooves between raised ridges (reads at 960x540 unlike a normal map)
+    for (let i = 0; i < n; i++) for (const sx of [1, -1]) {
+      b.add('dark', box(0.03, H * 0.72, 0.05, { r: 0.01 }), { p: [sx * (W / 2 + 0.004), vb + H * 0.44, -(s0 + i * 0.12)] });
+      b.add(o.slide, box(0.035, H * 0.74, 0.055, { r: 0.012 }), { p: [sx * (W / 2 + 0.012), vb + H * 0.44, -(s0 + 0.06 + i * 0.12)], c: 0xc8c8c8 });
+    }
+    // bevelled ejection-port lip
+    b.add(o.slide, side([[L * 0.33, vt - 0.01], [L * 0.57, vt - 0.01], [L * 0.57, vt - 0.06], [L * 0.33, vt - 0.06]], 0.06, { x: W / 2 - 0.02, bevel: 0.02, r: 0.02 }), { c: 0xdddddd });
     // sights
     b.add(o.slide, side([[0.12, vt], [0.62, vt], [0.58, vt + 0.2], [0.16, vt + 0.2]], 0.72, { r: 0.03, bevel: 0.02 }), { c: 0x6a6a6a });
     b.add('dark', box(0.12, 0.14, 0.52, { r: 0.02 }), { p: [0, vt + 0.14, -0.37] });
