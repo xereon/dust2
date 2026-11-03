@@ -8,7 +8,7 @@ const WALK = { h: 8, out: 70, mat: 'concrete_floor', redMat: 'concrete_floor#cur
 
 export function build(K) {
   const ochre = { h: 56, mat: 'plaster_white#mustard' };
-  const teal = { h: 52, mat: 'plaster_band_teal' };
+  const teal = { h: 52, mat: 'plaster_white#teal' };
 
   // ---- T spawn plateau (z 128) -----------------------------------------------------------
   K.region('tspawn', [

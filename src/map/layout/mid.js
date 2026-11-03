@@ -5,7 +5,7 @@ import { zx, zy, zc, blindArch } from './util.js';
 
 export function build(K) {
   const ochre = { h: 56, mat: 'plaster_white#mustard' };
-  const teal = { h: 52, mat: 'plaster_band_teal' };
+  const teal = { h: 52, mat: 'plaster_white#teal' };
 
   // ---- top mid courtyard ---------------------------------------------------------------------
   K.region('tmid_court', zc([

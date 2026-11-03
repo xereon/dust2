@@ -22,10 +22,11 @@ export function build(K) {
 
   // ---- town ring -----------------------------------------------------------------------------
   for (let y = y0 - PAD1; y < y1 + PAD1; y += CELL) for (let x = x0 - PAD1; x < x1 + PAD1; x += CELL) {
-    const bx = x + (r() - 0.5) * 40, by = y + (r() - 0.5) * 40;
+    const bx = x, by = y;
     if (inner(bx + CELL / 2, by + CELL / 2, PAD0 + CELL / 2)) continue;
-    if (r() < 0.12) continue;                                   // a gap / courtyard now and then
-    const w = CELL * (0.6 + 0.4 * r()), d = CELL * (0.6 + 0.4 * r());
+    if (r() < 0.05) continue;                                   // a rare gap / courtyard
+    // contiguous town blocks (no comb of free-standing slabs)
+    const w = CELL + 1, d = CELL + 1;
     // distance outward from the map: farther rings a little taller so they peek over the roofs
     const out = Math.max(Math.max(x0 - PAD0 - bx, bx - x1 - PAD0), Math.max(y0 - PAD0 - by, by - y1 - PAD0));
     const storeys = 2 + Math.floor(r() * 2.6 + Math.min(1, out / 1200));
@@ -33,8 +34,24 @@ export function build(K) {
     const mat = r() < 0.72 ? 'plaster_white' : (r() < 0.6 ? 'plaster_wall' : 'adobe');
     const tone = 0.86 + 0.1 * r();
     K.box([bx, by, zb], [bx + w, by + d, top], mat, { col: false, color: tone });
-    // parapet rim
-    if (r() < 0.7) {
+    // stepped massing: a set-back upper storey over part of the block
+    let top2 = top;
+    if (r() < 0.55) {
+      const fx0 = bx + w * (r() < 0.5 ? 0 : 0.4), fy0 = by + d * (r() < 0.5 ? 0 : 0.4);
+      top2 = top + 90 + Math.round(r()) * 40;
+      K.box([fx0, fy0, top], [fx0 + w * 0.6, fy0 + d * 0.6, top2], mat, { col: false, color: tone * 0.97 });
+      K.box([fx0 - 3, fy0 - 3, top2], [fx0 + w * 0.6 + 3, fy0 + d * 0.6 + 3, top2 + 6], 'plaster_trim', { col: false, color: 0.93 });
+    }
+    // parapet railing (iron posts + rail) on some roofs, a solid rim on others
+    if (r() < 0.3) {
+      const z0 = top, z1 = top + 30;
+      for (const [p0, p1] of [[[bx, by], [bx + w, by]], [[bx + w, by], [bx + w, by + d]], [[bx + w, by + d], [bx, by + d]], [[bx, by + d], [bx, by]]]) {
+        const L = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), n = Math.max(2, Math.round(L / 40));
+        for (let i = 0; i <= n; i++) { const t = i / n, px = p0[0] + (p1[0] - p0[0]) * t, py = p0[1] + (p1[1] - p0[1]) * t; K.box([px - 1, py - 1, z0], [px + 1, py + 1, z1], 'metal_beam', { col: false, color: 0.4 }); }
+        const lo = [Math.min(p0[0], p1[0]) - 1, Math.min(p0[1], p1[1]) - 1], hi = [Math.max(p0[0], p1[0]) + 1, Math.max(p0[1], p1[1]) + 1];
+        K.box([lo[0], lo[1], z1 - 2], [hi[0], hi[1], z1], 'metal_beam', { col: false, color: 0.4 });
+      }
+    } else if (r() < 0.8) {
       const t = 5, ph = 16 + r() * 10;
       K.box([bx - 2, by - 2, top], [bx + w + 2, by + t, top + ph], mat, { col: false, color: tone });
       K.box([bx - 2, by + d - t, top], [bx + w + 2, by + d + 2, top + ph], mat, { col: false, color: tone });
@@ -59,11 +76,11 @@ export function build(K) {
         const n = fx ? [sgn, 0, 0] : [0, sgn, 0];
         K.poly('window_frame', orient(P, n), { col: 0.1, normal: n });
       }
-      if (s > 0 && r() < 0.3) {
+      if (s > 0 && r() < 0.45) {
         const m = L * (0.3 + 0.4 * r()), bw = 60;
         const zz = 120 + s * 105 + 20;
-        if (fx) { const ex = sgn > 0 ? bx + w : bx - 22; K.box([ex, by + m - bw / 2, zz], [ex + 22, by + m + bw / 2, zz + 6], 'stone_block', { col: false, color: 0.9 }); }
-        else { const ey = sgn > 0 ? by + d : by - 22; K.box([bx + m - bw / 2, ey, zz], [bx + m + bw / 2, ey + 22, zz + 6], 'stone_block', { col: false, color: 0.9 }); }
+        if (fx) { const ex = sgn > 0 ? bx + w : bx - 22; K.box([ex, by + m - bw / 2, zz], [ex + 22, by + m + bw / 2, zz + 6], 'stone_block', { col: false, color: 0.9 }); const rx = sgn > 0 ? ex + 21 : ex; K.box([rx, by + m - bw / 2, zz + 6], [rx + 1.5, by + m + bw / 2, zz + 32], 'metal_grate', { col: false }); }
+        else { const ey = sgn > 0 ? by + d : by - 22; K.box([bx + m - bw / 2, ey, zz], [bx + m + bw / 2, ey + 22, zz + 6], 'stone_block', { col: false, color: 0.9 }); const ry = sgn > 0 ? ey + 21 : ey; K.box([bx + m - bw / 2, ry, zz + 6], [bx + m + bw / 2, ry + 1.5, zz + 32], 'metal_grate', { col: false }); }
       }
     }
     // roof clutter
@@ -101,13 +118,13 @@ export function build(K) {
   }
 
   // ---- hills -----------------------------------------------------------------------------------
-  const RAD = [Math.hypot(x1 - x0, y1 - y0) / 2 + PAD1 - 200, 6200, 7400, 8600, 9800];
+  const RAD = [Math.hypot(x1 - x0, y1 - y0) / 2 + PAD1 - 200, 6000, 7000, 8000, 9000];
   const N = 96;
   const hz = (a, k) => {
     // a: angle, k: ring index. North / north-west (toward +y, -x) rises highest.
     const north = 0.5 + 0.5 * Math.cos(a - 1.9);
     const n = 0.5 + 0.25 * Math.sin(a * 5 + 1.3) + 0.15 * Math.sin(a * 11 + 0.4) + 0.1 * Math.sin(a * 23 + 2.2);
-    const base = [-180, 180, 520, 760, 620][k];
+    const base = [-180, 600, 1500, 2100, 1700][k];
     return k === 0 ? base : base * (0.55 + 0.9 * north) * (0.6 + 0.8 * n);
   };
   const P = (a, k) => [cx + RAD[k] * Math.cos(a), cy + RAD[k] * Math.sin(a), hz(a, k)];

@@ -12,21 +12,22 @@ export function build(K) {
   K.region('utun_corr', zc([[-1736, 744], [-1588, 744], [-1588, 958], [-1736, 958]], 30),
     { ...tun, ceil: 176, beams: { dir: 'x', step: 96 } });
   // the hall is tall, with a broken timber skylight letting sun patches onto the floor
-  const uhall = { ...tun, ceil: 300, ceilTop: 360, beams: { dir: 'y', step: 128 } };
-  K.region('utun_hall_w', zc([[-2194, 1022], [-1867, 1022], [-1867, 958], [-1860, 958], [-1860, 1425], [-1906, 1425], [-2057, 1425], [-2194, 1425]], 32), uhall);
-  K.region('utun_hall_s', zc([[-1860, 958], [-1736, 958], [-1700, 958], [-1700, 1100], [-1860, 1100]], 32), uhall);
-  K.region('utun_hall_n', zc([[-1860, 1250], [-1700, 1250], [-1700, 1425], [-1860, 1425]], 32), uhall);
-  K.region('utun_hall_e', zc([
-    [-1700, 958], [-1588, 958], [-1537, 958], [-1537, 1020], [-1293, 1020], [-1293, 1180], [-1293, 1298], [-1653, 1298], [-1653, 1425], [-1700, 1425],
-  ], 32), uhall);
+  const uhall = { ...tun, ceil: 300, ceilTop: 316, beams: { dir: 'y', step: 128 } };
+  // the hall is tall; an open roof hole on its sun side (south-west of the lit patch, the sun
+  // stands at ~57 deg toward -x/-y) throws a sun patch onto the floor in front of the east exit
+  K.region('utun_hall_w', zc([[-2194, 1022], [-1867, 1022], [-1867, 958], [-1736, 958], [-1673, 958], [-1673, 1425], [-1906, 1425], [-2057, 1425], [-2194, 1425]], 32), uhall);
+  K.region('utun_hall_s', zc([[-1673, 958], [-1588, 958], [-1537, 958], [-1537, 1020], [-1520, 1020], [-1520, 1030], [-1673, 1030]], 32), uhall);
+  K.region('utun_hall_n', zc([[-1673, 1170], [-1520, 1170], [-1520, 1298], [-1653, 1298], [-1653, 1425], [-1673, 1425]], 32), uhall);
+  K.region('utun_hall_e', zc([[-1520, 1020], [-1293, 1020], [-1293, 1180], [-1293, 1298], [-1520, 1298]], 32), uhall);
   K.region('utun_exit', zc([[-2057, 1425], [-1906, 1425], [-1906, 1765], [-2057, 1765]], 32),
     { ...tun, ceil: 170, beams: { dir: 'x', step: 96 } });
   K.region('utun_exit_mouth', zc([[-2057, 1765], [-1906, 1765], [-1906, 1789], [-2057, 1789]], 32),
     { ...tun, arch: { spring: 118, crown: 170 }, ceilTop: 330, wallMat: 'adobe' });
-  K.region('utun_sky', zc([[-1860, 1100], [-1700, 1100], [-1700, 1250], [-1860, 1250]], 32), { ...tun, top: 360, decor: false });
-  // skylight timber grid (some joists missing) over the open bay
-  for (const [i, x] of [-1850, -1810, -1770, -1730, -1710].entries()) if (i !== 2) K.box([x - 4, 1094, 334], [x + 4, 1256, 344], 'wood_planks', { col: false, color: 0.7 });
-  for (let y = 1108; y < 1250; y += 18) if (Math.abs(y - 1180) > 20) K.box([-1866, y - 2, 344], [-1694, y + 2, 347], 'wood_planks', { col: false, color: 0.65 });
+  K.region('utun_sky', zc([[-1673, 1030], [-1520, 1030], [-1520, 1170], [-1673, 1170]], 32), { ...tun, top: 316, decor: false });
+  // a couple of old joists left across the roof hole, and a short parapet around it on the roof
+  for (const x of [-1640, -1560]) K.box([x - 4, 1026, 304], [x + 4, 1174, 312], 'wood_planks', { col: false, color: 0.7 });
+  for (const [a, b] of [[[-1681, 1022], [-1512, 1022]], [[-1512, 1178], [-1681, 1178]]]) K.slab(a, b, 316, 336, 8, 'plaster_wall', { col: false, color: 0.85 });
+  for (const [a, b] of [[[-1681, 1026], [-1681, 1174]], [[-1512, 1026], [-1512, 1174]]]) K.slab(a, b, 316, 336, 8, 'plaster_wall', { col: false, color: 0.85 });
   // shallow arched bays in the side walls
   for (const [x0, x1, y, sg] of [[-2185, -2075, 1425, -1], [-2010, -1930, 1022, 1], [-1500, -1400, 1020, 1], [-1600, -1480, 1298, -1]])
     blindArch(K, [x0, y], [x1, y], [0, sg], 32, 170, { mat: 'plaster_wall', col: 0.85, d: 14 });
@@ -61,12 +62,12 @@ export function build(K) {
   K.region('bwin_hole', zc([[-1334, 2626], [-1304, 2626], [-1304, 2719], [-1334, 2719]], 124),
     { mat: 'stone_block', ...stoneWall, ceil: 220, ceilMat: 'wood_planks', headerMat: 'adobe' });
   K.region('bwin_out', zc([[-1304, 2586], [-1250, 2586], [-1250, 2732], [-1304, 2732]], 118),
-    { mat: 'stone_block', top: 340, paint: { h: 52, mat: 'plaster_band_teal' } });
+    { mat: 'stone_block', top: 340, paint: { h: 52, mat: 'plaster_white#teal' } });
   // L-shaped climb from the hall: north up r1, then west up r2 onto the window platform
   K.region('bwin_r2', zx([[-1250, 2586], [-1180, 2586], [-1180, 2732], [-1250, 2732]], -1250, 114, -1180, 80),
-    { mat: 'concrete_floor', top: 340, paint: { h: 52, mat: 'plaster_band_teal' } });
+    { mat: 'concrete_floor', top: 340, paint: { h: 52, mat: 'plaster_white#teal' } });
   K.region('bwin_r1', [[-1180, 2586, 42], [-1052, 2586, 11], [-1052, 2726, 47.4], [-1067, 2732, 52.6], [-1180, 2732, 80]],
-    { mat: 'concrete_floor', top: 340, paint: { h: 52, mat: 'plaster_band_teal' } });
+    { mat: 'concrete_floor', top: 340, paint: { h: 52, mat: 'plaster_white#teal' } });
   K.box([-1485, 2628, 4], [-1460, 2665, 60], 'wood_crate');
 
   // B doors: thick frame with a timber lintel

@@ -35,10 +35,10 @@ export const noise = (x, y, z) => vnoise(x, y, z) * 0.65 + vnoise(x * 2.3 + 17, 
 
 // Painted variants of base materials: 'plaster_wall#ochre' etc.
 export const PAINT = {
-  ochre: 0xd9b26e, teal: 0x86aca4, white: 0xfbf6ec, warm: 0xf6e3c4, cream: 0xf3e6cc,
+  ochre: 0xd9b26e, teal: 0xa6bab2, white: 0xfbf6ec, warm: 0xf6e3c4, cream: 0xf3e6cc,
   sand: 0xe9cf9f, pink: 0xf0d6c8, grey: 0xd8d4cc, dark: 0xb8ab94, blue: 0x8fb0c2,
   green: 0x93ad95, red: 0xb5584a, rust: 0xa5703f, cool: 0xe6e6e2,
-  mustard: 0xd4b88a, curbred: 0xc07060,
+  mustard: 0xd4b88a, curbred: 0xbc8072,
   decal: 0xfffffd, // floor overlays (paint marks, stone patches): own instance, offset, no shadow casting
 };
 // Fallback world units per texture repeat (TextureLib.info(key).world wins when present).
