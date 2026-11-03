@@ -118,16 +118,17 @@ for (const team of ['T', 'CT']) {
   const m = createCharacterModel('T');
   const e = ent({ velocity: V(220, 0, 0) });
   settle(m, e, 120);
-  let maxSlide = 0, prev = null, prevStance = false;
+  let maxSlide = 0, prev = null, prevStance = false, sum = 0, cnt = 0;
   for (let i = 0; i < 240; i++) {
     e.origin.addScaledVector(e.velocity, 1 / 120);
     m.update(e, 1 / 120);
     const f = worldOf(m, BONE.toe_L);
     const grounded = f.y < 2.2;
-    if (prev && grounded && prevStance) maxSlide = Math.max(maxSlide, Math.hypot(f.x - prev.x, f.z - prev.z));
+    if (prev && grounded && prevStance) { const d = Math.hypot(f.x - prev.x, f.z - prev.z); maxSlide = Math.max(maxSlide, d); sum += d; cnt++; }
     prev = f; prevStance = grounded;
   }
-  ok(maxSlide < 0.9, `run: planted toe slides at most ${maxSlide.toFixed(2)}u per 1/120 s (body moves ${(220 / 120).toFixed(2)})`);
+  console.log(`  skate: mean ${(sum / cnt).toFixed(3)} max ${maxSlide.toFixed(2)} over ${cnt} planted frames`);
+  ok(sum / cnt < 0.12 && maxSlide < 0.6, `run: planted toe slides mean ${(sum / cnt).toFixed(3)} / max ${maxSlide.toFixed(2)}u per 1/120 s (body moves ${(220 / 120).toFixed(2)})`);
 }
 
 // ---- 3b. foot IK: one foot on a step edge, the other drops to the floor below ---------------------

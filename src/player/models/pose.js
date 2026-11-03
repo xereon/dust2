@@ -255,9 +255,9 @@ export class Animator {
 
     // --- gait
     const runB = smooth(110, 230, spd);
-    let freq = 0.85 + 0.0036 * spd;
+    let freq = 0.95 + 0.005 * spd;      // ~2.2 Hz at full run: shorter, quicker CS-like strides
     freq *= 1 - 0.1 * this.duck;
-    const stance = 0.52 - 0.2 * smooth(40, 250, spd);
+    const stance = 0.52 - 0.24 * smooth(40, 250, spd);
     if (m > 0.001 && this.air < 0.5) this.phase = frac(this.phase + freq * dt * (back ? 1 : 1));
     const D = spd / freq;
     const half = stance * D * 0.5;

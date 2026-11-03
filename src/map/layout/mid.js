@@ -78,6 +78,8 @@ export function build(K) {
   // stone balustrade where the landing overlooks the winding stairs
   for (let k = 0; k < arc.length - 1; k++) K.slab(arc[k], arc[k + 1], 32, 70, 8, 'stone_block', { side: 'left' });
   K.slab([-1135, 1230], [-1135, 1298], 32, 70, 8, 'stone_block', { side: 'left' });
+  // close the gap between the tall upper-tunnel hall ceiling (300) and the stairwell roof
+  K.slab([-1293, 1020], [-1293, 1298], 176, 318, 10, 'plaster_wall', { side: 'right', color: 0.85 });
   K.curvedStairs('tst_b', [-1175, 1230], [40, 50], [161, 210], 270, 360, 0, -104, 13,
     { ...tun, mat: 'stone_block', ceil: 182 });
 }

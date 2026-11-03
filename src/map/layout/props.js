@@ -180,13 +180,34 @@ function prop(K, name, args, pos, yaw = 0, fallback = null) { K.prop(name, args,
  * Door leaf: planked slab from hinge [x,y] toward tip [x,y], standing on z, height h.
  * Two ledges on one face so it reads as a boarded door, not a plank.
  */
-export function leaf(K, hinge, tip, z, h = 128, t = 5, mat = 'wood_door') {
-  K.slab(hinge, tip, z, z + h, t, mat, { color: 0.95 });
-  const dx = tip[0] - hinge[0], dy = tip[1] - hinge[1], l = Math.hypot(dx, dy);
-  const nx = dy / l, ny = -dx / l;
-  const a = [hinge[0] + dx * 0.06 + nx * (t / 2 + 1), hinge[1] + dy * 0.06 + ny * (t / 2 + 1)];
-  const b = [tip[0] - dx * 0.06 + nx * (t / 2 + 1), tip[1] - dy * 0.06 + ny * (t / 2 + 1)];
-  for (const f of [0.18, 0.78]) K.slab(a, b, z + h * f, z + h * f + 7, 2.5, mat, { col: false, color: 0.8 });
+export function leaf(K, hinge, tip, z, h = 128, t = 5, mat = 'wood_door', { ring = false } = {}) {
+  // slab for the edges + collision; the two broad faces get leaf-aligned UVs (one door design
+  // across the leaf, no box-projection stretch on a swung leaf)
+  K.slab(hinge, tip, z, z + h, t, mat, { color: 0.95, faces: { sides: [false, true, false, true] } });
+  {
+    const dx = tip[0] - hinge[0], dy = tip[1] - hinge[1], l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l, nx = uy, ny = -ux;
+    const S = 108;
+    for (const sg of [-1, 1]) {
+      const o = sg * t / 2;
+      const P = (sv, zz) => [hinge[0] + ux * sv + nx * o, hinge[1] + uy * sv + ny * o, zz];
+      let Q = [P(0, z), P(l, z), P(l, z + h), P(0, z + h)];
+      if (sg < 0) Q = Q.reverse();
+      K.poly(mat, Q, { col: 0.95, normal: [nx * sg, ny * sg, 0], uv: (q) => [((q[0] - hinge[0]) * ux + (q[1] - hinge[1]) * uy) / S, (q[2] - z) / S] });
+    }
+    // iron strap hinges and a ring pull on the inner face
+    for (const f of [0.14, 0.5, 0.86]) {
+      const a = [hinge[0] + nx * (t / 2 + 0.6), hinge[1] + ny * (t / 2 + 0.6)], b = [hinge[0] + ux * l * 0.62 + nx * (t / 2 + 0.6), hinge[1] + uy * l * 0.62 + ny * (t / 2 + 0.6)];
+      K.slab(a, b, z + h * f - 2, z + h * f + 2, 1.2, 'metal_beam', { col: false, color: 0.45 });
+    }
+    if (ring) {
+      const c = [hinge[0] + ux * l * 0.86 + nx * (t / 2 + 1.5), hinge[1] + uy * l * 0.86 + ny * (t / 2 + 1.5)], zc = z + h * 0.48;
+      for (let k = 0; k < 10; k++) {
+        const a0 = k / 10 * Math.PI * 2, a1 = (k + 1) / 10 * Math.PI * 2, R = 7;
+        const p0 = [c[0] + ux * R * Math.cos(a0), c[1] + uy * R * Math.cos(a0)], p1 = [c[0] + ux * R * Math.cos(a1), c[1] + uy * R * Math.cos(a1)];
+        K.slab(p0, p1, zc + R * Math.sin(a0) - 0.8, zc + R * Math.sin(a0) + 0.8 + Math.abs(R * (Math.sin(a1) - Math.sin(a0))), 1.4, 'metal_beam', { col: false, color: 0.55 });
+      }
+    }
+  }
 }
 
 export function build(K) {
@@ -194,9 +215,9 @@ export function build(K) {
   // long doors: outer pair (west leaf swung in, east leaf swung out) and the inner pair
   // detailed plank doors (props doubleDoor: framed leaves with iron straps and ring pulls), both
   // pairs swung toward the north; the slab leaves remain only as the no-props fallback
-  prop(K, 'doubleDoor', [172, 132, [1.0, 0.8], { depth: 40, seed: 3 }], [636, 293, 0], 180, () => {
-    leaf(K, [553, 296], [621, 348], 0, 130); leaf(K, [719, 296], [646, 252], 0, 130);
-  });
+  // outer pair: west leaf swung into the passage (ring pull toward the camera), east leaf swung out
+  leaf(K, [553, 296], [621, 348], 0, 130, 5, 'wood_door', { ring: true });
+  leaf(K, [719, 296], [646, 252], 0, 130, 5, 'wood_door', { ring: true });
   prop(K, 'doubleDoor', [173, 132, [0.85, 0.7], { depth: 36, seed: 5 }], [636.5, 765, 0], 180, () => {
     leaf(K, [553, 764], [620, 812], 0, 130); leaf(K, [720, 764], [655, 716], 0, 130);
   });

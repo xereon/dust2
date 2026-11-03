@@ -36,9 +36,9 @@ try {
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto(`http://127.0.0.1:${server.address().port}/index.html?harness=1&live=1&viewmodel=0`, { waitUntil: 'load' });
   await page.waitForFunction(() => window.__READY || window.__BOOT_ERROR, null, { timeout: 600000, polling: 500 });
-  await page.evaluate(() => World.match.beginMatch('CT', { teamSize: 5 }));
+  await page.evaluate(() => { World.match.beginMatch('CT', { teamSize: 5 }); if (World.local) World.local.takeDamage = () => 0; });
   await page.evaluate(() => window.__harness.applyPose('t_spawn'));
-  await page.evaluate(() => window.__harness.frames(150));       // let bots buy / start walking
+  await page.evaluate(() => window.__harness.frames(+(new URLSearchParams(location.search).get('warm') || 90)));
   const skate = [];
   // per-frame sampler of the followed bot's toe positions (world)
   await page.evaluate(() => {
@@ -59,6 +59,7 @@ try {
     requestAnimationFrame(tick);
   });
   for (let k = 0; k < N; k++) {
+    if (k > 0 && opt.sample) await page.evaluate((n) => window.__harness.frames(n), +opt.sample);
     const info = await page.evaluate(({ team, step }) => {
       const DEG = Math.PI / 180;
       const bots = World.entities.filter((e) => e.isBot && e.team === team && e.alive && e.model);
