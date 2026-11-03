@@ -105,5 +105,5 @@ export function build(K) {
   K.region('olong', zc([
     [82, -400], [388, -400], [388, -382], [529, -382], [529, -417], [776, -417], [776, 272], [722, 272], [550, 272],
     [469, 272], [469, 287], [113, 287], [113, -233], [82, -238],
-  ], 0), { base: WALK, mat: 'asphalt', top: 330, tops: { 5: 100, 11: 260, 12: 260, 13: 260 }, wallMats: { 6: 'stone_block', 8: 'stone_block' }, paint: teal, cornice: {} });
+  ], 0), { mat: 'paving_setts', top: 330, tops: { 5: 100, 11: 260, 12: 260, 13: 260 }, wallMats: { 6: 'stone_block', 8: 'stone_block' }, paint: teal, cornice: {} });
 }

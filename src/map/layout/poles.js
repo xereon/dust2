@@ -7,7 +7,7 @@ const LINES = [
   // T spawn plateau and the road down to outside long (south kerb)
   [[-1300, -1048, 128], [-900, -1034, 128], [-560, -1034, 128], [-150, -1128, 48.6], [175, -1128, 8], [430, -963, 8]],
   // outside long (west kerb) to the long-doors front
-  [[118, -360, 8], [150, -60, 8], [150, 250, 8]],
+  [[118, -360, 0], [130, -60, 0], [130, 250, 0]],
   // long hall (north kerb) and up long A (west then east kerb)
   [[505, 1205, 0], [930, 1212, 0], [1262, 1250, 4], [1262, 1500, 4], [1772, 1990, 6], [1610, 2420, 26]],
   // top mid and the mid lane (west side)
