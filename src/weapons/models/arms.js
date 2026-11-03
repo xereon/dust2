@@ -133,8 +133,8 @@ function template(team) {
     [-0.3, 3.75, 0.35], [-1.15, 3.55, 0.4], [-1.4, 2.8, 0.45], [-1.33, 1.2, 0.5],
   ];
   const palmGeo = G.deform(G.top(palmPts, 1.0, { bevel: 0.32, bseg: 4, cseg: 4 }), (v) => {
-    // dorsal arch across the knuckles and thinning toward the fingers
-    v.y += -0.12 * (v.x * v.x) / 2;
+    // dorsal arch across the knuckles (rounded back of the hand) and thinning toward the fingers
+    v.y += -(v.y > 0 ? 0.2 : 0.06) * v.x * v.x;
     const u = -v.z;
     if (v.y < 0) v.y *= 1 - 0.18 * Math.max(0, (u - 2.2) / 1.6);
     if (v.y > 0) v.y *= 0.92;

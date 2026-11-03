@@ -71,7 +71,8 @@ function draw(o = {}) {
       // away from the camera (never through the near plane)
       gp: [[0, [2.5, -10.5, -1.5]], [0.45, [0.1, 0.4, -0.3], 'out'], [0.7, [0, -0.1, 0.1], 'io'], [1, Z3, 'io']],
       gr: [[0, [20, 14 * tw, -28 * tw]], [0.45, [3, -1.5, 3], 'out'], [0.7, [-1, 0.5, -0.8], 'io'], [1, Z3, 'io']],
-      ...(o.bolt ? { bolt: [[0, 0], [0.55, 0], [0.7, 1, 'io'], [0.8, 1], [0.88, 0, 'in']], lhBolt: [[0, 0], [0.42, 0], [0.55, 1, 'io'], [0.84, 1], [1, 0, 'io']] } : {}),
+      // bolt cycles on the (camera-hidden) right side; no over-the-top hand reach during the draw
+      ...(o.bolt ? { bolt: [[0, 0], [0.55, 0], [0.7, 1, 'io'], [0.8, 1], [0.88, 0, 'in']] } : {}),
       ...(o.slide ? { slide: [[0, 0], [0.55, 0], [0.66, 1, 'io'], [0.74, 0, 'in']] } : {}),
     },
     ev: o.bolt ? [[0.7, 'bolt_back'], [0.88, 'bolt_fwd']] : o.slide ? [[0.66, 'slide_back'], [0.74, 'slide_fwd']] : [],

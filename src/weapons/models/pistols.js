@@ -95,8 +95,10 @@ export function pistolCfg({ gripTop, ang, width = 1.2, slideTravel = 1.2, extra 
   const [ru, rv] = at(1.25), [lu, lv] = at(1.75);
   return {
     hands: {
-      R: { p: [hw + 0.42, rv, -(ru - 1.45)], across, palm: [-1, 0, -0.1], pose: 'trigger' },
-      L: { p: [-(hw + 0.78), lv, -(lu + 0.1)], across, palm: [0.95, -0.05, -0.25], pose: 'wrap' },
+      // right palm wraps the rear-right of the grip (backstrap in the web of the hand); the support
+      // hand overlaps the right fingers on the left side, thumb forward along the frame
+      R: { p: [hw * 0.75 + 0.3, rv, -(ru - 1.2)], across, palm: [-0.82, 0, -0.57], pose: 'trigger' },
+      L: { p: [-(hw + 0.55), lv - 0.1, -(lu - 0.15)], across, palm: [0.9, -0.05, -0.42], pose: 'wrap' },
       magGrab: { p: [-0.9, gv - 5.2, -(gu - 1.3)], across: [0, 0, 1], palm: [0.8, 0.5, 0], pose: 'cup' },
     },
     slideTravel, ...extra,
