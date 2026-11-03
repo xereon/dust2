@@ -104,6 +104,15 @@ for (const team of ['T', 'CT']) {
   }
 }
 
+// ---- 2b. variants: round-robin looks, gear toggles collapse, tints differ -------------------------
+for (const team of ['T', 'CT']) {
+  const ms = [0, 1, 2].map((v) => createCharacterModel(team, v));
+  ok(new Set(ms.map((m) => m.variantName)).size === 3, `${team}: three distinct variants (${ms.map((m) => m.variantName).join(', ')})`);
+  ok(ms.some((m) => m.bones[BONE.tog_head1].scale.x < 0.01) && ms.some((m) => m.bones[BONE.tog_head1].scale.x === 1), `${team}: head gear toggles differ between variants`);
+  const c = ms.map((m) => Array.from(m.meshes[0].geometry.attributes.color.array.slice(0, 3 * 4000)).reduce((a, b) => a + b, 0));
+  ok(new Set(c.map((x) => x.toFixed(1))).size >= 2, `${team}: variant tints differ`);
+}
+
 // ---- 3. foot skating: planted foot must not move in world space ------------------------------------
 {
   const m = createCharacterModel('T');
